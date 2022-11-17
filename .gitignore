@@ -1,2 +1,9 @@
 ﻿# Project exclude paths
 /OnlineChat/wwwroot/node_modules/
+
+# binaries
+/OnlineChat/bin/
+/OnlineChat/obj/
+
+# IDEA
+.idea/
