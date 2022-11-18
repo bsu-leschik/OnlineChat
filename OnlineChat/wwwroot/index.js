@@ -1,33 +1,41 @@
 ﻿const hubConnection = new signalR.HubConnectionBuilder()
-                    .withUrl("/chat")
-                    .build();
+    .withUrl("/chat")
+    .build();
 
-document.getElementById('send-message-button').disabled = true;
+hubConnection.on("Receive", function(messageInfo) {
+    appendMessage(messageInfo.sender, messageInfo.text);
+})
 
-hubConnection.start().then(function () {
-    document.getElementById('send-message-button').disabled = false;
-    console.log("started...");
-}).catch(err => console.log("hey!\n"+err)); 
+document.getElementById('messenger-wrap').hidden = true;
 
-function getNickname() {
-    return document.getElementById('nickname-input').value;
+var username = '';
+
+function connect() {
+    console.log('connecting...');
+    hubConnection.start().then(async r => {
+        document.getElementById('login-wrap').hidden = true;
+        document.getElementById('messenger-wrap').hidden = false;
+        const messageList = await hubConnection.invoke("Connect", username, 0);
+        for (let message of messageList) {
+            appendMessage(message.sender, message.text);
+        }
+    });
 }
 
-hubConnection.on("Send", function(name, message) {
-    const element = document.createElement("li")
-    element.textContent = name + ": " + message;
-    console.log(message);
-    const firstElement = document.getElementById("discussion").firstChild;
-    document.getElementById("discussion").insertBefore(element, firstElement);  
+document.getElementById('connect-button').addEventListener("click", e => {
+    username = document.getElementById('nickname-input').value;
+    connect();
 });
 
-document.getElementById("send-message-button")
-        .addEventListener("click", () => {
-            const message = document.getElementById('message-input')?.value;
-            const nick = getNickname();
-            if (nick === null || nick === '') {
-                alert('You need to input nickname to send messages!');
-            } else {
-                hubConnection.invoke("Send", nick, message).then(result => console.log(result));
-            }
-        });
+function appendMessage(sender, message) {
+    const element = document.createElement("li");
+    element.textContent = sender + ": " + message;
+    const firstElement = document.getElementById("discussion").firstChild;
+    document.getElementById("discussion").insertBefore(element, firstElement);
+}
+
+document.getElementById('send-message-button')
+    .addEventListener('click', async e => {
+        const text = document.getElementById('message-input').value;
+        await hubConnection.invoke("Send", text);
+    })

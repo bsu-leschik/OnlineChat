@@ -1,38 +1,69 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using OnlineChat.Models;
 
 namespace OnlineChat.Hubs;
 
 public class ChatHub : Hub
 {
-    private readonly UsernameDictionary _usernames;
-    private const string DefaultName = "Somebody";
+    private readonly Storage _storage;
 
-    public ChatHub(UsernameDictionary usernames)
+    public ChatHub(Storage storage)
     {
-        _usernames = usernames;
+        _storage = storage;
     }
 
-    public async Task SendMessageFromServer(string message)
+    public async Task SendFromServer(int chatroomId, string message)
     {
-        await Clients.All.SendCoreAsync("Send", new object?[] { "Server", message });
+        var m = new Message("Server", message);
+        _storage.GetChatroomById(chatroomId)?.Messages.Add(m);
+        await Clients.Group(chatroomId.ToString()).SendCoreAsync("Receive", new object?[]
+                                                    { m });
     }
-    public override async Task OnConnectedAsync()
+
+    public async Task<List<Message>?> Connect(string username, int chatId)
     {
-        _usernames.Add(Context.ConnectionId, DefaultName);
-        await SendMessageFromServer("New user connected!");
-        await base.OnConnectedAsync();
+        if (string.IsNullOrEmpty(username) || chatId < 0)
+        {
+            return null;
+        }
+
+        chatId = 0;
+        var user = new User(username, Context.ConnectionId, chatId);
+        _storage.AddUser(user, chatId);
+        await SendFromServer(chatId, $"{username} joined the conversation");
+        await Groups.AddToGroupAsync(user.ConnectionId, chatId.ToString());
+        return _storage.GetChatroomById(chatId)?.Messages;
+    }
+
+    public async Task Send(string message)
+    {
+        var sender = _storage.GetUser(Context.ConnectionId);
+        if (sender is null)
+        {
+            return;
+        }
+
+        var chatroom = _storage.GetChatroomById(sender.ChatroomId);
+        if (chatroom is null)
+        {
+            return;
+        }
+
+        chatroom.Messages.Add(new Message(sender.Nickname, message));
+        await Clients.Group(sender.ChatroomId.ToString()).SendCoreAsync("Receive",
+            new object?[] { new Message(sender.Nickname, message) });
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        var username = _usernames.Get(Context.ConnectionId);
-        await SendMessageFromServer($"{username} disconnected");
-        await base.OnDisconnectedAsync(exception);
-    }
+        var sender = _storage.GetUser(Context.ConnectionId);
+        if (sender is null)
+        {
+            return;
+        }
 
-    public async Task Send(string name, string message)
-    {
-        _usernames.Set(Context.ConnectionId, name);
-        await Clients.All.SendCoreAsync("Send", new object?[]{ name, message });
+        await SendFromServer(sender.ChatroomId, $"{sender.Nickname} left");
+        _storage.Remove(sender);
+        await base.OnDisconnectedAsync(exception);
     }
 }

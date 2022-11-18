@@ -1,0 +1,49 @@
+﻿html {
+    font-family: "Arial Narrow";
+    font-size: 15px;
+}
+
+.text-input {
+    text-align: center;
+    font-size: 25px;
+    border-radius: 15px;
+    padding: 5px 10px 5px 15px;
+    transition: all 0.1s ease-in;
+}
+
+.text-input:hover {
+    border-radius: 22px;
+}
+
+.button {
+    padding: 5px 35px;
+    font-size: 25px;
+    border-radius: 15px;
+    transition: all 0.1s ease-in;
+    background-color: white;
+    margin: 10px;
+}
+
+.button:hover {
+    border-radius: 35px;
+    background-color: whitesmoke;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+}
+
+#discussion {
+    border: 1px solid black;
+    border-radius: 15px;
+    padding: 10px;
+    font-family: 'Arial';
+    font-size: 20px;
+    width: 80%;
+}
+
+
