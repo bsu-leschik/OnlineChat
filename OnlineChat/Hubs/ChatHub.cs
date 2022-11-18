@@ -4,8 +4,7 @@ namespace OnlineChat.Hubs;
 
 public class ChatHub : Hub
 {
-    //private readonly Dictionary<string, string> _usernames = new();
-    private UsernameDictionary _usernames;
+    private readonly UsernameDictionary _usernames;
     private readonly string _defaultName = "Somebody";
 
     public ChatHub(UsernameDictionary usernames)
