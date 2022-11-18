@@ -5,7 +5,7 @@ namespace OnlineChat.Hubs;
 public class ChatHub : Hub
 {
     private readonly UsernameDictionary _usernames;
-    private readonly string _defaultName = "Somebody";
+    private const string DefaultName = "Somebody";
 
     public ChatHub(UsernameDictionary usernames)
     {
@@ -18,7 +18,7 @@ public class ChatHub : Hub
     }
     public override async Task OnConnectedAsync()
     {
-        _usernames.Add(Context.ConnectionId, _defaultName);
+        _usernames.Add(Context.ConnectionId, DefaultName);
         await SendMessageFromServer("New user connected!");
         await base.OnConnectedAsync();
     }
