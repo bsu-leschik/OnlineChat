@@ -23,9 +23,9 @@ hubConnection.on("Send", function(name, message) {
 
 document.getElementById("send-message-button")
         .addEventListener("click", () => {
-            const message = document.getElementById('message-input').value;
+            const message = document.getElementById('message-input')?.value;
             const nick = getNickname();
-            if (nick === undefined || nick === '') {
+            if (nick === null || nick === '') {
                 alert('You need to input nickname to send messages!');
             } else {
                 hubConnection.invoke("Send", nick, message).then(result => console.log(result));
