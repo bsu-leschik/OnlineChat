@@ -1,4 +1,3 @@
-using OnlineChat;
 using OnlineChat.Hubs;
 using OnlineChat.Models;
 
@@ -10,8 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 // builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
+
 builder.Services.AddSingleton<Storage>();
-builder.Services.AddSingleton<UsernameDictionary>();
 
 var app = builder.Build();
 
