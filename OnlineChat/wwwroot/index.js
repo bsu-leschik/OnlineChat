@@ -6,6 +6,7 @@ const connectButton = document.getElementById('connect-button');
 const sendMessageButton = document.getElementById('send-message-button');
 const messageInputField = document.getElementById('message-input');
 const discussion = document.getElementById("discussion");
+const loginErrorMessage = document.getElementById('login-error-message');
 
 hubConnection.on("Receive", function(messageInfo) {
     appendMessage(messageInfo.sender, messageInfo.text);
@@ -15,12 +16,21 @@ document.getElementById('messenger-wrap').hidden = true;
 
 var username = '';
 
+function showLoginErrorMessage(message) {
+    loginErrorMessage.textContent = message;
+    loginErrorMessage.hidden = false;
+}
+
 function connect() {
     hubConnection.start().then(async r => {
+        const messageList = await hubConnection.invoke("Connect", username, 0);
+        if (messageList === null) {
+            showLoginErrorMessage('Failed to connect to the server');
+            return;
+        }
         document.getElementById('login-wrap').hidden = true;
         document.getElementById('messenger-wrap').hidden = false;
         document.getElementById('welcome-text').textContent += username + '!';
-        const messageList = await hubConnection.invoke("Connect", username, 0);
         for (let message of messageList) {
             appendMessage(message.sender, message.text);
         }
@@ -35,8 +45,9 @@ connectButton.addEventListener("click", e =>    {
     username = document.getElementById('nickname-input').value;
     if (validateNickname(username))
         connect();
-    else 
-        document.getElementById('login-error-message').hidden = false;
+    else {
+        showLoginErrorMessage('Invalid nickname!');
+    }
 });
 
 function appendMessage(sender, message) {
