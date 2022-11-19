@@ -10,10 +10,12 @@
         <div id="login" class="container">
             <input type="text" id="nickname-input" class="text-input" placeholder="Nickname"/>
             <input type="button" class="button" id="connect-button" value="Connect"/>
+            <p id="login-error-message" hidden=true>Not valid username!</p>
         </div>
     </div>
     <div id="messenger-wrap">
         <div id="messenger" class="container">
+            <p id="welcome-text">Welcome, </p>
             <input type="text" id="message-input" class="text-input" placeholder="Type your message"/>
             <input type="button" class="button" id="send-message-button" value="Send"/>
             <div id="discussion"></div>

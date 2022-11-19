@@ -13,7 +13,10 @@ public class Storage
     public Chatroom CreateNewChatroom()
     {
         var chatroom = new Chatroom(_chatroomCount);
-        _chatrooms.Add(chatroom);
+        lock (_chatrooms)
+        {
+            _chatrooms.Add(chatroom);
+        }
         ++_chatroomCount;
         return chatroom;
     }
@@ -25,7 +28,10 @@ public class Storage
 
     public void AddUser(User u, int chatroomId)
     {
-        _users.Add(u);
+        lock (_users)
+        {
+            _users.Add(u);
+        }
     }
 
     public User? GetUser(string connectionId)
@@ -35,7 +41,13 @@ public class Storage
 
     public void Remove(User u)
     {
-        _users.Remove(u);
-        _chatrooms.FirstOrDefault(c => c.Users.Contains(u))?.Users.Remove(u);
+        lock (_users)
+        {
+            lock (_chatrooms)
+            {
+                _users.Remove(u);
+                _chatrooms.FirstOrDefault(c => c.Users.Contains(u))?.Users.Remove(u);
+            }
+        }
     }
 }

@@ -46,4 +46,21 @@
     width: 80%;
 }
 
+#login-error-message {
+    margin-top: -4px;
+    color: red;
+    font-family: 'Arial';
+    font-size: 20px;
+}
 
+#message {
+    font: inherit;
+    font-family: "Arial";
+    font-size: 20px;
+}
+
+#welcome-text {
+    font-family: Arial;
+    font-size: 20px;
+    margin: 4px;
+}
