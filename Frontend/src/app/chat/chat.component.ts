@@ -42,6 +42,10 @@ export class ChatComponent implements OnInit {
   onSendClicked() : void {
     const input = document.getElementById('message-input') as HTMLInputElement;
     const message = input.value;
+    if (message.length == 0) {
+      return;
+    }
+    input.value = '';
     this.hubConnection.invoke('Send', message)
       .then()
       .catch(() => alert('Failed to send message'));
