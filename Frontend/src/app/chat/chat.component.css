@@ -1,0 +1,63 @@
+#messenger {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+#welcome-text {
+  font-family: Arial sans-serif;
+  font-size: 20px;
+  margin: 4px;
+}
+
+#send-message-button {
+  padding: 5px 35px;
+  font-size: 25px;
+  border-radius: 15px;
+  transition: all 0.1s ease-in;
+  background-color: white;
+  margin: 10px;
+}
+
+#send-message-button:hover {
+  border-radius: 35px;
+  background-color: whitesmoke;
+}
+
+#message-input {
+  text-align: center;
+  font-size: 25px;
+  border-radius: 15px;
+  padding: 5px 10px 5px 15px;
+  transition: all 0.1s ease-in;
+}
+
+#message-input:hover {
+  border-radius: 22px;
+}
+
+#discussion {
+  padding: 20px;
+  border: 1px solid black;
+  border-radius: 30px;
+  max-width: 90%;
+  display: flex;
+  justify-content: left;
+  flex-direction: column;
+}
+
+.message {
+  text-align: left;
+  margin: 1px;
+  font-family: 'Arial', serif;
+  font-size: 15px;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+#welcome-text {
+  font-family: Arial, serif;
+  font-size: 20px;
+  margin: 4px;
+}

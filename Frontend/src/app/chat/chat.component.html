@@ -1,0 +1,8 @@
+<div id="messenger">
+  <p id="welcome-text">Welcome, </p>
+  <input type="text" id="message-input" placeholder="Type your message"/>
+  <input type="button" id="send-message-button" value="Send" (click)="onSendClicked()"/>
+  <div id="discussion">
+    <p *ngFor='let message of messages.reverse();' class="message"><b>{{message.sender}}</b>: {{message.text}}</p>
+  </div>
+</div>
