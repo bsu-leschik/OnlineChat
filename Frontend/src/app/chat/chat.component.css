@@ -61,3 +61,21 @@
   font-size: 20px;
   margin: 4px;
 }
+
+#leave-button {
+  margin: 15px;
+  font-family: Arial, serif;
+  font-size: 25px;
+  position: absolute;
+  transition: all 0.1s ease-in;
+  background-color: #00aeff;
+  color: aliceblue;
+  padding: 10px 30px;
+  border-radius: 15px;
+}
+
+#leave-button:hover {
+  border-radius: 25px;
+}
+
+

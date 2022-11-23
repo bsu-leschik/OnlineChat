@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using OnlineChat.Hubs.Reponse;
 using OnlineChat.Models;
 
 namespace OnlineChat.Hubs;
@@ -6,6 +7,7 @@ namespace OnlineChat.Hubs;
 public class ChatHub : Hub
 {
     private readonly Storage _storage;
+
 
     public ChatHub(Storage storage)
     {
@@ -20,19 +22,32 @@ public class ChatHub : Hub
                                                     { m });
     }
 
-    public async Task<List<Message>?> Connect(string username, int chatId)
+    public async Task<ConnectionResponse> Connect(string username, int chatId)
     {
         if (string.IsNullOrEmpty(username) || chatId < 0)
         {
-            return null;
+            return new ConnectionResponse
+            {
+                Response = ConnectionResponseCode.WrongNickname
+            };
         }
 
-        chatId = 0;
+        if (_storage.GetChatroomById(chatId) is null)
+        {
+            return new ConnectionResponse
+            { 
+                Response = ConnectionResponseCode.RoomDoesntExist 
+            };
+        }
         var user = new User(username, Context.ConnectionId, chatId);
         _storage.AddUser(user, chatId);
         await SendFromServer(chatId, $"{username} joined the conversation");
         await Groups.AddToGroupAsync(user.ConnectionId, chatId.ToString());
-        return _storage.GetChatroomById(chatId)?.Messages;
+        return new ConnectionResponse
+        { 
+          Messages = _storage.GetChatroomById(chatId)?.Messages,
+          Response = ConnectionResponseCode.SuccessfullyConnected 
+        };
     }
 
     public async Task Send(string message)

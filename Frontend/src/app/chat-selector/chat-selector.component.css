@@ -1,0 +1,65 @@
+#chatrooms {
+  font-family: Arial, serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.button {
+  transition: all 0.1s ease-in;
+  background-color: #00aeff;
+  color: aliceblue;
+}
+
+#chatroom {
+  font-family: Arial, serif;
+  font-size: 20px;
+  margin: 3px;
+  display: flex;
+  flex-direction: row;
+  width: 50%;
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+#header {
+  font-family: Arial, serif;
+  text-align: center;
+  font-size: 35px;
+}
+
+#create-chatroom-button {
+  padding: 15px;
+  font-family: Arial, serif;
+  font-size: 25px;
+  border-radius: 20px;
+  position: absolute;
+  right: 10px;
+}
+
+#create-chatroom-button:hover {
+  border-radius: 35px;
+}
+
+#room-id {
+  margin-right: 5px;
+}
+
+#users-count {
+  margin-right: 10px;
+}
+
+#join-button {
+  margin-right: 10px;
+  font-size: 30px;
+  border-radius: 20px;
+  padding: 3px 35px;
+  margin-left: auto;
+}
+
+#join-button:hover {
+  border-radius: 35px;
+  font-size: 30px;
+}

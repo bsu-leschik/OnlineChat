@@ -1,0 +1,9 @@
+<div id="header">Select chat!</div>
+<input type="button" value="Create chatroom" class="button" id='create-chatroom-button' (click)="createChatroom()"/>
+<div id="chatrooms">
+  <div *ngFor='let room of chatrooms' id="chatroom">
+    <p id="room-id">Chat #{{room.id}}</p>
+    <p id="users-count">Users: {{room.usersCount}}</p>
+    <input type="button" value="Join" id="join-button" class="button" (click)="joinChatroom(room.id)"/>
+  </div>
+</div>
