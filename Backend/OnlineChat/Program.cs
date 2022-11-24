@@ -1,5 +1,7 @@
 using OnlineChat.Hubs;
 using OnlineChat.Models;
+using OnlineChat.Services;
+using OnlineChat.Services.StorageSanitizer;
 
 var myPolicy = "MyPolicy";
 
@@ -25,7 +27,13 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddSignalR();
 
-builder.Services.AddSingleton<Storage>();
+builder.Services.AddSingleton<Storage>(provider =>
+{
+    var instance = new Storage();
+    var sanitizer = new TimeoutStorageSanitizer(instance, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5));
+    instance.AddStorageSanitizer(sanitizer);
+    return instance;
+});
 
 var app = builder.Build();
 

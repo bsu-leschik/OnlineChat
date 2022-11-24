@@ -1,13 +1,15 @@
 ﻿using System.Collections.Immutable;
-using OnlineChat.Models.ChatCleanerService;
+using OnlineChat.Models;
+using OnlineChat.Services.StorageSanitizer;
 
-namespace OnlineChat.Models;
+namespace OnlineChat.Services;
 
-public class Storage
+public class Storage : IDisposable
 {
     private int _chatroomCount = 0;
     private readonly List<Chatroom> _chatrooms = new();
     private readonly List<User> _users = new();
+    private readonly List<IStorageSanitizer> _sanitizers = new();
 
     public Storage()
     {
@@ -16,6 +18,12 @@ public class Storage
     
     public Chatroom CreateNewChatroom()
     {
+        int lastId = _chatrooms.LastOrDefault()?.Id ?? 0; 
+        if (lastId  == int.MaxValue)
+        {
+            RemapChatrooms();
+            CreateNewChatroom();
+        }
         var chatroom = new Chatroom(_chatroomCount);
         lock (_chatrooms)
         {
@@ -60,11 +68,26 @@ public class Storage
         }
     }
 
-    public void RemapChatrooms()
+    public void AddStorageSanitizer(IStorageSanitizer sanitizer)
+    {
+        _sanitizers.Add(sanitizer);
+        sanitizer.StartSanitizing();
+    }
+
+    public void RemoveStorageSanitizer(IStorageSanitizer sanitizer)
+    {
+        _sanitizers.Remove(sanitizer);
+        if (sanitizer is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+    }
+
+    private void RemapChatrooms()
     {
         lock (_chatrooms)
         {
-            for (int i = 0; i < _chatrooms.Count; ++i)
+            for (var i = 0; i < _chatrooms.Count; ++i)
             {
                 _chatrooms[i].Id = i;
             }
@@ -108,6 +131,14 @@ public class Storage
         lock (_chatrooms)
         {
             return _chatrooms.ToImmutableList();
+        }
+    }
+
+    public void Dispose()
+    {
+        foreach (var sanitizer in _sanitizers.OfType<IDisposable>())
+        {
+            sanitizer.Dispose();
         }
     }
 }
