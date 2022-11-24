@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using OnlineChat.Hubs.ConnectionGuards;
 using OnlineChat.Hubs.Reponse;
+using OnlineChat.Hubs.SendMessageApprover;
 using OnlineChat.Models;
 using OnlineChat.Services;
 
@@ -10,12 +11,14 @@ public class ChatHub : Hub
 {
     private readonly Storage _storage;
     private readonly ConnectionGuard _connectionGuard;
+    private readonly SendMessageGuard _sendMessageGuard;
 
 
-    public ChatHub(Storage storage, ConnectionGuard connectionGuard)
+    public ChatHub(Storage storage, ConnectionGuard connectionGuard, SendMessageGuard sendMessageGuard)
     {
         _storage = storage;
         _connectionGuard = connectionGuard;
+        _sendMessageGuard = sendMessageGuard;
     }
 
     public async Task SendFromServer(int chatroomId, string message)
@@ -62,6 +65,10 @@ public class ChatHub : Hub
             return;
         }
 
+        if (!_sendMessageGuard.Approve(sender, message))
+        {
+            return;
+        }
         chatroom.Messages.Add(new Message(sender.Nickname, message));
         await Clients.Group(sender.ChatroomId.ToString()).SendCoreAsync("Receive",
             new object?[] { new Message(sender.Nickname, message) });

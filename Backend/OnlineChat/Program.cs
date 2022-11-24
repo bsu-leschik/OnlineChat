@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using OnlineChat.Hubs;
 using OnlineChat.Hubs.ConnectionGuards;
+using OnlineChat.Hubs.SendMessageApprover;
 using OnlineChat.Models;
 using OnlineChat.Services;
 using OnlineChat.Services.StorageSanitizer;
@@ -29,6 +31,10 @@ builder.Services.AddCors(options =>
 builder.Services.AddSingleton<ConnectionGuard>(b => new ConnectionGuard(b.GetService<Storage>()!)
                                                     .AddApprover(new IsEmptyUsernameApprover())
                                                     .AddApprover(new IsDuplicateNicknameApprover()));
+
+builder.Services.AddSingleton<SendMessageGuard>(b => new SendMessageGuard()
+                                                     .AddVerifier(new EmptyOrWhitespaceMessageVerifier())
+                                                     .AddVerifier(new IsSpamVerifier()));
 
 builder.Services.AddSignalR();
 
