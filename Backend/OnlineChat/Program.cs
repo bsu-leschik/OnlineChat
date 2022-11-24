@@ -1,4 +1,5 @@
 using OnlineChat.Hubs;
+using OnlineChat.Hubs.ConnectionGuards;
 using OnlineChat.Models;
 using OnlineChat.Services;
 using OnlineChat.Services.StorageSanitizer;
@@ -24,6 +25,10 @@ builder.Services.AddCors(options =>
              .AllowCredentials();
         });
 });
+
+builder.Services.AddSingleton<ConnectionGuard>(b => new ConnectionGuard(b.GetService<Storage>()!)
+                                                    .AddApprover(new IsEmptyUsernameApprover())
+                                                    .AddApprover(new IsDuplicateNicknameApprover()));
 
 builder.Services.AddSignalR();
 
