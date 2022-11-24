@@ -51,27 +51,28 @@ public class ChatHub : Hub
         };
     }
 
-    public async Task Send(string message)
+    public async Task<int> Send(string message)
     {
         var sender = _storage.GetUser(Context.ConnectionId);
         if (sender is null)
         {
-            return;
+            return 0;
         }
 
         var chatroom = _storage.GetChatroomById(sender.ChatroomId);
         if (chatroom is null)
         {
-            return;
+            return 0;
         }
 
         if (!_sendMessageGuard.Approve(sender, message))
         {
-            return;
+            return 0;
         }
         chatroom.Messages.Add(new Message(sender.Nickname, message));
         await Clients.Group(sender.ChatroomId.ToString()).SendCoreAsync("Receive",
             new object?[] { new Message(sender.Nickname, message) });
+        return message.Length;
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)

@@ -35,8 +35,8 @@ export class ChatComponent implements OnInit {
     this.hubConnection.start().then(async () => {
       const response = await this.hubConnection.invoke('Connect', this.nickname, this.chatId) as ConnectionResponse;
       if (response.response != ConnectionResponseCode.SuccessfullyConnected) {
-          alert("Access denied");
-          return;
+        ChatComponent.switchResponseCode(response.response);
+        return;
       }
       for (let message of response.messages)
         this.messages.push(message);
@@ -44,24 +44,53 @@ export class ChatComponent implements OnInit {
       welcomeText.textContent += this.nickname + '!';
     }).catch(() => alert('Failed to start connection'));
   }
-  onSendClicked() : void {
+
+  async onSendClicked(): Promise<void> {
     const input = document.getElementById('message-input') as HTMLInputElement;
     const message = input.value;
     if (message.length == 0) {
       return;
     }
     input.value = '';
-    this.hubConnection.invoke('Send', message)
+    let value: number = await this.hubConnection.invoke('Send', message)
       .then()
       .catch(() => alert('Failed to send message'));
+
+    console.log(value);
+    if (value == 0) {
+      ChatComponent.showErrorMessage('Failed to send the message');
+    } else {
+      ChatComponent.hideErrorMessage();
+    }
   }
+
   @HostListener('window:popstate', ['$event'])
   onPopState() {
     this.hubConnection.stop();
   }
-  onLeaveClicked() {
-    this.hubConnection.stop();
+
+  async onLeaveClicked() {
+    await this.hubConnection.stop();
     this.router.navigate(['select-chat']);
+  }
+  private static showErrorMessage(message: string) {
+    const text = document.getElementById('error-text') as HTMLParagraphElement;
+    text.textContent = message;
+    text.hidden = false;
+  }
+  private static hideErrorMessage() {
+    const text = document.getElementById('error-text') as HTMLParagraphElement;
+    text.hidden = true;
+  }
+  private static switchResponseCode(code: ConnectionResponseCode) {
+    switch (code) {
+      case ConnectionResponseCode.AccessDenied: alert('Access denied'); break;
+      case ConnectionResponseCode.DuplicateNickname: alert('Duplicate nickname'); break;
+      case ConnectionResponseCode.BannedNickname: alert('The nickname is banned'); break;
+      case ConnectionResponseCode.RoomIsFull: alert('Room is full'); break;
+      case ConnectionResponseCode.WrongNickname: alert('Incorrect nickname'); break;
+      case ConnectionResponseCode.RoomDoesntExist: alert("Room doesn't exist"); break;
+    }
   }
 }
 
