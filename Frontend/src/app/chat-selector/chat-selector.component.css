@@ -31,12 +31,11 @@
 }
 
 #create-chatroom-button {
-  padding: 15px;
+  padding: 5px 15px;
   font-family: Arial, serif;
   font-size: 25px;
-  border-radius: 20px;
+  border-radius: 15px;
   position: absolute;
-  right: 10px;
 }
 
 #create-chatroom-button:hover {
