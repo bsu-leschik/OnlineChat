@@ -56,7 +56,6 @@ export class ChatComponent implements OnInit {
       .then()
       .catch(() => alert('Failed to send message'));
 
-    console.log(value);
     if (value == 0) {
       ChatComponent.showErrorMessage('Failed to send the message');
     } else {

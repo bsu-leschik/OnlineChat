@@ -72,6 +72,7 @@ public class ChatHub : Hub
         chatroom.Messages.Add(new Message(sender.Nickname, message));
         await Clients.Group(sender.ChatroomId.ToString()).SendCoreAsync("Receive",
             new object?[] { new Message(sender.Nickname, message) });
+        sender.ResetLastMessageTime();
         return message.Length;
     }
 

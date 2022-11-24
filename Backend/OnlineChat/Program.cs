@@ -1,8 +1,7 @@
-using System.Diagnostics;
+using OnlineChat;
 using OnlineChat.Hubs;
 using OnlineChat.Hubs.ConnectionGuards;
 using OnlineChat.Hubs.SendMessageApprover;
-using OnlineChat.Models;
 using OnlineChat.Services;
 using OnlineChat.Services.StorageSanitizer;
 
@@ -28,20 +27,22 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.AddSingleton<ConnectionGuard>(b => new ConnectionGuard(b.GetService<Storage>()!)
+builder.Services.AddSingleton(b => new ConnectionGuard(b.GetService<Storage>()!)
                                                     .AddApprover(new IsEmptyUsernameApprover())
                                                     .AddApprover(new IsDuplicateNicknameApprover()));
 
-builder.Services.AddSingleton<SendMessageGuard>(b => new SendMessageGuard()
+builder.Services.AddSingleton(_ => new SendMessageGuard()
                                                      .AddVerifier(new EmptyOrWhitespaceMessageVerifier())
                                                      .AddVerifier(new IsSpamVerifier()));
 
 builder.Services.AddSignalR();
 
-builder.Services.AddSingleton<Storage>(provider =>
+builder.Services.AddSingleton(_ =>
 {
     var instance = new Storage();
-    var sanitizer = new TimeoutStorageSanitizer(instance, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5));
+    var sanitizer = new TimeoutStorageSanitizer(instance,
+        Constants.TimeoutSanitizerRefreshTime,
+        Constants.TimeoutSanitizerMaxEmptyTime);
     instance.AddStorageSanitizer(sanitizer);
     return instance;
 });

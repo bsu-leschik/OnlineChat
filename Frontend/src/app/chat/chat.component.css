@@ -81,4 +81,6 @@
 #error-text {
   color: red;
   font-size: 15px;
+  font-family: Arial, serif;
+  margin: 5px;
 }
