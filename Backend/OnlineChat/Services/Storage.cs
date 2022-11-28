@@ -15,20 +15,22 @@ public class Storage : IDisposable
     {
         CreateNewChatroom();
     }
-    
+
     public Chatroom CreateNewChatroom()
     {
-        int lastId = _chatrooms.LastOrDefault()?.Id ?? 0; 
-        if (lastId  == int.MaxValue)
+        var lastId = _chatrooms.LastOrDefault()?.Id ?? 0;
+        if (lastId == int.MaxValue)
         {
             RemapChatrooms();
             CreateNewChatroom();
         }
+
         var chatroom = new Chatroom(_chatroomCount);
         lock (_chatrooms)
         {
             _chatrooms.Add(chatroom);
         }
+
         ++_chatroomCount;
         return chatroom;
     }
@@ -56,6 +58,7 @@ public class Storage : IDisposable
             {
                 chatroom.LastEmptyTime = DateTime.Now;
             }
+
             chatroom.Users.Add(u);
         }
     }
@@ -95,7 +98,7 @@ public class Storage : IDisposable
             _chatroomCount = _chatrooms.Count;
         }
     }
-    
+
     public User? GetUser(string connectionId)
     {
         lock (_users)

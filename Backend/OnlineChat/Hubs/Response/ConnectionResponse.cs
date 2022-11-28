@@ -1,6 +1,6 @@
 ﻿using OnlineChat.Models;
 
-namespace OnlineChat.Hubs.Reponse;
+namespace OnlineChat.Hubs.Response;
 
 public class ConnectionResponse
 {

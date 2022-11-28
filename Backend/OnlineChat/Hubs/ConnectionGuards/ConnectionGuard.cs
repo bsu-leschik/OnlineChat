@@ -1,4 +1,4 @@
-﻿using OnlineChat.Hubs.Reponse;
+﻿using OnlineChat.Hubs.Response;
 using OnlineChat.Services;
 
 namespace OnlineChat.Hubs.ConnectionGuards;

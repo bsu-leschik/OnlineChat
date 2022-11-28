@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using OnlineChat.Hubs.ConnectionGuards;
-using OnlineChat.Hubs.Reponse;
+using OnlineChat.Hubs.Response;
 using OnlineChat.Hubs.SendMessageApprover;
 using OnlineChat.Models;
 using OnlineChat.Services;
