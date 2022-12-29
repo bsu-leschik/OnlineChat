@@ -22,7 +22,7 @@ public class ChatsController : Controller
     }
 
     [HttpPost("create")]
-    public int CreateChatroom( /*[FromBody] string username*/)
+    public async Task<int> CreateChatroom(/*[FromBody] string username*/)
     {
         return _storage.CreateNewChatroom().Id;
     }

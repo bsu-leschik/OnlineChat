@@ -5,7 +5,7 @@ using OnlineChat.Hubs.SendMessageApprover;
 using OnlineChat.Services;
 using OnlineChat.Services.StorageSanitizer;
 
-var myPolicy = "MyPolicy";
+const string myPolicy = "MyPolicy";
 
 var builder = WebApplication.CreateBuilder(args);
 
