@@ -1,91 +1,69 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using OnlineChat.Hubs.ConnectionGuards;
+﻿using System.Security.Claims;
+using BusinessLogic;
+using Database;
+using Database.Entities;
+using Microsoft.AspNetCore.SignalR;
 using OnlineChat.Hubs.Response;
-using OnlineChat.Hubs.SendMessageApprover;
-using OnlineChat.Models;
-using OnlineChat.Services;
 
 namespace OnlineChat.Hubs;
 
 public class ChatHub : Hub
 {
-    private readonly Storage _storage;
-    private readonly ConnectionGuard _connectionGuard;
-    private readonly SendMessageGuard _sendMessageGuard;
+    private readonly IStorageService _storageService;
 
-
-    public ChatHub(Storage storage, ConnectionGuard connectionGuard, SendMessageGuard sendMessageGuard)
+    public ChatHub(IStorageService storageService)
     {
-        _storage = storage;
-        _connectionGuard = connectionGuard;
-        _sendMessageGuard = sendMessageGuard;
+        _storageService = storageService;
     }
 
-    public async Task SendFromServer(int chatroomId, string message)
+    public async Task<ConnectionResponse> Connect(string chatId)
     {
-        var m = new Message("Server", message);
-        _storage.GetChatroomById(chatroomId)?.Messages.Add(m);
-        await Clients.Group(chatroomId.ToString()).SendCoreAsync("Receive", new object?[]
-                                                    { m });
-    }
-
-    public async Task<ConnectionResponse> Connect(string username, int chatId)
-    {
-        if (!_connectionGuard.Check(username, chatId))
+        if (!Guid.TryParse(chatId, out var id))
         {
-            return new ConnectionResponse
-            { 
-                Response = _connectionGuard.GetResponseCode() 
-            };
+            return new ConnectionResponse(messages: null, ConnectionResponseCode.Error);
         }
-        
-        
-        var user = new User(username, Context.ConnectionId, chatId);
-        _storage.AddUser(user, chatId);
-        await SendFromServer(chatId, $"{username} joined the conversation");
-        await Groups.AddToGroupAsync(user.ConnectionId, chatId.ToString());
-        return new ConnectionResponse
-        { 
-          Messages = _storage.GetChatroomById(chatId)?.Messages,
-          Response = ConnectionResponseCode.SuccessfullyConnected 
-        };
-    }
-
-    public async Task<int> Send(string message)
-    {
-        var sender = _storage.GetUser(Context.ConnectionId);
-        if (sender is null)
+        var user = await UserFinder.FindUser(_storageService, ClaimsPrincipal.Current!, CancellationToken.None);
+        if (user is null)
         {
-            return 0;
+            return new ConnectionResponse(messages: null, ConnectionResponseCode.AccessDenied);
         }
 
-        var chatroom = _storage.GetChatroomById(sender.ChatroomId);
+        var chatroom = user.Chatrooms.FirstOrDefault(c => c.Id == id);
+        return chatroom is null
+            ? new ConnectionResponse(messages: null, ConnectionResponseCode.RoomDoesntExist)
+            : new ConnectionResponse(messages: chatroom.Messages, ConnectionResponseCode.SuccessfullyConnected);
+    }
+
+    public async Task SendFromServer(Guid chatroomId, string message)
+    {
+        var chatroom = await _storageService.GetChatroom(c => c.Id == chatroomId, CancellationToken.None);
         if (chatroom is null)
         {
-            return 0;
+            throw new ArgumentException($"{chatroomId} doesn't exist");
         }
 
-        if (!_sendMessageGuard.Approve(sender, message))
-        {
-            return 0;
-        }
-        chatroom.Messages.Add(new Message(sender.Nickname, message));
-        await Clients.Group(sender.ChatroomId.ToString()).SendCoreAsync("Receive",
-            new object?[] { new Message(sender.Nickname, message) });
-        sender.ResetLastMessageTime();
-        return message.Length;
+        var messageObject = new Message(sender: "Server", text: message);
+        await SendMessageToChat(chatroomId.ToString(), messageObject);
     }
 
-    public override async Task OnDisconnectedAsync(Exception? exception)
+    private async Task SendMessageToChat(string chatId, Message message)
     {
-        var sender = _storage.GetUser(Context.ConnectionId);
-        if (sender is null)
+        await Clients.Group(chatId)
+                     .SendCoreAsync("Receive", new object?[] { message });
+    }
+
+    public async Task Send(Guid chatId, string message)
+    {
+        var user = await UserFinder.FindUser(_storageService, ClaimsPrincipal.Current!, CancellationToken.None);
+
+        var chatroom = user?.Chatrooms.FirstOrDefault(c => c.Id == chatId);
+        if (chatroom is null)
         {
             return;
         }
 
-        await SendFromServer(sender.ChatroomId, $"{sender.Nickname} left");
-        _storage.Remove(sender);
-        await base.OnDisconnectedAsync(exception);
+        var username = ClaimsPrincipal.Current!.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)!.Value;
+        var messageObject = new Message(username, message);
+        await SendMessageToChat(chatId.ToString(), messageObject);
     }
 }

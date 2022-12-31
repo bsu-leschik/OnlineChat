@@ -1,19 +1,30 @@
+using Constants;
+using Database;
+using Database.Entities;
+using MediatR;
+using Microsoft.AspNetCore.Identity;
 using OnlineChat;
 using OnlineChat.Hubs;
-using OnlineChat.Hubs.ConnectionGuards;
-using OnlineChat.Hubs.SendMessageApprover;
-using OnlineChat.Services;
-using OnlineChat.Services.StorageSanitizer;
 
 const string myPolicy = "MyPolicy";
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddAuthentication(Schemes.DefaultCookieScheme)
+       .AddCookie(Schemes.DefaultCookieScheme, pb =>
+       {
+           pb.LoginPath = "/login";
+           pb.LogoutPath = "/logout";
+           pb.SlidingExpiration = true;
+           pb.Cookie.Name = "dl";
+       });
+
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher>();
+builder.Services.AddDbContext<Database.Database>();
+builder.Services.AddSingleton<IStorageService>(sp => new DatabaseStorageService(sp.GetService<Database.Database>()!));
 
 builder.Services.AddCors(options =>
 {
@@ -27,46 +38,25 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.AddSingleton(b => new ConnectionGuard(b.GetService<Storage>()!)
-                                                    .AddApprover(new IsEmptyUsernameApprover())
-                                                    .AddApprover(new IsDuplicateNicknameApprover()));
-
-builder.Services.AddSingleton(_ => new SendMessageGuard()
-                                                     .AddVerifier(new EmptyOrWhitespaceMessageVerifier())
-                                                     .AddVerifier(new IsSpamVerifier()));
-
 builder.Services.AddSignalR();
 
-builder.Services.AddSingleton(_ =>
-{
-    var instance = new Storage();
-    var sanitizer = new TimeoutStorageSanitizer(instance,
-        Constants.TimeoutSanitizerRefreshTime,
-        Constants.TimeoutSanitizerMaxEmptyTime);
-    instance.AddStorageSanitizer(sanitizer);
-    return instance;
-});
+//builder.Services.AddSingleton<IStorageService, Storage>();
+builder.Services.AddMediatR(typeof(Program));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseAuthentication();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-
-//app.UseHttpsRedirection();
-
-//app.UseStaticFiles();
-
 app.UseRouting();
-// app.UseAuthorization();
+
 app.UseCors(myPolicy);
-//app.UseFileServer();
 app.MapHub<ChatHub>("/chat");
 app.MapControllers();
-// app.UseEndpoints(b => b.MapControllers());
 
 app.Run();

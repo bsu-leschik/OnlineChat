@@ -1,29 +1,37 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using OnlineChat.Models;
-using OnlineChat.Services;
+﻿using BusinessLogic.Commands.CreateChatroom;
+using BusinessLogic.Queries.Chatrooms.GetChatrooms;
+using BusinessLogic.Queries.Messages.GetMessages;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace OnlineChat.Controllers;
 
 [ApiController]
-[Route("chatrooms")]
+[Route("api/chatrooms/")]
 public class ChatsController : Controller
 {
-    private readonly Storage _storage;
+    private readonly IMediator _mediator;
 
-    public ChatsController(Storage storage)
+    public ChatsController(IMediator mediator)
     {
-        _storage = storage;
+        _mediator = mediator;
     }
 
-    [HttpGet]
-    public IEnumerable<ChatroomInfo> GetChatrooms()
+    [HttpGet("get")]
+    public async Task<IActionResult> GetChatrooms()
     {
-        return _storage.GetChatrooms().Select(ChatroomInfo.Of).ToList();
+        return Ok(await _mediator.Send(new GetChatroomsRequest()));
     }
 
     [HttpPost("create")]
-    public async Task<int> CreateChatroom(/*[FromBody] string username*/)
+    public async Task<IActionResult> CreateChatroom(CreateChatroomCommand command)
     {
-        return _storage.CreateNewChatroom().Id;
+        return Ok(await _mediator.Send(command));
+    }
+
+    [HttpGet("messages")]
+    public async Task<IActionResult> GetMessages(GetMessagesQuery request)
+    {
+        return Ok(await _mediator.Send(request));
     }
 }
