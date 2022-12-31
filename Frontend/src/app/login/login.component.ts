@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import {StorageService} from "../storage.service";
 import {Navigation, Router} from "@angular/router";
 import {Constants} from "../constants";
+import { Console } from 'console';
+import { write } from 'fs';
 
 @Component({
   selector: 'app-login',
@@ -9,6 +11,8 @@ import {Constants} from "../constants";
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
+
+  nickName: string = "";
 
   constructor(private storage: StorageService, private router: Router) {
     if (storage.get<string>(Constants.NicknameStorageField) != null) {
@@ -19,17 +23,15 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {}
 
   async onConnectClicked(): Promise<void> {
-    let inputElement: HTMLInputElement = document.getElementById('nickname-input') as HTMLInputElement;
-    const nickname = inputElement.value;
-    if (nickname == null) {
+    if (this.nickName == null) {
       this.showErrorMessage('Nickname is null.');
       return;
     }
-    if (!this.checkNickname(nickname)) {
+    if (!this.checkNickname(this.nickName)) {
       this.showErrorMessage('Invalid nickname');
       return;
     }
-    this.storage.set(Constants.NicknameStorageField, nickname);
+    this.storage.set(Constants.NicknameStorageField, this.nickName);
     this.storage.set(Constants.ChatIdStorageField, 0);
     await this.router.navigate(['select-chat']);
   }
