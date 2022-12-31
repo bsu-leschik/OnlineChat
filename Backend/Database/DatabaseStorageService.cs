@@ -14,12 +14,12 @@ public class DatabaseStorageService : IStorageService
     
     public Task<User?> GetUser(Func<User, bool> predicate, CancellationToken cancellationToken)
     {
-        return _database.Users.FindAsync(predicate, cancellationToken).AsTask();
+        return Task.FromResult(_database.Users.Include(u => u.Chatrooms).FirstOrDefault(predicate));
     }
 
     public Task<Chatroom?> GetChatroom(Func<Chatroom, bool> predicate, CancellationToken cancellationToken)
     {
-        return _database.Chatrooms.FindAsync(predicate, cancellationToken).AsTask();
+        return Task.FromResult(_database.Chatrooms.Include(c => c.Users).FirstOrDefault(predicate));
     }
 
     public async Task AddChatroom(Chatroom chatroom, CancellationToken cancellationToken)
@@ -49,5 +49,22 @@ public class DatabaseStorageService : IStorageService
     public Task<List<Chatroom>> GetChatrooms(CancellationToken cancellationToken)
     {
         return _database.Chatrooms.ToListAsync(cancellationToken);
+    }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        await _database.SaveChangesAsync(cancellationToken);
+    }
+
+    public Task Update(User u, CancellationToken cancellationToken)
+    {
+        _database.Users.Update(u);
+        return Task.CompletedTask;
+    }
+
+    public Task Update(Chatroom c, CancellationToken cancellationToken)
+    {
+        _database.Chatrooms.Update(c);
+        return Task.CompletedTask;
     }
 }

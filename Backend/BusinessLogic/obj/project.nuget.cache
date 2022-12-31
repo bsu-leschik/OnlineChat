@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "DEbdiHKSJvhypWN5RYZhI/GyERiMoFTN9ZbruAUd8t/JgQYyM8xZIwhUPLqOPMKeD8LI69A8UZ2v4sxWEb14HA==",
+  "dgSpecHash": "6g0fxZchVsOjWhkZtY6Z3oXnts05umA0hL49Bo80N8RZir4kjEV4RLHlSsOD5ATkcDkHr2LPQFxqJltJrvWn3g==",
   "success": true,
   "projectFilePath": "D:\\Programming\\Other Projects\\OnlineChat\\Backend\\BusinessLogic\\BusinessLogic.csproj",
   "expectedPackageFiles": [
@@ -8,6 +8,7 @@
     "C:\\Users\\tyoma\\.nuget\\packages\\azure.identity\\1.6.0\\azure.identity.1.6.0.nupkg.sha512",
     "C:\\Users\\tyoma\\.nuget\\packages\\mediatr\\11.1.0\\mediatr.11.1.0.nupkg.sha512",
     "C:\\Users\\tyoma\\.nuget\\packages\\mediatr.contracts\\1.0.1\\mediatr.contracts.1.0.1.nupkg.sha512",
+    "C:\\Users\\tyoma\\.nuget\\packages\\mediatr.extensions.microsoft.dependencyinjection\\11.0.0\\mediatr.extensions.microsoft.dependencyinjection.11.0.0.nupkg.sha512",
     "C:\\Users\\tyoma\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\1.1.1\\microsoft.bcl.asyncinterfaces.1.1.1.nupkg.sha512",
     "C:\\Users\\tyoma\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",
     "C:\\Users\\tyoma\\.nuget\\packages\\microsoft.data.sqlclient\\5.0.1\\microsoft.data.sqlclient.5.0.1.nupkg.sha512",

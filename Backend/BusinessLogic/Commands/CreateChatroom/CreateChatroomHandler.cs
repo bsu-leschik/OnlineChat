@@ -36,7 +36,14 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
                 type: request.Type,
                 users: users!
             );
+            foreach (var user in users)
+            {
+                if (!user!.Chatrooms.Contains(chatroom))
+                    user!.Chatrooms.Add(chatroom);
+                // await _storageService.Update(user, cancellationToken);
+            }
             await _storageService.AddChatroom(chatroom, cancellationToken);
+            await _storageService.SaveChangesAsync(cancellationToken);
             return new CreateChatroomResponse(chatroom.Id);
         }
         catch (Exception)

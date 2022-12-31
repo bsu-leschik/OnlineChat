@@ -23,7 +23,8 @@ public class AuthenticationController : ControllerBase
     {
         return Ok(await _mediator.Send(command));
     }
-
+    
+    [Authorize]
     [HttpPost("/logout")]
     public async Task<IActionResult> Logout()
     {

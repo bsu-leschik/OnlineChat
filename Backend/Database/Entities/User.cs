@@ -1,4 +1,6 @@
-﻿namespace Database.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Database.Entities;
 
 public class User
 {

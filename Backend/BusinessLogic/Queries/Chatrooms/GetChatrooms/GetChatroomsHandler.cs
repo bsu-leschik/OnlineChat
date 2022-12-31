@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-using BusinessLogic.Services;
-using Database;
+﻿using Database;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 

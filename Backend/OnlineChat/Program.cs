@@ -1,8 +1,11 @@
+using System.Reflection;
+using BusinessLogic.Queries.Chatrooms.GetChatrooms;
 using Constants;
 using Database;
 using Database.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using OnlineChat;
 using OnlineChat.Hubs;
 
@@ -10,6 +13,7 @@ const string myPolicy = "MyPolicy";
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(Schemes.DefaultCookieScheme)
        .AddCookie(Schemes.DefaultCookieScheme, pb =>
        {
@@ -23,8 +27,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher>();
-builder.Services.AddDbContext<Database.Database>();
-builder.Services.AddSingleton<IStorageService>(sp => new DatabaseStorageService(sp.GetService<Database.Database>()!));
+builder.Services.AddDbContextPool<Database.Database>(options =>
+    options.UseSqlServer("Server=.;Database=ChatDb;Trusted_Connection=True;Encrypt=False"));
+builder.Services.AddScoped<IStorageService, DatabaseStorageService>(
+    sp => new DatabaseStorageService(sp.GetRequiredService<Database.Database>())
+);
 
 builder.Services.AddCors(options =>
 {
@@ -38,14 +45,11 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.AddSignalR();
 
-//builder.Services.AddSingleton<IStorageService, Storage>();
-builder.Services.AddMediatR(typeof(Program));
+builder.Services.AddSignalR();
+builder.Services.AddMediatR(typeof(GetChatroomsHandler));
 
 var app = builder.Build();
-
-app.UseAuthentication();
 
 if (app.Environment.IsDevelopment())
 {
@@ -55,6 +59,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseRouting();
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseCors(myPolicy);
 app.MapHub<ChatHub>("/chat");
 app.MapControllers();
