@@ -1,0 +1,17 @@
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\bin\Debug\net7.0\BusinessLogic.deps.json
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\bin\Debug\net7.0\BusinessLogic.dll
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\bin\Debug\net7.0\BusinessLogic.pdb
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\bin\Debug\net7.0\Constants.dll
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\bin\Debug\net7.0\Database.dll
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\bin\Debug\net7.0\Constants.pdb
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\bin\Debug\net7.0\Database.pdb
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\obj\Debug\net7.0\BusinessLogic.csproj.AssemblyReference.cache
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\obj\Debug\net7.0\BusinessLogic.GeneratedMSBuildEditorConfig.editorconfig
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\obj\Debug\net7.0\BusinessLogic.AssemblyInfoInputs.cache
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\obj\Debug\net7.0\BusinessLogic.AssemblyInfo.cs
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\obj\Debug\net7.0\BusinessLogic.csproj.CoreCompileInputs.cache
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\obj\Debug\net7.0\BusinessLogic.csproj.CopyComplete
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\obj\Debug\net7.0\BusinessLogic.dll
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\obj\Debug\net7.0\refint\BusinessLogic.dll
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\obj\Debug\net7.0\BusinessLogic.pdb
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\obj\Debug\net7.0\ref\BusinessLogic.dll

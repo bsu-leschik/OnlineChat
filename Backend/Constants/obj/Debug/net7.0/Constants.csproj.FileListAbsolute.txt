@@ -1,0 +1,12 @@
+D:\Programming\Other Projects\OnlineChat\Backend\Constants\bin\Debug\net7.0\Constants.deps.json
+D:\Programming\Other Projects\OnlineChat\Backend\Constants\bin\Debug\net7.0\Constants.dll
+D:\Programming\Other Projects\OnlineChat\Backend\Constants\bin\Debug\net7.0\Constants.pdb
+D:\Programming\Other Projects\OnlineChat\Backend\Constants\obj\Debug\net7.0\Constants.csproj.AssemblyReference.cache
+D:\Programming\Other Projects\OnlineChat\Backend\Constants\obj\Debug\net7.0\Constants.GeneratedMSBuildEditorConfig.editorconfig
+D:\Programming\Other Projects\OnlineChat\Backend\Constants\obj\Debug\net7.0\Constants.AssemblyInfoInputs.cache
+D:\Programming\Other Projects\OnlineChat\Backend\Constants\obj\Debug\net7.0\Constants.AssemblyInfo.cs
+D:\Programming\Other Projects\OnlineChat\Backend\Constants\obj\Debug\net7.0\Constants.csproj.CoreCompileInputs.cache
+D:\Programming\Other Projects\OnlineChat\Backend\Constants\obj\Debug\net7.0\Constants.dll
+D:\Programming\Other Projects\OnlineChat\Backend\Constants\obj\Debug\net7.0\refint\Constants.dll
+D:\Programming\Other Projects\OnlineChat\Backend\Constants\obj\Debug\net7.0\Constants.pdb
+D:\Programming\Other Projects\OnlineChat\Backend\Constants\obj\Debug\net7.0\ref\Constants.dll
