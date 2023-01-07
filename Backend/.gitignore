@@ -6,7 +6,10 @@
 /OnlineChat/obj/
 /BusinessLogic/bin/
 /BusinessLogic/obj/
-
+/Constants/obj/
+/Constants/bin/
+/Database/bin/
+/Database/obj/
 # IDEA
 .idea/
 .vs/
