@@ -4,9 +4,10 @@
 # binaries
 /OnlineChat/bin/
 /OnlineChat/obj/
+/BusinessLogic/bin/
+/BusinessLogic/obj/
 
 # IDEA
 .idea/
 .vs/
 
-BusinessLogic/bin/
