@@ -19,13 +19,13 @@ public class AuthenticationController : ControllerBase
 
     [HttpPost("/login")]
     [AllowAnonymous]
-    public async Task<IActionResult> Login(LoginCommand command)
+    public async Task<IActionResult> Login([FromBody] LoginCommand command)
     {
         return Ok(await _mediator.Send(command));
     }
     
-    [Authorize]
     [HttpPost("/logout")]
+    [Authorize(AuthenticationSchemes = Constants.Schemes.DefaultCookieScheme)]
     public async Task<IActionResult> Logout()
     {
         await _mediator.Send(new LogoutCommand());

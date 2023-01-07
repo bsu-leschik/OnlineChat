@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {StorageService} from "../storage.service";
 import {Constants} from "../constants";
 import {Router} from "@angular/router";
-import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {HttpClient} from "@angular/common/http";
 
 @Component({
   selector: 'app-chat-selector',
@@ -25,35 +25,42 @@ export class ChatSelectorComponent implements OnInit {
   }
 
   private updateChatrooms(): void {
-    this.httpClient.get<ChatroomInfo[]>(Constants.ChatroomsControllerUrl).subscribe(chatrooms => {
-      if (chatrooms != null)
-        this.chatrooms = chatrooms;
-    });
+    this.httpClient.get<ChatroomInfo[]>(Constants.ApiUrl + '/chatrooms/get-chatrooms', {
+      withCredentials: true
+    }).subscribe(chatrooms => {
+        console.log(chatrooms);
+        if (chatrooms != null) {
+          this.chatrooms = chatrooms;
+        }
+      });
   }
 
-  public joinChatroom(chatId: number) {
+  public joinChatroom(chatId: string) {
     this.storage.set(Constants.ChatIdStorageField, chatId);
     this.router.navigate(['chat']);
   }
 
   public createChatroom() {
-    const httpOptions = {
-      headers: new HttpHeaders({'Content-Type': 'application/json', 'accept': 'text/plain'})
-    }
-    let username = this.storage.get<string>(Constants.NicknameStorageField);
-    this.httpClient.post(Constants.CreateChatroomUrl, null).subscribe(result => {
-      this.chatrooms.push(new class implements ChatroomInfo {
-        id: number = result as number;
-        usersCount: number = 0;
-      });
-    });
+    alert('not implemented');
+    return;
+    // const httpOptions = {
+    //   headers: new HttpHeaders({'Content-Type': 'application/json', 'accept': 'text/plain'})
+    // }
+    // let username = this.storage.get<string>(Constants.NicknameStorageField);
+    // this.httpClient.post(Constants.CreateChatroomUrl, null).subscribe(result => {
+    //   this.chatrooms.push(new class implements ChatroomInfo {
+    //     id: number = result as number;
+    //     usersCount: number = 0;
+    //   });
+    // });
   }
+
   public ngOnDestroy() {
     clearInterval(this.intervalId);
   }
 }
 
 interface ChatroomInfo {
-  id: number;
+  id: string;
   usersCount: number;
 }

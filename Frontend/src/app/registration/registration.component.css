@@ -19,7 +19,7 @@
   border-radius: 22px;
 }
 
-#login-button {
+#register-button {
   padding: 5px 35px;
   font-size: 25px;
   border-radius: 15px;
@@ -28,7 +28,7 @@
   margin: 10px;
 }
 
-#login-button:hover {
+#register-button:hover {
   border-radius: 35px;
   background-color: whitesmoke;
 }

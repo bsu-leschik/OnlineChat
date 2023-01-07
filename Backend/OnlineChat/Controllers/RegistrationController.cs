@@ -18,7 +18,7 @@ public class RegistrationController : ControllerBase
 
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> Register(RegistrationCommand command)
+    public async Task<IActionResult> Register([FromBody] RegistrationCommand command)
     {
         return Ok(await _mediator.Send(command));
     }

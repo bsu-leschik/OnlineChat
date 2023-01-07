@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import {StorageService} from "../storage.service";
-import {Navigation, Router} from "@angular/router";
+import {Router} from "@angular/router";
 import {Constants} from "../constants";
+import {HttpClient} from "@angular/common/http";
 
 @Component({
   selector: 'app-login',
@@ -10,28 +11,42 @@ import {Constants} from "../constants";
 })
 export class LoginComponent implements OnInit {
 
-  constructor(private storage: StorageService, private router: Router) {
-    if (storage.get<string>(Constants.NicknameStorageField) != null) {
-      this.router.navigate(['select-chat']);
-    }
+  constructor(private storage: StorageService, private router: Router, private httpClient: HttpClient) {
+
   }
 
   ngOnInit(): void {}
 
   async onConnectClicked(): Promise<void> {
-    let inputElement: HTMLInputElement = document.getElementById('nickname-input') as HTMLInputElement;
-    const nickname = inputElement.value;
-    if (nickname == null) {
-      this.showErrorMessage('Nickname is null.');
+    const usernameInput: HTMLInputElement = document.getElementById('nickname-input') as HTMLInputElement;
+    const passwordInput: HTMLInputElement = document.getElementById('password-input') as HTMLInputElement;
+    const username = usernameInput.value;
+    const password = passwordInput.value;
+    if (username == null || password == null) {
+      this.showErrorMessage('Password or nickname is null.');
       return;
     }
-    if (!this.checkNickname(nickname)) {
+    if (!this.checkNickname(username)) {
       this.showErrorMessage('Invalid nickname');
       return;
     }
-    this.storage.set(Constants.NicknameStorageField, nickname);
-    this.storage.set(Constants.ChatIdStorageField, 0);
-    await this.router.navigate(['select-chat']);
+    this.httpClient.post<LoginResponse>(Constants.ServerUrl + '/login', {
+      'username': username,
+      'password': password,
+    }, {
+      withCredentials: true
+    }).subscribe(response => {
+      if (response == LoginResponse.Success) {
+        this.storage.set(Constants.NicknameStorageField, username);
+        this.router.navigate(['select-chat']);
+        return;
+      }
+      if (response == LoginResponse.WrongPassword) {
+        this.showErrorMessage('Wrong password');
+        return;
+      }
+      this.showErrorMessage('Wrong username');
+    });
   }
 
   checkNickname(nickname: string): boolean {
@@ -43,7 +58,14 @@ export class LoginComponent implements OnInit {
     if (element == null) {
       return;
     }
+
     element.textContent = message;
     element.hidden = false;
   }
+}
+
+enum LoginResponse {
+  Success = 0,
+  WrongPassword,
+  WrongUsername
 }

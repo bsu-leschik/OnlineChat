@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace OnlineChat.Controllers;
 
 [ApiController]
-[Route("api/chatrooms/")]
+[Route("api/chatrooms")]
+[Authorize(AuthenticationSchemes = Constants.Schemes.DefaultCookieScheme)]
 public class ChatsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -18,22 +19,23 @@ public class ChatsController : ControllerBase
         _mediator = mediator;
     }
 
-    [Authorize]
+    [Authorize(AuthenticationSchemes = Constants.Schemes.DefaultCookieScheme)]
     [HttpGet("get-chatrooms")]
     public async Task<IActionResult> GetChatrooms()
     {
         return Ok(await _mediator.Send(new GetChatroomsRequest()));
     }
 
-    [Authorize]
+    [Authorize(AuthenticationSchemes = Constants.Schemes.DefaultCookieScheme)]
     [HttpPost("create")]
-    public async Task<IActionResult> CreateChatroom(CreateChatroomCommand command)
+    public async Task<IActionResult> CreateChatroom([FromBody] CreateChatroomCommand command)
     {
         return Ok(await _mediator.Send(command));
     }
 
+    [Authorize(AuthenticationSchemes = Constants.Schemes.DefaultCookieScheme)]
     [HttpGet("get-messages")]
-    public async Task<IActionResult> GetMessages(GetMessagesQuery request)
+    public async Task<IActionResult> GetMessages([FromBody] GetMessagesQuery request)
     {
         return Ok(await _mediator.Send(request));
     }

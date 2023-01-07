@@ -1,4 +1,3 @@
-using System.Reflection;
 using BusinessLogic.Queries.Chatrooms.GetChatrooms;
 using Constants;
 using Database;
@@ -10,6 +9,7 @@ using OnlineChat;
 using OnlineChat.Hubs;
 
 const string myPolicy = "MyPolicy";
+const string frontEnd = "http://localhost:4200";
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +21,15 @@ builder.Services.AddAuthentication(Schemes.DefaultCookieScheme)
            pb.LogoutPath = "/logout";
            pb.SlidingExpiration = true;
            pb.Cookie.Name = "dl";
+           pb.Cookie.SameSite = SameSiteMode.None;
+           pb.Events.OnRedirectToLogin = context =>
+           {
+               context.Response.StatusCode = 401;
+               context.RedirectUri = frontEnd + "/login";
+               return Task.CompletedTask;
+           };
        });
+builder.Services.AddAuthorization();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -58,11 +66,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseCors(myPolicy);
 app.MapHub<ChatHub>("/chat");
 app.MapControllers();
+
 
 app.Run();
