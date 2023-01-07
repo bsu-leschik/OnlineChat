@@ -10,6 +10,7 @@
 /Constants/bin/
 /Database/bin/
 /Database/obj/
+
 # IDEA
 .idea/
 .vs/
