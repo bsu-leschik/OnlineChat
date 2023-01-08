@@ -1,4 +1,6 @@
-﻿namespace Extensions;
+﻿using System.Runtime.CompilerServices;
+
+namespace Extensions;
 
 public static class AsyncEnumerableExtensions
 {
@@ -14,12 +16,27 @@ public static class AsyncEnumerableExtensions
         return result;
     }
 
-    public async static IAsyncEnumerable<TR> SelectAsync<T, TR>(this IAsyncEnumerable<T> enumerable, Func<T, TR> func, CancellationToken cancellationToken)
+    public async static IAsyncEnumerable<TR> SelectAsync<T, TR>(this IAsyncEnumerable<T> enumerable, Func<T, TR> func,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var enumerator = enumerable.GetAsyncEnumerator(cancellationToken);
         while (await enumerator.MoveNextAsync())
         {
             yield return func(enumerator.Current);
         }
+    }
+
+    public async static Task<T?> FirstOrDefaultAsync<T>(this IAsyncEnumerable<T> enumerable, Func<T, bool> predicate,
+        CancellationToken cancellationToken)
+    {
+        var enumerator = enumerable.GetAsyncEnumerator(cancellationToken);
+        while (await enumerator.MoveNextAsync())
+        {
+            if (predicate(enumerator.Current))
+            {
+                return enumerator.Current;
+            }
+        }
+        return default;
     }
 }

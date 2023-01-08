@@ -1,5 +1,4 @@
 ﻿using BusinessLogic.Extensions;
-using BusinessLogic.Services;
 using Database;
 using Database.Entities;
 using MediatR;
@@ -23,7 +22,7 @@ public class RegistrationRequestHandler : IRequestHandler<RegistrationCommand, R
         }
 
         var user = new User(command.Username, command.Password);
-        await _storageService.AddUser(user, cancellationToken);
+        await _storageService.AddUserAsync(user, cancellationToken);
         return new RegistrationResponse("Success");
     }
 }

@@ -1,5 +1,4 @@
-﻿using BusinessLogic.Services;
-using Database;
+﻿using Database;
 using Database.Entities;
 using MediatR;
 
@@ -18,7 +17,7 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
     {
         try
         {
-            Task<User?> GetUserByName(string username) => _storageService.GetUser(u => u.Username == username,
+            Task<User?> GetUserByName(string username) => _storageService.GetUserAsync(u => u.Username == username,
                 cancellationToken);
 
             var users = request.Usernames
@@ -42,7 +41,7 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
                     user.Chatrooms.Add(chatroom);
                 // await _storageService.Update(user, cancellationToken);
             }
-            await _storageService.AddChatroom(chatroom, cancellationToken);
+            await _storageService.AddChatroomAsync(chatroom, cancellationToken);
             await _storageService.SaveChangesAsync(cancellationToken);
             return new CreateChatroomResponse(chatroom.Id);
         }

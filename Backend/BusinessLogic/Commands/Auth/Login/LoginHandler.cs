@@ -1,5 +1,4 @@
 ﻿using System.Security.Claims;
-using BusinessLogic.Services;
 using Constants;
 using Database;
 using Database.Entities;
@@ -16,7 +15,8 @@ public class LoginHandler : IRequestHandler<LoginCommand, LoginResponse>
     private readonly IPasswordHasher<User> _passwordHasher;
     private readonly IHttpContextAccessor _accessor;
 
-    public LoginHandler(IStorageService storageService, IPasswordHasher<User> passwordHasher, IHttpContextAccessor accessor)
+    public LoginHandler(IStorageService storageService, IPasswordHasher<User> passwordHasher,
+        IHttpContextAccessor accessor)
     {
         _storageService = storageService;
         _passwordHasher = passwordHasher;
@@ -25,7 +25,7 @@ public class LoginHandler : IRequestHandler<LoginCommand, LoginResponse>
 
     public async Task<LoginResponse> Handle(LoginCommand command, CancellationToken cancellationToken)
     {
-        var user = await _storageService.GetUser(u => u.Username == command.Username, cancellationToken);
+        var user = await _storageService.GetUserAsync(u => u.Username == command.Username, cancellationToken);
         if (user is null)
         {
             return LoginResponse.WrongUsername;
@@ -38,13 +38,13 @@ public class LoginHandler : IRequestHandler<LoginCommand, LoginResponse>
         {
             return LoginResponse.WrongPassword;
         }
-        
+
         var claims = new List<Claim>
-        {
-            new(ClaimTypes.Name, user.Username),
-            new("Token", user.Token.ToString())
-        };
-        var identity = new ClaimsIdentity(claims, Schemes.DefaultCookieScheme);
+                         {
+                             new(Claims.Name, user.Username), 
+                             new(Claims.Token, user.Token.ToString())
+                         };
+        var identity = new ClaimsIdentity(claims, authenticationType: Schemes.DefaultCookieScheme);
         var principal = new ClaimsPrincipal(identity);
         await _accessor.HttpContext!.SignInAsync(principal);
         return LoginResponse.Success;

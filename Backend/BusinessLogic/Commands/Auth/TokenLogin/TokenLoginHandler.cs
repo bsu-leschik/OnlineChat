@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using Database;
+﻿using Database;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -26,7 +25,7 @@ public class TokenLoginHandler : IRequestHandler<TokenLoginCommand, TokenLoginRe
             return TokenLoginResponse.Error(TokenLoginResponseCode.BadRequest);
         }
 
-        var (username, token) = Decompose(principal);
+        var (username, token) = Users.Decompose(principal);
         if (username is null)
         {
             return TokenLoginResponse.Error(TokenLoginResponseCode.BadRequest);
@@ -37,7 +36,7 @@ public class TokenLoginHandler : IRequestHandler<TokenLoginCommand, TokenLoginRe
             return TokenLoginResponse.Error(TokenLoginResponseCode.TokenExpired);
         }
 
-        var user = await _storageService.GetUser(u => u.Username == username, CancellationToken.None);
+        var user = await _storageService.GetUserAsync(u => u.Username == username, CancellationToken.None);
         if (user is null)
         {
             return TokenLoginResponse.Error(TokenLoginResponseCode.BadRequest);
@@ -50,19 +49,5 @@ public class TokenLoginHandler : IRequestHandler<TokenLoginCommand, TokenLoginRe
 
         await _contextAccessor.HttpContext!.SignInAsync(principal);
         return TokenLoginResponse.Success(username);
-    }
-
-    private static (string? Username, Guid? Token) Decompose(ClaimsPrincipal principal)
-    {
-        Guid? guid = null;
-
-        var username = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)
-                                ?.Value;
-        var guidAsString = principal.Claims.FirstOrDefault(c => c.Type == "Token")?.Value;
-        if (Guid.TryParse(guidAsString, out var id))
-        {
-            guid = id;
-        }
-        return (username, guid);
     }
 }

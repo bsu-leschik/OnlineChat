@@ -2,6 +2,4 @@
 
 namespace BusinessLogic.Commands.Auth.TokenLogin;
 
-public class TokenLoginCommand : IRequest<TokenLoginResponse>
-{
-}
+public struct TokenLoginCommand : IRequest<TokenLoginResponse> {}

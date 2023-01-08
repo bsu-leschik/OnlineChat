@@ -642,6 +642,7 @@
       },
       "Database/1.0.0": {
         "dependencies": {
+          "Extensions": "1.0.0",
           "MediatR": "11.1.0",
           "Microsoft.EntityFrameworkCore": "7.0.1",
           "Microsoft.EntityFrameworkCore.SqlServer": "7.0.1"

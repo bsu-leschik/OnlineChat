@@ -22,6 +22,7 @@ builder.Services.AddAuthentication(Schemes.DefaultCookieScheme)
            pb.SlidingExpiration = true;
            pb.Cookie.Name = "dl";
            pb.Cookie.SameSite = SameSiteMode.None;
+           pb.Cookie.IsEssential = true;
            pb.Events.OnRedirectToLogin = context =>
            {
                context.Response.StatusCode = 401;

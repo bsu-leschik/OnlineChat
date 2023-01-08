@@ -12,7 +12,7 @@ import {ChatroomInfo, ChatType} from "../shared/chatroom";
 })
 export class ChatSelectorComponent implements OnInit {
   public chatrooms: ChatroomInfo[] = [];
-  private intervalId;
+  private readonly intervalId;
 
   constructor(private storage: StorageService, private httpClient: HttpClient, private router: Router) {
     if (storage.get<string>(Constants.NicknameStorageField) === undefined) {

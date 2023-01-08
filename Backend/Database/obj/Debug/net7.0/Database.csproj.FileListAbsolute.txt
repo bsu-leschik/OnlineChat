@@ -12,3 +12,6 @@ D:\Programming\Other Projects\OnlineChat\Backend\Database\obj\Debug\net7.0\Datab
 D:\Programming\Other Projects\OnlineChat\Backend\Database\obj\Debug\net7.0\ref\Database.dll
 D:\Programming\Other Projects\OnlineChat\Backend\Database\bin\Debug\net7.0\Database.runtimeconfig.json
 D:\Programming\Other Projects\OnlineChat\Backend\Database\obj\Debug\net7.0\Database.genruntimeconfig.cache
+D:\Programming\Other Projects\OnlineChat\Backend\Database\bin\Debug\net7.0\Extensions.dll
+D:\Programming\Other Projects\OnlineChat\Backend\Database\bin\Debug\net7.0\Extensions.pdb
+D:\Programming\Other Projects\OnlineChat\Backend\Database\obj\Debug\net7.0\Database.csproj.CopyComplete

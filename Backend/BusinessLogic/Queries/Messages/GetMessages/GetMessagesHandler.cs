@@ -15,7 +15,7 @@ public class GetMessagesHandler : IRequestHandler<GetMessagesQuery, GetMessagesR
 
     public async Task<GetMessagesResponse> Handle(GetMessagesQuery request, CancellationToken cancellationToken)
     {
-        var user = await UserFinder.FindUser(_storageService, ClaimsPrincipal.Current!, cancellationToken);
+        var user = await Users.FindUser(_storageService, ClaimsPrincipal.Current!, cancellationToken);
         return new GetMessagesResponse
                    {
                        Messages = user?.Chatrooms.FirstOrDefault(c => c.Id == request.ChatId)
