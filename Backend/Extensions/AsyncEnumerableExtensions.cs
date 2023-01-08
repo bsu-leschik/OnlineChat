@@ -7,38 +7,33 @@ public static class AsyncEnumerableExtensions
     public async static Task<List<T>> ToListAsync<T>(this IAsyncEnumerable<T> enumerable,
         CancellationToken cancellationToken)
     {
-        var enumerator = enumerable.GetAsyncEnumerator(cancellationToken);
         var result = new List<T>();
-        while (await enumerator.MoveNextAsync())
+        await foreach (var element in enumerable.WithCancellation(cancellationToken))
         {
-            result.Add(enumerator.Current);
+            result.Add(element);       
         }
-        await enumerator.DisposeAsync();
         return result;
     }
 
     public async static IAsyncEnumerable<TR> SelectAsync<T, TR>(this IAsyncEnumerable<T> enumerable, Func<T, TR> func,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var enumerator = enumerable.GetAsyncEnumerator(cancellationToken);
-        while (await enumerator.MoveNextAsync())
+        await foreach (var element in enumerable.WithCancellation(cancellationToken))
         {
-            yield return func(enumerator.Current);
+            yield return func(element);
         }
-        await enumerator.DisposeAsync();
     }
 
     public async static Task<T?> FirstOrDefaultAsync<T>(this IAsyncEnumerable<T> enumerable, Func<T, bool> predicate,
         CancellationToken cancellationToken)
     {
-        var enumerator = enumerable.GetAsyncEnumerator(cancellationToken);
-        while (await enumerator.MoveNextAsync())
+        await foreach (var element in enumerable.WithCancellation(cancellationToken))
         {
-            if (!predicate(enumerator.Current)) continue;
-            await enumerator.DisposeAsync();
-            return enumerator.Current;
+            if (predicate(element))
+            {
+                return element;
+            }
         }
-        await enumerator.DisposeAsync();
         return default;
     }
 }
