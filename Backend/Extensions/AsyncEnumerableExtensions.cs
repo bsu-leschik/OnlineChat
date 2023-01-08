@@ -13,6 +13,7 @@ public static class AsyncEnumerableExtensions
         {
             result.Add(enumerator.Current);
         }
+        await enumerator.DisposeAsync();
         return result;
     }
 
@@ -24,6 +25,7 @@ public static class AsyncEnumerableExtensions
         {
             yield return func(enumerator.Current);
         }
+        await enumerator.DisposeAsync();
     }
 
     public async static Task<T?> FirstOrDefaultAsync<T>(this IAsyncEnumerable<T> enumerable, Func<T, bool> predicate,
@@ -32,11 +34,11 @@ public static class AsyncEnumerableExtensions
         var enumerator = enumerable.GetAsyncEnumerator(cancellationToken);
         while (await enumerator.MoveNextAsync())
         {
-            if (predicate(enumerator.Current))
-            {
-                return enumerator.Current;
-            }
+            if (!predicate(enumerator.Current)) continue;
+            await enumerator.DisposeAsync();
+            return enumerator.Current;
         }
+        await enumerator.DisposeAsync();
         return default;
     }
 }
