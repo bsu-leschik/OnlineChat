@@ -1161,6 +1161,16 @@
             "rid": "win"
           }
         }
+      },
+      "Extensions/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v7.0",
+        "compile": {
+          "bin/placeholder/Extensions.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Extensions.dll": {}
+        }
       }
     }
   },
@@ -3511,10 +3521,16 @@
         "useSharedDesignerContext.txt",
         "version.txt"
       ]
+    },
+    "Extensions/1.0.0": {
+      "type": "project",
+      "path": "../Extensions/Extensions.csproj",
+      "msbuildProject": "../Extensions/Extensions.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net7.0": [
+      "Extensions >= 1.0.0",
       "MediatR >= 11.1.0",
       "Microsoft.EntityFrameworkCore >= 7.0.1",
       "Microsoft.EntityFrameworkCore.SqlServer >= 7.0.1",
@@ -3547,7 +3563,11 @@
       "frameworks": {
         "net7.0": {
           "targetAlias": "net7.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "D:\\Programming\\Other Projects\\OnlineChat\\Backend\\Extensions\\Extensions.csproj": {
+              "projectPath": "D:\\Programming\\Other Projects\\OnlineChat\\Backend\\Extensions\\Extensions.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

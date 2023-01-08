@@ -15,3 +15,5 @@ D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\obj\Debug\net7.0\
 D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\obj\Debug\net7.0\refint\BusinessLogic.dll
 D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\obj\Debug\net7.0\BusinessLogic.pdb
 D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\obj\Debug\net7.0\ref\BusinessLogic.dll
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\bin\Debug\net7.0\Extensions.dll
+D:\Programming\Other Projects\OnlineChat\Backend\BusinessLogic\bin\Debug\net7.0\Extensions.pdb

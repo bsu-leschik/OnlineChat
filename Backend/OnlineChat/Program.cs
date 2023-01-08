@@ -50,6 +50,10 @@ builder.Services.AddCors(options =>
              .AllowAnyHeader()
              .AllowAnyMethod()
              .AllowCredentials();
+            b.WithOrigins("http://127.0.0.1:4200")
+             .AllowAnyHeader()
+             .AllowAnyMethod()
+             .AllowCredentials();
         });
 });
 

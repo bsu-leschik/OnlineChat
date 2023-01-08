@@ -1,4 +1,7 @@
-﻿using Database.Entities;
+﻿using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
+using Database.Entities;
+using Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Database;
@@ -53,14 +56,23 @@ public class DatabaseStorageService : IStorageService
         await _database.SaveChangesAsync(cancellationToken);
     }
 
-    public Task<List<Chatroom>> GetChatrooms(CancellationToken cancellationToken)
-    {
-        return _database.Chatrooms.ToListAsync(cancellationToken);
-    }
-
     public async Task SaveChangesAsync(CancellationToken cancellationToken)
     {
         await _database.SaveChangesAsync(cancellationToken);
+    }
+
+    public async IAsyncEnumerable<Chatroom> GetUsersChatroomsAsync(User user, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var enumerator = _database.Chatrooms.
+                                   Include(c => c.Users)
+                                   .Include(c => c.Users)
+                                   .AsAsyncEnumerable()
+                                   .GetAsyncEnumerator(cancellationToken);
+        while (await enumerator.MoveNextAsync())
+        {
+            if (enumerator.Current.Users.Contains(u => u.Username == user.Username))
+                yield return enumerator.Current;
+        }
     }
 
     public async Task AddMessageTo(Chatroom chatroom, Message message, CancellationToken cancellationToken)

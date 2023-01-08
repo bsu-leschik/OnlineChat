@@ -1,4 +1,5 @@
 ﻿using Database;
+using Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -24,7 +25,9 @@ public class GetChatroomsHandler : IRequestHandler<GetChatroomsRequest, List<Cha
         }
 
 
-        return user.Chatrooms.Select(ChatroomInfo.Of)
-                   .ToList();
+
+        return await _storageService.GetUsersChatroomsAsync(user, cancellationToken)
+                                 .SelectAsync(ChatroomInfo.Of, cancellationToken)
+                                 .ToListAsync(cancellationToken);
     }
 }

@@ -3,6 +3,7 @@ import {StorageService} from "../storage.service";
 import {Constants} from "../constants";
 import {Router} from "@angular/router";
 import {HttpClient} from "@angular/common/http";
+import {ChatroomInfo, ChatType} from "../shared/chatroom";
 
 @Component({
   selector: 'app-chat-selector',
@@ -30,6 +31,9 @@ export class ChatSelectorComponent implements OnInit {
     }).subscribe(chatrooms => {
         console.log(chatrooms);
         if (chatrooms != null) {
+          const username = this.storage.get<string>(Constants.NicknameStorageField);
+          this.filter(chatrooms, username);
+          console.log(chatrooms);
           this.chatrooms = chatrooms;
         }
       });
@@ -58,9 +62,17 @@ export class ChatSelectorComponent implements OnInit {
   public ngOnDestroy() {
     clearInterval(this.intervalId);
   }
-}
 
-interface ChatroomInfo {
-  id: string;
-  usersCount: number;
+  isPublic(room: ChatroomInfo) {
+    return room.chatType == ChatType.Public;
+  }
+
+  filter(chatrooms: ChatroomInfo[], username: string) {
+    chatrooms.forEach(c => {
+      let index = c.users.indexOf(username);
+      if (index > -1) {
+        c.users.splice(index, 1);
+      }
+    });
+  }
 }

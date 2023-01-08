@@ -15,7 +15,9 @@ export class LoginComponent implements OnInit {
 
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.tryAutoLogin();
+  }
 
   async onConnectClicked(): Promise<void> {
     const usernameInput: HTMLInputElement = document.getElementById('nickname-input') as HTMLInputElement;
@@ -37,8 +39,7 @@ export class LoginComponent implements OnInit {
       withCredentials: true
     }).subscribe(response => {
       if (response == LoginResponse.Success) {
-        this.storage.set(Constants.NicknameStorageField, username);
-        this.router.navigate(['select-chat']);
+        this.onLoggedIn(username);
         return;
       }
       if (response == LoginResponse.WrongPassword) {
@@ -62,10 +63,41 @@ export class LoginComponent implements OnInit {
     element.textContent = message;
     element.hidden = false;
   }
+
+  private tryAutoLogin() {
+    this.httpClient.get<TokenLoginResponse>(Constants.ServerUrl + '/auto-login', {
+      withCredentials: true
+    })
+      .subscribe(result => {
+        if (result.responseCode == TokenLoginResponseCode.Success) {
+          this.onLoggedIn(result.username);
+          return;
+        }
+        console.log(result)
+      })
+  }
+
+  private onLoggedIn(username: string) {
+    this.storage.isLoggedIn = true;
+    this.storage.set(Constants.NicknameStorageField, username);
+    this.router.navigate(['select-chat']);
+  }
 }
 
 enum LoginResponse {
   Success = 0,
   WrongPassword,
   WrongUsername
+}
+
+interface TokenLoginResponse {
+  username: string;
+  responseCode: TokenLoginResponseCode;
+}
+
+enum TokenLoginResponseCode {
+  Success = 0,
+  TokenExpired,
+  NotLoggedIn,
+  BadRequest
 }

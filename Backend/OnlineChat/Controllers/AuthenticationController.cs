@@ -1,5 +1,6 @@
 ﻿using BusinessLogic.Commands.Auth.Login;
 using BusinessLogic.Commands.Auth.Logout;
+using BusinessLogic.Commands.Auth.TokenLogin;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,13 @@ public class AuthenticationController : ControllerBase
         _mediator = mediator;
     }
 
+    [HttpGet("/auto-login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Login()
+    {
+        return Ok(await _mediator.Send(new TokenLoginCommand()));
+    }
+    
     [HttpPost("/login")]
     [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginCommand command)

@@ -1,0 +1,12 @@
+D:\Programming\Other Projects\OnlineChat\Backend\Extensions\bin\Debug\net7.0\Extensions.deps.json
+D:\Programming\Other Projects\OnlineChat\Backend\Extensions\bin\Debug\net7.0\Extensions.dll
+D:\Programming\Other Projects\OnlineChat\Backend\Extensions\bin\Debug\net7.0\Extensions.pdb
+D:\Programming\Other Projects\OnlineChat\Backend\Extensions\obj\Debug\net7.0\Extensions.csproj.AssemblyReference.cache
+D:\Programming\Other Projects\OnlineChat\Backend\Extensions\obj\Debug\net7.0\Extensions.GeneratedMSBuildEditorConfig.editorconfig
+D:\Programming\Other Projects\OnlineChat\Backend\Extensions\obj\Debug\net7.0\Extensions.AssemblyInfoInputs.cache
+D:\Programming\Other Projects\OnlineChat\Backend\Extensions\obj\Debug\net7.0\Extensions.AssemblyInfo.cs
+D:\Programming\Other Projects\OnlineChat\Backend\Extensions\obj\Debug\net7.0\Extensions.csproj.CoreCompileInputs.cache
+D:\Programming\Other Projects\OnlineChat\Backend\Extensions\obj\Debug\net7.0\Extensions.dll
+D:\Programming\Other Projects\OnlineChat\Backend\Extensions\obj\Debug\net7.0\refint\Extensions.dll
+D:\Programming\Other Projects\OnlineChat\Backend\Extensions\obj\Debug\net7.0\Extensions.pdb
+D:\Programming\Other Projects\OnlineChat\Backend\Extensions\obj\Debug\net7.0\ref\Extensions.dll

@@ -10,6 +10,7 @@
         "dependencies": {
           "Constants": "1.0.0",
           "Database": "1.0.0",
+          "Extensions": "1.0.0",
           "MediatR": "11.1.0",
           "MediatR.Extensions.Microsoft.DependencyInjection": "11.0.0",
           "Swashbuckle.AspNetCore": "6.4.0"
@@ -648,6 +649,11 @@
         "runtime": {
           "Database.dll": {}
         }
+      },
+      "Extensions/1.0.0": {
+        "runtime": {
+          "Extensions.dll": {}
+        }
       }
     }
   },
@@ -1153,6 +1159,11 @@
       "sha512": ""
     },
     "Database/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Extensions/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

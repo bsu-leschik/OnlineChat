@@ -11,7 +11,6 @@ public interface IStorageService
     public Task AddUser(User user, CancellationToken cancellationToken);
     public Task Remove(User user, CancellationToken cancellationToken);
     public Task Remove(Chatroom chatroom, CancellationToken cancellationToken);
-    public Task<List<Chatroom>> GetChatrooms(CancellationToken cancellationToken);
     public Task SaveChangesAsync(CancellationToken cancellationToken);
-    public Task AddMessageTo(Chatroom chatroom, Message message, CancellationToken cancellationToken);
+    public IAsyncEnumerable<Chatroom> GetUsersChatroomsAsync(User user, CancellationToken cancellationToken);
 }

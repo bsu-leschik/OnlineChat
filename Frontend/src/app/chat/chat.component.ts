@@ -40,7 +40,8 @@ export class ChatComponent implements OnInit {
         return;
       }
       let welcomeText: HTMLParagraphElement = document.getElementById('welcome-text') as HTMLParagraphElement;
-      welcomeText.textContent += '!';
+      const username = this.storage.get<string>(Constants.NicknameStorageField);
+      welcomeText.textContent += username + '!';
       if (response.messages != null) {
         for (let message of response.messages)
           this.messages.push(message);
