@@ -11,15 +11,22 @@ public class DatabaseStorageService : IStorageService
     {
         _database = database;
     }
-    
+
     public Task<User?> GetUser(Func<User, bool> predicate, CancellationToken cancellationToken)
     {
-        return Task.FromResult(_database.Users.Include(u => u.Chatrooms).FirstOrDefault(predicate));
+        return Task.FromResult(
+            _database.Users
+                     .Include(u => u.Chatrooms)
+                     .FirstOrDefault(predicate));
     }
 
     public Task<Chatroom?> GetChatroom(Func<Chatroom, bool> predicate, CancellationToken cancellationToken)
     {
-        return Task.FromResult(_database.Chatrooms.Include(c => c.Users).FirstOrDefault(predicate));
+        var chatroom = _database.Chatrooms
+                                .Include(c => c.Messages)
+                                .Include(c => c.Users)
+                                .FirstOrDefault(predicate);
+        return Task.FromResult(chatroom);
     }
 
     public async Task AddChatroom(Chatroom chatroom, CancellationToken cancellationToken)
@@ -56,15 +63,8 @@ public class DatabaseStorageService : IStorageService
         await _database.SaveChangesAsync(cancellationToken);
     }
 
-    public Task Update(User u, CancellationToken cancellationToken)
+    public async Task AddMessageTo(Chatroom chatroom, Message message, CancellationToken cancellationToken)
     {
-        _database.Users.Update(u);
-        return Task.CompletedTask;
-    }
-
-    public Task Update(Chatroom c, CancellationToken cancellationToken)
-    {
-        _database.Chatrooms.Update(c);
-        return Task.CompletedTask;
+        await SaveChangesAsync(cancellationToken);
     }
 }

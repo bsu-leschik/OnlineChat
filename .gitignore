@@ -5,3 +5,5 @@ Backend/BusinessLogic/obj/Debug/net7.0/BusinessLogic.pdb
 Backend/BusinessLogic/obj/Debug/net7.0/BusinessLogic.dll
 Backend/BusinessLogic/bin/Debug/net7.0/BusinessLogic.pdb
 Backend/BusinessLogic/bin/Debug/net7.0/BusinessLogic.dll
+Backend/BusinessLogic/bin/
+Backend/Database/bin/

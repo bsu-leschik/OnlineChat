@@ -4,6 +4,7 @@ using Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Database.Migrations
 {
     [DbContext(typeof(Database))]
-    partial class DatabaseModelSnapshot : ModelSnapshot
+    [Migration("20230108151050_MessagesUpd")]
+    partial class MessagesUpd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,7 +60,7 @@ namespace Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ChatroomId")
+                    b.Property<Guid>("ChatroomId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Sender")
@@ -118,9 +121,13 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Database.Entities.Message", b =>
                 {
-                    b.HasOne("Database.Entities.Chatroom", null)
+                    b.HasOne("Database.Entities.Chatroom", "Chatroom")
                         .WithMany("Messages")
-                        .HasForeignKey("ChatroomId");
+                        .HasForeignKey("ChatroomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chatroom");
                 });
 
             modelBuilder.Entity("Database.Entities.Chatroom", b =>

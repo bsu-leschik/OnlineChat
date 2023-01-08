@@ -39,7 +39,7 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
             foreach (var user in users)
             {
                 if (!user!.Chatrooms.Contains(chatroom))
-                    user!.Chatrooms.Add(chatroom);
+                    user.Chatrooms.Add(chatroom);
                 // await _storageService.Update(user, cancellationToken);
             }
             await _storageService.AddChatroom(chatroom, cancellationToken);

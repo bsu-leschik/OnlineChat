@@ -1,4 +1,5 @@
 ﻿using Database.Entities;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Database;
 
@@ -12,6 +13,5 @@ public interface IStorageService
     public Task Remove(Chatroom chatroom, CancellationToken cancellationToken);
     public Task<List<Chatroom>> GetChatrooms(CancellationToken cancellationToken);
     public Task SaveChangesAsync(CancellationToken cancellationToken);
-    public Task Update(User u, CancellationToken cancellationToken);
-    public Task Update(Chatroom c, CancellationToken cancellationToken);
+    public Task AddMessageTo(Chatroom chatroom, Message message, CancellationToken cancellationToken);
 }

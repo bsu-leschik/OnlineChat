@@ -2,6 +2,7 @@
 using BusinessLogic;
 using Database;
 using Database.Entities;
+using Microsoft.AspNet.SignalR.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using OnlineChat.Hubs.Response;
 
@@ -22,13 +23,18 @@ public class ChatHub : Hub
         {
             return new ConnectionResponse(messages: null, ConnectionResponseCode.Error);
         }
-        var user = await UserFinder.FindUser(_storageService, ClaimsPrincipal.Current!, CancellationToken.None);
+        if (Context.User is null)
+        {
+            return new ConnectionResponse(messages: null, ConnectionResponseCode.AccessDenied);
+        }
+        var user = await UserFinder.FindUser(_storageService, Context.User, CancellationToken.None);
         if (user is null)
         {
             return new ConnectionResponse(messages: null, ConnectionResponseCode.AccessDenied);
         }
 
-        var chatroom = user.Chatrooms.FirstOrDefault(c => c.Id == id);
+        await Groups.AddToGroupAsync(Context.ConnectionId, chatId);
+        var chatroom = await _storageService.GetChatroom(c => c.Id == id, CancellationToken.None);
         return chatroom is null
             ? new ConnectionResponse(messages: null, ConnectionResponseCode.RoomDoesntExist)
             : new ConnectionResponse(messages: chatroom.Messages, ConnectionResponseCode.SuccessfullyConnected);
@@ -48,22 +54,45 @@ public class ChatHub : Hub
 
     private async Task SendMessageToChat(string chatId, Message message)
     {
-        await Clients.Group(chatId)
+        if (!Guid.TryParse(chatId, out var id))
+        {
+            return;
+        }
+
+        var chatroom = await _storageService.GetChatroom(c => c.Id == id, CancellationToken.None);
+        if (chatroom is null)
+        {
+            return;
+        }
+        chatroom.Messages.Add(message);
+        var saving = _storageService.SaveChangesAsync(CancellationToken.None);
+        var sending = Clients.Group(chatId)
                      .SendCoreAsync("Receive", new object?[] { message });
+        await Task.WhenAll(saving, sending);
     }
 
-    public async Task Send(Guid chatId, string message)
+    public async Task Send(string chatId, string message)
     {
-        var user = await UserFinder.FindUser(_storageService, ClaimsPrincipal.Current!, CancellationToken.None);
+        if (!Guid.TryParse(chatId, out var id))
+        {
+            return;
+        }
 
-        var chatroom = user?.Chatrooms.FirstOrDefault(c => c.Id == chatId);
+        if (Context.User is null)
+        {
+            return;
+        }
+
+        var user = await UserFinder.FindUser(_storageService, Context.User, CancellationToken.None);
+
+        var chatroom = user?.Chatrooms.FirstOrDefault(c => c.Id == id);
         if (chatroom is null)
         {
             return;
         }
 
-        var username = ClaimsPrincipal.Current!.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)!.Value;
+        var username = Context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)!.Value;
         var messageObject = new Message(username, message);
-        await SendMessageToChat(chatId.ToString(), messageObject);
+        await SendMessageToChat(chatId, messageObject);
     }
 }

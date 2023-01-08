@@ -33,16 +33,22 @@ export class ChatComponent implements OnInit {
 
   ngOnInit(): void {
     this.hubConnection.start().then(async () => {
-      const response = await this.hubConnection.invoke('Connect', this.nickname, this.chatId) as ConnectionResponse;
+      const response = await this.hubConnection.invoke('Connect', this.chatId) as ConnectionResponse;
+      console.log(response);
       if (response.response != ConnectionResponseCode.SuccessfullyConnected) {
         ChatComponent.switchResponseCode(response.response);
         return;
       }
-      for (let message of response.messages)
-        this.messages.push(message);
       let welcomeText: HTMLParagraphElement = document.getElementById('welcome-text') as HTMLParagraphElement;
-      welcomeText.textContent += this.nickname + '!';
-    }).catch(() => alert('Failed to start connection'));
+      welcomeText.textContent += '!';
+      if (response.messages != null) {
+        for (let message of response.messages)
+          this.messages.push(message);
+      }
+    }).catch((error) => {
+      alert('Failed to start connection1');
+      console.log(error);
+    });
   }
 
   async onSendClicked(): Promise<void> {
@@ -52,7 +58,7 @@ export class ChatComponent implements OnInit {
       return;
     }
     input.value = '';
-    let value: number = await this.hubConnection.invoke('Send', message)
+    let value: number = await this.hubConnection.invoke('Send', this.chatId, message)
       .then()
       .catch(() => alert('Failed to send message'));
 
