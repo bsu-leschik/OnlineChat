@@ -30,6 +30,7 @@ builder.Services.AddAuthentication(Schemes.DefaultCookieScheme)
                return Task.CompletedTask;
            };
        });
+
 builder.Services.AddAuthorization();
 
 builder.Services.AddControllers();
@@ -47,11 +48,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: myPolicy,
         b =>
         {
-            b.WithOrigins("http://localhost:4200")
-             .AllowAnyHeader()
-             .AllowAnyMethod()
-             .AllowCredentials();
-            b.WithOrigins("http://127.0.0.1:4200")
+            b.WithOrigins("http://localhost:4200", "http://127.0.0.1:4200")
              .AllowAnyHeader()
              .AllowAnyMethod()
              .AllowCredentials();

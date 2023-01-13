@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Database.Entities;
+﻿using Database.Entities;
 using Extensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -60,19 +59,19 @@ public class DatabaseStorageService : IStorageService
         await _database.SaveChangesAsync(cancellationToken);
     }
 
-    public async IAsyncEnumerable<Chatroom> GetChatroomsAsync(Func<Chatroom, bool> predicate,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
+    public IAsyncEnumerable<Chatroom> GetChatroomsAsync(CancellationToken cancellationToken)
     {
-        var enumerator = _database.Chatrooms
-                                  .Include(c => c.Users)
-                                  .Include(c => c.Users)
-                                  .AsAsyncEnumerable()
-                                  .GetAsyncEnumerator(cancellationToken);
-        while (await enumerator.MoveNextAsync())
-        {
-            if (predicate(enumerator.Current))
-                yield return enumerator.Current;
-        }
+        return _database.Chatrooms
+                        .Include(c => c.Users)
+                        .Include(c => c.Messages)
+                        .AsAsyncEnumerable();
+    }
+
+    public IAsyncEnumerable<User> GetUsersAsync(CancellationToken cancellationToken)
+    {
+        return _database.Users
+                        .Include(u => u.Chatrooms)
+                        .AsAsyncEnumerable();
     }
 
     public async Task AddMessageTo(Chatroom chatroom, Message message, CancellationToken cancellationToken)

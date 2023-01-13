@@ -1,5 +1,8 @@
 ﻿namespace Database.Entities;
 
+/// <summary>
+/// Data class
+/// </summary>
 public class User
 {
     public Guid Id { get; set; }
@@ -21,4 +24,19 @@ public class User
     }
     
     public User() {}
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is not User user)
+        {
+            return false;
+        }
+
+        return user.Id == Id;
+    }
+
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
+    }
 }

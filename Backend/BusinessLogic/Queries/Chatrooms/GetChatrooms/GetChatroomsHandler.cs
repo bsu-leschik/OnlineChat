@@ -24,15 +24,14 @@ public class GetChatroomsHandler : IRequestHandler<GetChatroomsRequest, List<Cha
             return chatroom.Users.Contains(u => u.Username == user.Username);
         }
 
-        var user = await Users.FindUser(_storageService, _accessor.HttpContext!.User, cancellationToken);
+        var user = await BusinessLogic.Users.FindUser(_storageService, _accessor.HttpContext!.User, cancellationToken);
         if (user == null)
         {
             return new List<ChatroomInfo>();
         }
 
-        return await _storageService
-                     .GetChatroomsAsync(c => IsInChat(c, user), cancellationToken)
-                     .SelectAsync(ChatroomInfo.Of, cancellationToken)
-                     .ToListAsync(cancellationToken);
+        return user.Chatrooms
+                   .Select(ChatroomInfo.Of)
+                   .ToList();
     }
 }

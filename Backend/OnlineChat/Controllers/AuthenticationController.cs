@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace OnlineChat.Controllers;
 
+/// <summary>
+/// Controller, responsible for authentication (login, logout, auto-login)
+/// </summary>
 [ApiController]
 [Route("api/authentication")]
 public class AuthenticationController : ControllerBase
@@ -20,7 +23,7 @@ public class AuthenticationController : ControllerBase
 
     [HttpGet("/auto-login")]
     [AllowAnonymous]
-    public async Task<IActionResult> Login()
+    public async Task<IActionResult> LoginWithToken()
     {
         return Ok(await _mediator.Send(new TokenLoginCommand()));
     }

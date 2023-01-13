@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace OnlineChat.Controllers;
 
+/// <summary>
+/// Controller, responsible for CRUD operations with chatrooms
+/// </summary>
+
 [ApiController]
 [Route("api/chatrooms")]
 [Authorize(AuthenticationSchemes = Constants.Schemes.DefaultCookieScheme)]

@@ -1,5 +1,6 @@
 ﻿using Database;
 using Database.Entities;
+using Extensions;
 using MediatR;
 
 namespace BusinessLogic.Commands.CreateChatroom;
@@ -20,26 +21,29 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
             Task<User?> GetUserByName(string username) => _storageService.GetUserAsync(u => u.Username == username,
                 cancellationToken);
 
-            var users = request.Usernames
-                               .Select(username =>
-                               {
-                                   var task = GetUserByName(username);
-                                   task.Wait(cancellationToken);
-                                   return task.Result;
-                               })
-                               .Where(user => user is not null)
-                               .ToList();
+            List<User> users = request.Usernames
+                                      .Select(username =>
+                                      {
+                                          var task = GetUserByName(username);
+                                          task.Wait(cancellationToken);
+                                          return task.Result;
+                                      })
+                                      .Where(user => user is not null)
+                                      .ToList()!;
+
+            if (await IsDuplicateChatroomAsync(users, request.Type, cancellationToken))
+            {
+                return CreateChatroomResponse.Failed;
+            }
 
             var chatroom = new Chatroom(
                 id: Guid.NewGuid(),
                 type: request.Type,
-                users: users!
+                users: users
             );
-            foreach (var user in users)
+            foreach (var user in users.Where(user => !user.Chatrooms.Contains(chatroom)))
             {
-                if (!user!.Chatrooms.Contains(chatroom))
-                    user.Chatrooms.Add(chatroom);
-                // await _storageService.Update(user, cancellationToken);
+                user.Chatrooms.Add(chatroom);
             }
             await _storageService.AddChatroomAsync(chatroom, cancellationToken);
             await _storageService.SaveChangesAsync(cancellationToken);
@@ -47,7 +51,18 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
         }
         catch (Exception)
         {
-            return new CreateChatroomResponse(Guid.Empty, created: false);
+            return CreateChatroomResponse.Failed;
         }
+    }
+
+    private async Task<bool> IsDuplicateChatroomAsync(List<User> users, Chatroom.ChatType type, CancellationToken cancellationToken)
+    {
+        if (type == Chatroom.ChatType.Public)
+        {
+            return false;
+        }
+
+        return await _storageService.GetChatroomsAsync(cancellationToken)
+                              .ContainsAsync(c => ListExtensions.EqualAsSets(c.Users, users), cancellationToken);
     }
 }

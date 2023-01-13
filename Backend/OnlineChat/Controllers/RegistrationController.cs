@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace OnlineChat.Controllers;
 
+/// <summary>
+/// Registration controller
+/// </summary>
 [ApiController]
 [Route("api/register")]
 public class RegistrationController : ControllerBase

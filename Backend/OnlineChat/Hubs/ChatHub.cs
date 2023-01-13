@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using BusinessLogic;
+﻿using BusinessLogic;
 using Constants;
 using Database;
 using Database.Entities;
@@ -7,6 +6,9 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace OnlineChat.Hubs;
 
+/// <summary>
+/// RPC Chatroom hub
+/// </summary>
 public class ChatHub : Hub
 {
     private readonly IStorageService _storageService;
@@ -16,6 +18,11 @@ public class ChatHub : Hub
         _storageService = storageService;
     }
 
+    /// <summary>
+    /// First method to invoke
+    /// </summary>
+    /// <param name="chatId"></param>
+    /// <returns></returns>
     public async Task<ConnectionResponse> Connect(string chatId)
     {
         if (!Guid.TryParse(chatId, out var id))
@@ -39,6 +46,12 @@ public class ChatHub : Hub
             : new ConnectionResponse(messages: chatroom.Messages, ConnectionResponseCode.SuccessfullyConnected);
     }
 
+    /// <summary>
+    /// Method for sending message to chat
+    /// Warning: method doesn't check if the caller is in chat  
+    /// </summary>
+    /// <param name="chatId"></param>
+    /// <param name="message"></param>
     private async Task SendMessageToChat(Guid chatId, Message message)
     {
         var chatroom = await _storageService.GetChatroomAsync(c => c.Id == chatId, CancellationToken.None);
@@ -53,6 +66,11 @@ public class ChatHub : Hub
         await Task.WhenAll(saving, sending);
     }
 
+    /// <summary>
+    /// Method for users to send messages
+    /// </summary>
+    /// <param name="chatId"></param>
+    /// <param name="message"></param>
     public async Task Send(string chatId, string message)
     {
         if (!Guid.TryParse(chatId, out var id))

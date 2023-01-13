@@ -11,11 +11,9 @@ public class TokenLoginResponse
         ResponseCode = responseCode;
     }
 
-    public static TokenLoginResponse Error(TokenLoginResponseCode code) 
-        => new TokenLoginResponse(string.Empty, code);
+    public static TokenLoginResponse Error(TokenLoginResponseCode code) => new(string.Empty, code);
 
-    public static TokenLoginResponse Success(string username)
-        => new TokenLoginResponse(username, TokenLoginResponseCode.Success);
+    public static TokenLoginResponse Success(string username) => new(username, TokenLoginResponseCode.Success);
 }
 
 public enum TokenLoginResponseCode

@@ -11,5 +11,6 @@ public interface IStorageService
     public Task RemoveAsync(User user, CancellationToken cancellationToken);
     public Task RemoveAsync(Chatroom chatroom, CancellationToken cancellationToken);
     public Task SaveChangesAsync(CancellationToken cancellationToken);
-    public IAsyncEnumerable<Chatroom> GetChatroomsAsync(Func<Chatroom, bool> predicate, CancellationToken cancellationToken);
+    public IAsyncEnumerable<Chatroom> GetChatroomsAsync(CancellationToken cancellationToken);
+    public IAsyncEnumerable<User> GetUsersAsync(CancellationToken cancellationToken);
 }

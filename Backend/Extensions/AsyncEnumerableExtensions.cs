@@ -36,4 +36,22 @@ public static class AsyncEnumerableExtensions
         }
         return default;
     }
+
+    public async static IAsyncEnumerable<T> WhereAsync<T>(this IAsyncEnumerable<T> enumerable, Func<T, bool> predicate,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        await foreach (var x in enumerable.WithCancellation(cancellationToken))
+        {
+            if (predicate(x))
+            {
+                yield return x;
+            }
+        }
+    }
+
+    public async static Task<bool> ContainsAsync<T>(this IAsyncEnumerable<T> enumerable, Func<T, bool> predicate,
+        CancellationToken cancellationToken)
+    {
+        return await enumerable.FirstOrDefaultAsync(predicate, cancellationToken) is null;
+    }
 }
