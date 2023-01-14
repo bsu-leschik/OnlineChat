@@ -21,7 +21,7 @@ export class HeaderComponent implements OnInit {
   }
 
   logout() {
-    this.httpClient.post(Constants.ServerUrl + '/logout', {},{
+    this.httpClient.post(Constants.ServerUrl + '/api/authentication/logout', {},{
       withCredentials: true
     }).subscribe(result => {
       this.storage.isLoggedIn = false;

@@ -52,6 +52,7 @@ public static class AsyncEnumerableExtensions
     public async static Task<bool> ContainsAsync<T>(this IAsyncEnumerable<T> enumerable, Func<T, bool> predicate,
         CancellationToken cancellationToken)
     {
-        return await enumerable.FirstOrDefaultAsync(predicate, cancellationToken) is null;
+        var result = await enumerable.FirstOrDefaultAsync(predicate, cancellationToken);
+        return result is not null;
     }
 }

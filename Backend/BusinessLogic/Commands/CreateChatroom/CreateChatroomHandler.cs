@@ -18,18 +18,22 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
     {
         try
         {
-            Task<User?> GetUserByName(string username) => _storageService.GetUserAsync(u => u.Username == username,
-                cancellationToken);
+            // Task<User?> GetUserByName(string username) => _storageService.GetUserAsync(u => u.Username == username,
+                // cancellationToken);
 
-            List<User> users = request.Usernames
-                                      .Select(username =>
-                                      {
-                                          var task = GetUserByName(username);
-                                          task.Wait(cancellationToken);
-                                          return task.Result;
-                                      })
-                                      .Where(user => user is not null)
-                                      .ToList()!;
+            List<User> users = await _storageService.GetUsersAsync(cancellationToken)
+                                              .WhereAsync(u => request.Usernames.Contains(u.Username),
+                                                  cancellationToken)
+                                              .ToListAsync(cancellationToken);
+            // List<User> users = request.Usernames
+            //                           .Select(username =>
+            //                           {
+            //                               var task = GetUserByName(username);
+            //                               task.Wait(cancellationToken);
+            //                               return task.Result;
+            //                           })
+            //                           .Where(user => user is not null)
+            //                           .ToList()!;
 
             if (await IsDuplicateChatroomAsync(users, request.Type, cancellationToken))
             {
