@@ -1,17 +1,21 @@
-﻿using Database;
+﻿using System.Security.Claims;
+using Database;
 using Database.Entities;
 using Extensions;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 
 namespace BusinessLogic.Commands.CreateChatroom;
 
 public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, CreateChatroomResponse>
 {
     private readonly IStorageService _storageService;
+    private readonly IHttpContextAccessor _contextAccessor;
 
-    public CreateChatroomHandler(IStorageService storageService)
+    public CreateChatroomHandler(IStorageService storageService, IHttpContextAccessor contextAccessor)
     {
         _storageService = storageService;
+        _contextAccessor = contextAccessor;
     }
 
     public async Task<CreateChatroomResponse> Handle(CreateChatroomCommand request, CancellationToken cancellationToken)
@@ -20,7 +24,12 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
         {
             // Task<User?> GetUserByName(string username) => _storageService.GetUserAsync(u => u.Username == username,
                 // cancellationToken);
-
+            var user = await Users.FindUser(_storageService, _contextAccessor.HttpContext!.User, cancellationToken);
+            if (user is null || !request.Usernames.Contains(user.Username))
+            {
+                return CreateChatroomResponse.Failed;
+            }
+            
             List<User> users = await _storageService.GetUsersAsync(cancellationToken)
                                               .WhereAsync(u => request.Usernames.Contains(u.Username),
                                                   cancellationToken)
@@ -45,9 +54,9 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
                 type: request.Type,
                 users: users
             );
-            foreach (var user in users.Where(user => !user.Chatrooms.Contains(chatroom)))
+            foreach (var u in users.Where(user => !user.Chatrooms.Contains(chatroom)))
             {
-                user.Chatrooms.Add(chatroom);
+                u.Chatrooms.Add(chatroom);
             }
             await _storageService.AddChatroomAsync(chatroom, cancellationToken);
             await _storageService.SaveChangesAsync(cancellationToken);
