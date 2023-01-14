@@ -1,7 +1,7 @@
 <div id="login-wrap">
   <div id="login-container">
-    <input type="text" id="nickname-input" class="input" placeholder="Nickname">
-    <input type="password" id="password-input" class="input" placeholder="Password">
+    <input type="text" id="nickname-input" class="input" placeholder="Nickname" (keydown.enter)="onConnectClicked()">
+    <input type="password" id="password-input" class="input" placeholder="Password" (keydown.enter)="onConnectClicked()">
     <input type="button" id="login-button" (keydown.enter)="onConnectClicked()" value="Connect" (click)="onConnectClicked()">
     <p id="error-message" [hidden]=true></p>
   </div>

@@ -1,6 +1,6 @@
 import {Component, HostListener, OnInit} from '@angular/core';
 import {HubConnection, HubConnectionBuilder} from '@microsoft/signalr';
-import {StorageService} from "../storage.service";
+import {StorageService} from "../shared/services/storage.service";
 import {Router} from "@angular/router";
 import {Constants} from "../constants";
 

@@ -9,7 +9,6 @@ using OnlineChat;
 using OnlineChat.Hubs;
 
 const string myPolicy = "MyPolicy";
-const string frontEnd = "http://localhost:4200";
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,8 +16,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(Schemes.DefaultCookieScheme)
        .AddCookie(Schemes.DefaultCookieScheme, pb =>
        {
-           pb.LoginPath = "/login";
-           pb.LogoutPath = "/logout";
+           pb.LoginPath = '/' + Routes.LoginPath;
+           pb.LogoutPath = '/' + Routes.LogoutPath;
            pb.SlidingExpiration = true;
            pb.Cookie.Name = "dl";
            pb.Cookie.SameSite = SameSiteMode.None;
@@ -26,7 +25,7 @@ builder.Services.AddAuthentication(Schemes.DefaultCookieScheme)
            pb.Events.OnRedirectToLogin = context =>
            {
                context.Response.StatusCode = 401;
-               context.RedirectUri = frontEnd + "/login";
+               context.RedirectUri = Routes.Frontend + "/login";
                return Task.CompletedTask;
            };
        });
@@ -48,7 +47,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: myPolicy,
         b =>
         {
-            b.WithOrigins("http://localhost:4200", "http://127.0.0.1:4200")
+            b.WithOrigins(Routes.Localhost, Routes.Frontend)
              .AllowAnyHeader()
              .AllowAnyMethod()
              .AllowCredentials();
@@ -75,6 +74,5 @@ app.UseAuthorization();
 app.UseCors(myPolicy);
 app.MapHub<ChatHub>("/chat");
 app.MapControllers();
-
 
 app.Run();

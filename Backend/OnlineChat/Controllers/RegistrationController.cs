@@ -1,4 +1,5 @@
 ﻿using BusinessLogic.Commands.Auth.Registration;
+using Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ namespace OnlineChat.Controllers;
 /// Registration controller
 /// </summary>
 [ApiController]
-[Route("api/register")]
+[Route($"{Routes.RegistrationApi}")]
 public class RegistrationController : ControllerBase
 {
     private readonly IMediator _mediator;

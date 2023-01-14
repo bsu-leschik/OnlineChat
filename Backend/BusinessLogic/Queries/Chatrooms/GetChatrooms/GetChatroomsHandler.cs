@@ -30,6 +30,10 @@ public class GetChatroomsHandler : IRequestHandler<GetChatroomsRequest, List<Cha
             return new List<ChatroomInfo>();
         }
 
+        return await _storageService.GetChatroomsAsync(cancellationToken)
+                              .WhereAsync(chat => IsInChat(chat, user), cancellationToken)
+                              .SelectAsync(ChatroomInfo.Of, cancellationToken)
+                              .ToListAsync(cancellationToken);
         return user.Chatrooms
                    .Select(ChatroomInfo.Of)
                    .ToList();

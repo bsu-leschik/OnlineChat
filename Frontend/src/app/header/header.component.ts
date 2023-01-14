@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {StorageService} from "../storage.service";
+import {StorageService} from "../shared/services/storage.service";
 import {Constants} from "../constants";
 import {Router} from "@angular/router";
 import {HttpClient} from "@angular/common/http";

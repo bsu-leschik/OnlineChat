@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
-import {StorageService} from "../storage.service";
+import {StorageService} from "../shared/services/storage.service";
 import {Constants} from "../constants";
 import {Router} from "@angular/router";
-import {HttpClient} from "@angular/common/http";
 import {ChatroomInfo, ChatType} from "../shared/chatroom";
+import {ChatroomService} from "../shared/services/chatroom.service";
 
 @Component({
   selector: 'app-chat-selector',
@@ -14,7 +14,9 @@ export class ChatSelectorComponent implements OnInit {
   public chatrooms: ChatroomInfo[] = [];
   private readonly intervalId;
 
-  constructor(private storage: StorageService, private httpClient: HttpClient, private router: Router) {
+  constructor(private storage: StorageService,
+              private router: Router,
+              private chatroomsService: ChatroomService) {
     if (storage.get<string>(Constants.NicknameStorageField) === undefined) {
       router.navigate(['login']);
     }
@@ -26,14 +28,11 @@ export class ChatSelectorComponent implements OnInit {
   }
 
   private updateChatrooms(): void {
-    this.httpClient.get<ChatroomInfo[]>(Constants.ApiUrl + '/chatrooms/get-chatrooms', {
-      withCredentials: true
-    }).subscribe(chatrooms => {
-        console.log(chatrooms);
+    this.chatroomsService.getChatrooms()
+      .subscribe(chatrooms => {
         if (chatrooms != null) {
           const username = this.storage.get<string>(Constants.NicknameStorageField);
           this.filter(chatrooms, username);
-          console.log(chatrooms);
           this.chatrooms = chatrooms;
         }
       });
@@ -69,7 +68,7 @@ export class ChatSelectorComponent implements OnInit {
 
   filter(chatrooms: ChatroomInfo[], username: string) {
     chatrooms.forEach(c => {
-      let index = c.users.indexOf(username);
+      let index = c.users.indexOf(username, 0);
       if (index > -1) {
         c.users.splice(index, 1);
       }

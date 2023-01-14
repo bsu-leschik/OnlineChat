@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import {StorageService} from "../storage.service";
+import {StorageService} from "../shared/services/storage.service";
 import {Router} from "@angular/router";
 import {Constants} from "../constants";
-import {HttpClient} from "@angular/common/http";
+import {AuthenticationService, LoginResponse, TokenLoginResponseCode} from "../shared/services/authentication.service";
 
 @Component({
   selector: 'app-login',
@@ -11,7 +11,9 @@ import {HttpClient} from "@angular/common/http";
 })
 export class LoginComponent implements OnInit {
 
-  constructor(private storage: StorageService, private router: Router, private httpClient: HttpClient) {
+  constructor(private storage: StorageService,
+              private router: Router,
+              private authService: AuthenticationService) {
 
   }
 
@@ -32,12 +34,8 @@ export class LoginComponent implements OnInit {
       this.showErrorMessage('Invalid nickname');
       return;
     }
-    this.httpClient.post<LoginResponse>(Constants.ServerUrl + '/login', {
-      'username': username,
-      'password': password,
-    }, {
-      withCredentials: true
-    }).subscribe(response => {
+    this.authService.login(username, password)
+      .subscribe(response => {
       if (response == LoginResponse.Success) {
         this.onLoggedIn(username);
         return;
@@ -65,9 +63,8 @@ export class LoginComponent implements OnInit {
   }
 
   private tryAutoLogin() {
-    this.httpClient.get<TokenLoginResponse>(Constants.ServerUrl + '/auto-login', {
-      withCredentials: true
-    })
+    this.authService
+      .tryAutoLogin()
       .subscribe(result => {
         if (result.responseCode == TokenLoginResponseCode.Success) {
           this.onLoggedIn(result.username);
@@ -82,22 +79,4 @@ export class LoginComponent implements OnInit {
     this.storage.set(Constants.NicknameStorageField, username);
     this.router.navigate(['select-chat']);
   }
-}
-
-enum LoginResponse {
-  Success = 0,
-  WrongPassword,
-  WrongUsername
-}
-
-interface TokenLoginResponse {
-  username: string;
-  responseCode: TokenLoginResponseCode;
-}
-
-enum TokenLoginResponseCode {
-  Success = 0,
-  TokenExpired,
-  NotLoggedIn,
-  BadRequest
 }

@@ -1,11 +1,12 @@
 ﻿using BusinessLogic.Queries.Users.GetUsernames;
+using Constants;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace OnlineChat.Controllers;
 
 [ApiController]
-[Route("api/users")]
 public class UsersController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -15,9 +16,14 @@ public class UsersController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpGet("get-users")]
-    public async Task<IActionResult> GetUsers(GetUsernamesQuery request)
+    [HttpGet($"{Routes.UsersApi}/get-users/{{startingWith}}")]
+    public async Task<IActionResult> GetUsers([FromRoute] string startingWith)
     {
-        return Ok(await _mediator.Send(request));
+        return Ok(await _mediator.Send(new GetUsernamesQuery
+                                           {
+                                               StartingWith = startingWith.IsNullOrEmpty()
+                                                   ? null
+                                                   : startingWith
+                                           }));
     }
 }
