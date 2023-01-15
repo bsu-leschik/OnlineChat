@@ -44,18 +44,7 @@ export class ChatSelectorComponent implements OnInit {
   }
 
   public createChatroom() {
-    alert('not implemented');
-    return;
-    // const httpOptions = {
-    //   headers: new HttpHeaders({'Content-Type': 'application/json', 'accept': 'text/plain'})
-    // }
-    // let username = this.storage.get<string>(Constants.NicknameStorageField);
-    // this.httpClient.post(Constants.CreateChatroomUrl, null).subscribe(result => {
-    //   this.chatrooms.push(new class implements ChatroomInfo {
-    //     id: number = result as number;
-    //     usersCount: number = 0;
-    //   });
-    // });
+    this.router.navigate(['create-chat']);
   }
 
   public ngOnDestroy() {

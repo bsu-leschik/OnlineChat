@@ -12,14 +12,14 @@ import {Constants} from "../constants";
 
 export class ChatComponent implements OnInit {
   private readonly nickname: string;
-  private readonly chatId: number;
+  private readonly chatId: string;
   private hubConnection: HubConnection;
   public messages: Message[] = [];
 
   constructor(private storage: StorageService, private router: Router) {
     console.log('init');
     this.nickname = this.storage.get<string>('nickname');
-    this.chatId = this.storage.get<number>('chatId');
+    this.chatId = this.storage.get<string>('chatId');
     if (this.nickname == undefined || this.chatId == undefined) {
       this.router.navigate(['login']);
     }

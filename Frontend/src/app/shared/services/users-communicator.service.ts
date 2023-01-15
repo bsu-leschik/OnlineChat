@@ -15,12 +15,12 @@ export class UsersCommunicatorService {
 
   public getUsernames(startingWith?: string): Observable<GetUsernamesResponse> {
     if (startingWith === undefined) {
-      return this.httpClient.get<GetUsernamesResponse>(this._api, {
+      return this.httpClient.get<GetUsernamesResponse>(this._api + '/get-users/' + '', {
           withCredentials: true,
         }
       );
     }
-    return this.httpClient.get<GetUsernamesResponse>(this._api + '/' + startingWith, {
+    return this.httpClient.get<GetUsernamesResponse>(this._api + '/get-users/' + startingWith, {
       withCredentials: true
     });
   }

@@ -9,6 +9,8 @@ import { ChatSelectorComponent } from './chat-selector/chat-selector.component';
 import { HttpClientModule } from "@angular/common/http";
 import { RegistrationComponent } from './registration/registration.component';
 import { HeaderComponent } from './header/header.component';
+import { CreateChatComponent } from './create-chat/create-chat.component';
+import {FormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -17,13 +19,15 @@ import { HeaderComponent } from './header/header.component';
     ChatComponent,
     ChatSelectorComponent,
     RegistrationComponent,
-    HeaderComponent
+    HeaderComponent,
+    CreateChatComponent
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    HttpClientModule
-  ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        HttpClientModule,
+        FormsModule
+    ],
   providers: [HttpClientModule],
   bootstrap: [AppComponent]
 })

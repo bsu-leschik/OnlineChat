@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using Database;
+﻿using Database;
 using Database.Entities;
 using Extensions;
 using MediatR;
@@ -20,20 +19,24 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
 
     public async Task<CreateChatroomResponse> Handle(CreateChatroomCommand request, CancellationToken cancellationToken)
     {
+        if (request.Usernames.Count != 2 && request.Type != Chatroom.ChatType.Public)
+        {
+            return CreateChatroomResponse.Failed;
+        }
         try
         {
             // Task<User?> GetUserByName(string username) => _storageService.GetUserAsync(u => u.Username == username,
-                // cancellationToken);
+            // cancellationToken);
             var user = await Users.FindUser(_storageService, _contextAccessor.HttpContext!.User, cancellationToken);
             if (user is null || !request.Usernames.Contains(user.Username))
             {
                 return CreateChatroomResponse.Failed;
             }
-            
+
             List<User> users = await _storageService.GetUsersAsync(cancellationToken)
-                                              .WhereAsync(u => request.Usernames.Contains(u.Username),
-                                                  cancellationToken)
-                                              .ToListAsync(cancellationToken);
+                                                    .WhereAsync(u => request.Usernames.Contains(u.Username),
+                                                        cancellationToken)
+                                                    .ToListAsync(cancellationToken);
             // List<User> users = request.Usernames
             //                           .Select(username =>
             //                           {
@@ -44,7 +47,9 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
             //                           .Where(user => user is not null)
             //                           .ToList()!;
 
-            if (await IsDuplicateChatroomAsync(users, request.Type, cancellationToken))
+            if (users.Count == 2
+                && request.Type == Chatroom.ChatType.Private
+                && await IsDuplicateChatroomAsync(users, request.Type, cancellationToken))
             {
                 return CreateChatroomResponse.Failed;
             }
@@ -54,7 +59,7 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
                 type: request.Type,
                 users: users
             );
-            foreach (var u in users.Where(user => !user.Chatrooms.Contains(chatroom)))
+            foreach (var u in users.Where(us => !us.Chatrooms.Contains(chatroom)))
             {
                 u.Chatrooms.Add(chatroom);
             }
@@ -68,14 +73,15 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
         }
     }
 
-    private async Task<bool> IsDuplicateChatroomAsync(List<User> users, Chatroom.ChatType type, CancellationToken cancellationToken)
+    private Task<bool> IsDuplicateChatroomAsync(List<User> users, Chatroom.ChatType type,
+        CancellationToken cancellationToken)
     {
         if (type == Chatroom.ChatType.Public)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
-        return await _storageService.GetChatroomsAsync(cancellationToken)
+        return _storageService.GetChatroomsAsync(cancellationToken)
                               .ContainsAsync(c => ListExtensions.EqualAsSets(c.Users, users), cancellationToken);
     }
 }

@@ -73,9 +73,4 @@ public class DatabaseStorageService : IStorageService
                         .Include(u => u.Chatrooms)
                         .AsAsyncEnumerable();
     }
-
-    public async Task AddMessageTo(Chatroom chatroom, Message message, CancellationToken cancellationToken)
-    {
-        await SaveChangesAsync(cancellationToken);
-    }
 }

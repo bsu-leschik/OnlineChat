@@ -22,7 +22,7 @@ export class ChatroomService {
     return this.httpClient.post<CreateChatroomResponse>(this._api + '/create',
       {
         'type': chatType,
-        'users': users
+        'usernames': users
       }, {
         withCredentials: true
       });
