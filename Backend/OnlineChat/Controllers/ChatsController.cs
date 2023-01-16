@@ -1,29 +1,46 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using OnlineChat.Models;
-using OnlineChat.Services;
+﻿using BusinessLogic.Commands.CreateChatroom;
+using BusinessLogic.Queries.Chatrooms.GetChatrooms;
+using BusinessLogic.Queries.Messages.GetMessages;
+using Constants;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace OnlineChat.Controllers;
 
+/// <summary>
+/// Controller, responsible for CRUD operations with chatrooms
+/// </summary>
+
 [ApiController]
-[Route("chatrooms")]
-public class ChatsController : Controller
+[Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
+public class ChatsController : ControllerBase
 {
-    private readonly Storage _storage;
+    private readonly IMediator _mediator;
 
-    public ChatsController(Storage storage)
+    public ChatsController(IMediator mediator)
     {
-        _storage = storage;
+        _mediator = mediator;
     }
 
-    [HttpGet]
-    public IEnumerable<ChatroomInfo> GetChatrooms()
+    [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
+    [HttpGet($"{Routes.ChatroomsApi}/get-chatrooms")]
+    public async Task<IActionResult> GetChatrooms()
     {
-        return _storage.GetChatrooms().Select(ChatroomInfo.Of).ToList();
+        return Ok(await _mediator.Send(new GetChatroomsRequest()));
     }
 
-    [HttpPost("create")]
-    public async Task<int> CreateChatroom(/*[FromBody] string username*/)
+    [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
+    [HttpPost($"{Routes.ChatroomsApi}/create")]
+    public async Task<IActionResult> CreateChatroom([FromBody] CreateChatroomCommand command)
     {
-        return _storage.CreateNewChatroom().Id;
+        return Ok(await _mediator.Send(command));
+    }
+
+    [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
+    [HttpGet($"{Routes.ChatroomsApi}/get-messages")]
+    public async Task<IActionResult> GetMessages([FromBody] GetMessagesQuery request)
+    {
+        return Ok(await _mediator.Send(request));
     }
 }

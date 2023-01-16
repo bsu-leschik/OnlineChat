@@ -1,0 +1,15 @@
+
+Backend/BusinessLogic/obj/Debug/net7.0/refint/BusinessLogic.dll
+Backend/BusinessLogic/obj/Debug/net7.0/ref/BusinessLogic.dll
+Backend/BusinessLogic/obj/Debug/net7.0/BusinessLogic.pdb
+Backend/BusinessLogic/obj/Debug/net7.0/BusinessLogic.dll
+Backend/BusinessLogic/bin/Debug/net7.0/BusinessLogic.pdb
+Backend/BusinessLogic/bin/Debug/net7.0/BusinessLogic.dll
+Backend/BusinessLogic/bin/
+Backend/Database/bin/
+Backend/Extensions/bin/
+Backend/Extensions/obj/
+
+*.dll
+*.pdb
+*.cache

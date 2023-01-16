@@ -1,91 +1,98 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using OnlineChat.Hubs.ConnectionGuards;
-using OnlineChat.Hubs.Response;
-using OnlineChat.Hubs.SendMessageApprover;
-using OnlineChat.Models;
-using OnlineChat.Services;
+﻿using BusinessLogic;
+using Constants;
+using Database;
+using Database.Entities;
+using Microsoft.AspNetCore.SignalR;
 
 namespace OnlineChat.Hubs;
 
+/// <summary>
+/// RPC Chatroom hub
+/// </summary>
 public class ChatHub : Hub
 {
-    private readonly Storage _storage;
-    private readonly ConnectionGuard _connectionGuard;
-    private readonly SendMessageGuard _sendMessageGuard;
+    private readonly IStorageService _storageService;
 
-
-    public ChatHub(Storage storage, ConnectionGuard connectionGuard, SendMessageGuard sendMessageGuard)
+    public ChatHub(IStorageService storageService)
     {
-        _storage = storage;
-        _connectionGuard = connectionGuard;
-        _sendMessageGuard = sendMessageGuard;
+        _storageService = storageService;
     }
 
-    public async Task SendFromServer(int chatroomId, string message)
+    /// <summary>
+    /// First method to invoke
+    /// </summary>
+    /// <param name="chatId"></param>
+    /// <returns></returns>
+    public async Task<ConnectionResponse> Connect(string chatId)
     {
-        var m = new Message("Server", message);
-        _storage.GetChatroomById(chatroomId)?.Messages.Add(m);
-        await Clients.Group(chatroomId.ToString()).SendCoreAsync("Receive", new object?[]
-                                                    { m });
-    }
-
-    public async Task<ConnectionResponse> Connect(string username, int chatId)
-    {
-        if (!_connectionGuard.Check(username, chatId))
+        if (!Guid.TryParse(chatId, out var id))
         {
-            return new ConnectionResponse
-            { 
-                Response = _connectionGuard.GetResponseCode() 
-            };
+            return new ConnectionResponse(messages: null, ConnectionResponseCode.Error);
         }
-        
-        
-        var user = new User(username, Context.ConnectionId, chatId);
-        _storage.AddUser(user, chatId);
-        await SendFromServer(chatId, $"{username} joined the conversation");
-        await Groups.AddToGroupAsync(user.ConnectionId, chatId.ToString());
-        return new ConnectionResponse
-        { 
-          Messages = _storage.GetChatroomById(chatId)?.Messages,
-          Response = ConnectionResponseCode.SuccessfullyConnected 
-        };
-    }
-
-    public async Task<int> Send(string message)
-    {
-        var sender = _storage.GetUser(Context.ConnectionId);
-        if (sender is null)
+        if (Context.User is null)
         {
-            return 0;
+            return new ConnectionResponse(messages: null, ConnectionResponseCode.AccessDenied);
+        }
+        var user = await Users.FindUser(_storageService, Context.User, CancellationToken.None);
+        if (user is null)
+        {
+            return new ConnectionResponse(messages: null, ConnectionResponseCode.AccessDenied);
         }
 
-        var chatroom = _storage.GetChatroomById(sender.ChatroomId);
+        await Groups.AddToGroupAsync(Context.ConnectionId, chatId);
+        var chatroom = await _storageService.GetChatroomAsync(c => c.Id == id, CancellationToken.None);
+        return chatroom is null
+            ? new ConnectionResponse(messages: null, ConnectionResponseCode.RoomDoesntExist)
+            : new ConnectionResponse(messages: chatroom.Messages, ConnectionResponseCode.SuccessfullyConnected);
+    }
+
+    /// <summary>
+    /// Method for sending message to chat
+    /// Warning: method doesn't check if the caller is in chat  
+    /// </summary>
+    /// <param name="chatId"></param>
+    /// <param name="message"></param>
+    private async Task SendMessageToChat(Guid chatId, Message message)
+    {
+        var chatroom = await _storageService.GetChatroomAsync(c => c.Id == chatId, CancellationToken.None);
         if (chatroom is null)
         {
-            return 0;
+            return;
         }
-
-        if (!_sendMessageGuard.Approve(sender, message))
-        {
-            return 0;
-        }
-        chatroom.Messages.Add(new Message(sender.Nickname, message));
-        await Clients.Group(sender.ChatroomId.ToString()).SendCoreAsync("Receive",
-            new object?[] { new Message(sender.Nickname, message) });
-        sender.ResetLastMessageTime();
-        return message.Length;
+        chatroom.Messages.Add(message);
+        var saving = _storageService.SaveChangesAsync(CancellationToken.None);
+        var sending = Clients.Group(chatId.ToString())
+                     .SendCoreAsync("Receive", new object?[] { message });
+        await Task.WhenAll(saving, sending);
     }
 
-    public override async Task OnDisconnectedAsync(Exception? exception)
+    /// <summary>
+    /// Method for users to send messages
+    /// </summary>
+    /// <param name="chatId"></param>
+    /// <param name="message"></param>
+    public async Task Send(string chatId, string message)
     {
-        var sender = _storage.GetUser(Context.ConnectionId);
-        if (sender is null)
+        if (!Guid.TryParse(chatId, out var id))
         {
             return;
         }
 
-        await SendFromServer(sender.ChatroomId, $"{sender.Nickname} left");
-        _storage.Remove(sender);
-        await base.OnDisconnectedAsync(exception);
+        if (Context.User is null)
+        {
+            return;
+        }
+
+        var user = await Users.FindUser(_storageService, Context.User, CancellationToken.None);
+
+        var chatroom = user?.Chatrooms.FirstOrDefault(c => c.Id == id);
+        if (chatroom is null)
+        {
+            return;
+        }
+
+        var username = Context.User.Claims.FirstOrDefault(c => c.Type == Claims.Name)!.Value;
+        var messageObject = new Message(username, message);
+        await SendMessageToChat(id, messageObject);
     }
 }

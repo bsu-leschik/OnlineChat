@@ -8,8 +8,7 @@
 
 .button {
   transition: all 0.1s ease-in;
-  background-color: #00aeff;
-  color: aliceblue;
+  background-color: transparent;
 }
 
 #chatroom {
@@ -30,19 +29,7 @@
   font-size: 35px;
 }
 
-#create-chatroom-button {
-  padding: 5px 15px;
-  font-family: Arial, serif;
-  font-size: 25px;
-  border-radius: 15px;
-  position: absolute;
-}
-
-#create-chatroom-button:hover {
-  border-radius: 35px;
-}
-
-#room-id {
+.room-info {
   margin-right: 5px;
 }
 
@@ -53,12 +40,27 @@
 #join-button {
   margin-right: 10px;
   font-size: 30px;
-  border-radius: 20px;
+  border-radius: 15px;
   padding: 3px 35px;
   margin-left: auto;
 }
 
-#join-button:hover {
-  border-radius: 35px;
-  font-size: 30px;
+#create-chatroom-button {
+  position: fixed;
+  display: inline-block;
+  right: 30px;
+  bottom: 30px;
+  width: 60px;
+  height: 60px;
+  border: 1px solid transparent;
+  border-radius: 100%;
+  text-align: center;
+  font-size: 50px;
+  background-color: dodgerblue;
+  color: white;
+  transition: 0.1s ease-in;
+}
+
+#create-chatroom-button:hover {
+  background-color: #0366c7;
 }
