@@ -7,20 +7,18 @@ import { LoginComponent } from './login/login.component';
 import { ChatComponent } from './chat/chat.component';
 import { ChatSelectorComponent } from './chat-selector/chat-selector.component';
 import { HttpClientModule } from "@angular/common/http";
-import { FormsModule }   from '@angular/forms';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
     ChatComponent,
-    ChatSelectorComponent,
+    ChatSelectorComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule,
-    FormsModule
+    HttpClientModule
   ],
   providers: [HttpClientModule],
   bootstrap: [AppComponent]
