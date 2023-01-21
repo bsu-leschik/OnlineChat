@@ -31,7 +31,8 @@ public class LoginHandler : IRequestHandler<LoginCommand, LoginResponse>
             return LoginResponse.WrongUsername;
         }
 
-        var verifyResult = _passwordHasher.VerifyHashedPassword(user, providedPassword: command.Password,
+        var verifyResult = _passwordHasher.VerifyHashedPassword(user, 
+            providedPassword: command.Password,
             hashedPassword: user.Password);
 
         if (verifyResult == PasswordVerificationResult.Failed)

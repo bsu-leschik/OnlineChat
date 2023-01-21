@@ -1,4 +1,5 @@
-﻿using Database;
+﻿using BusinessLogic.UsersService;
+using Database;
 using Database.Entities;
 using Extensions;
 using MediatR;
@@ -10,11 +11,13 @@ public class GetChatroomsHandler : IRequestHandler<GetChatroomsRequest, List<Cha
 {
     private readonly IStorageService _storageService;
     private readonly IHttpContextAccessor _accessor;
+    private readonly IUsersService _usersService;
 
-    public GetChatroomsHandler(IStorageService storageService, IHttpContextAccessor accessor)
+    public GetChatroomsHandler(IStorageService storageService, IHttpContextAccessor accessor, IUsersService usersService)
     {
         _storageService = storageService;
         _accessor = accessor;
+        _usersService = usersService;
     }
 
     public async Task<List<ChatroomInfo>> Handle(GetChatroomsRequest request, CancellationToken cancellationToken)
@@ -24,7 +27,7 @@ public class GetChatroomsHandler : IRequestHandler<GetChatroomsRequest, List<Cha
             return chatroom.Users.Contains(u => u.Username == user.Username);
         }
 
-        var user = await BusinessLogic.Users.FindUser(_storageService, _accessor.HttpContext!.User, cancellationToken);
+        var user = await _usersService.FindUser(_accessor.HttpContext!.User, cancellationToken);
         if (user == null)
         {
             return new List<ChatroomInfo>();

@@ -9,6 +9,8 @@ Backend/BusinessLogic/bin/
 Backend/Database/bin/
 Backend/Extensions/bin/
 Backend/Extensions/obj/
+Backend/UnitTests/bin/
+Backend/UnitTests/obj/
 
 *.dll
 *.pdb

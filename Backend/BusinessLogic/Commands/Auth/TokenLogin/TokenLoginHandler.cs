@@ -1,4 +1,5 @@
-﻿using Database;
+﻿using BusinessLogic.UsersService;
+using Database;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -9,11 +10,13 @@ public class TokenLoginHandler : IRequestHandler<TokenLoginCommand, TokenLoginRe
 {
     private readonly IStorageService _storageService;
     private readonly IHttpContextAccessor _contextAccessor;
+    private readonly IUsersService _usersService;
 
-    public TokenLoginHandler(IStorageService storageService, IHttpContextAccessor contextAccessor)
+    public TokenLoginHandler(IStorageService storageService, IHttpContextAccessor contextAccessor, IUsersService usersService)
     {
         _storageService = storageService;
         _contextAccessor = contextAccessor;
+        _usersService = usersService;
     }
 
     public async Task<TokenLoginResponse> Handle(TokenLoginCommand request, CancellationToken cancellationToken)
@@ -25,7 +28,7 @@ public class TokenLoginHandler : IRequestHandler<TokenLoginCommand, TokenLoginRe
             return TokenLoginResponse.Error(TokenLoginResponseCode.BadRequest);
         }
 
-        var (username, token) = Users.Decompose(principal);
+        var (username, token) = await _usersService.Decompose(principal, cancellationToken);
         if (username is null)
         {
             return TokenLoginResponse.Error(TokenLoginResponseCode.BadRequest);

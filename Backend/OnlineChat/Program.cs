@@ -1,4 +1,5 @@
 using BusinessLogic.Queries.Chatrooms.GetChatrooms;
+using BusinessLogic.UsersService;
 using Constants;
 using Database;
 using Database.Entities;
@@ -41,6 +42,7 @@ builder.Services.AddDbContextPool<Database.Database>(options =>
 builder.Services.AddScoped<IStorageService, DatabaseStorageService>(
     sp => new DatabaseStorageService(sp.GetRequiredService<Database.Database>())
 );
+builder.Services.AddScoped<IUsersService, UsersService>();
 
 builder.Services.AddCors(options =>
 {

@@ -1,4 +1,4 @@
-﻿using BusinessLogic;
+﻿using BusinessLogic.UsersService;
 using Constants;
 using Database;
 using Database.Entities;
@@ -12,10 +12,12 @@ namespace OnlineChat.Hubs;
 public class ChatHub : Hub
 {
     private readonly IStorageService _storageService;
+    private readonly IUsersService _usersService;
 
-    public ChatHub(IStorageService storageService)
+    public ChatHub(IStorageService storageService, IUsersService usersService)
     {
         _storageService = storageService;
+        _usersService = usersService;
     }
 
     /// <summary>
@@ -33,7 +35,7 @@ public class ChatHub : Hub
         {
             return new ConnectionResponse(messages: null, ConnectionResponseCode.AccessDenied);
         }
-        var user = await Users.FindUser(_storageService, Context.User, CancellationToken.None);
+        var user = await _usersService.FindUser(Context.User, CancellationToken.None);
         if (user is null)
         {
             return new ConnectionResponse(messages: null, ConnectionResponseCode.AccessDenied);
@@ -83,7 +85,7 @@ public class ChatHub : Hub
             return;
         }
 
-        var user = await Users.FindUser(_storageService, Context.User, CancellationToken.None);
+        var user = await _usersService.FindUser(Context.User, CancellationToken.None);
 
         var chatroom = user?.Chatrooms.FirstOrDefault(c => c.Id == id);
         if (chatroom is null)

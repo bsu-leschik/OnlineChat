@@ -1,4 +1,5 @@
-﻿using Database;
+﻿using BusinessLogic.UsersService;
+using Database;
 using Database.Entities;
 using Extensions;
 using MediatR;
@@ -10,11 +11,13 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
 {
     private readonly IStorageService _storageService;
     private readonly IHttpContextAccessor _contextAccessor;
+    private readonly IUsersService _usersService;
 
-    public CreateChatroomHandler(IStorageService storageService, IHttpContextAccessor contextAccessor)
+    public CreateChatroomHandler(IStorageService storageService, IHttpContextAccessor contextAccessor, IUsersService usersService)
     {
         _storageService = storageService;
         _contextAccessor = contextAccessor;
+        _usersService = usersService;
     }
 
     public async Task<CreateChatroomResponse> Handle(CreateChatroomCommand request, CancellationToken cancellationToken)
@@ -27,7 +30,7 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
         {
             // Task<User?> GetUserByName(string username) => _storageService.GetUserAsync(u => u.Username == username,
             // cancellationToken);
-            var user = await Users.FindUser(_storageService, _contextAccessor.HttpContext!.User, cancellationToken);
+            var user = await _usersService.FindUser(_contextAccessor.HttpContext!.User, cancellationToken);
             if (user is null || !request.Usernames.Contains(user.Username))
             {
                 return CreateChatroomResponse.Failed;
