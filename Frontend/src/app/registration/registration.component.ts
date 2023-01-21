@@ -14,7 +14,6 @@ export class RegistrationComponent implements OnInit {
   public username: string = "";
   public password: string = "";
   public errorMessage: string = "";
-  public errorHidden: boolean = true;
 
   constructor(private httpClient: HttpClient,
               private router: Router,
@@ -41,7 +40,6 @@ export class RegistrationComponent implements OnInit {
 
   showErrorMessage(message: string) : void {
     this.errorMessage = message;
-    this.errorHidden = false;
   }
 }
 

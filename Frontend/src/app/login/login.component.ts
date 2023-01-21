@@ -14,7 +14,6 @@ export class LoginComponent implements OnInit {
   public username: string = "";
   public password: string = "";
   public errorMessage: string = "";
-  public errorHidden: boolean = true;
 
   constructor(private storage: StorageService,
               private router: Router,
@@ -55,7 +54,6 @@ export class LoginComponent implements OnInit {
 
   showErrorMessage(message: string) : void {
     this.errorMessage = message;
-    this.errorHidden = false;
   }
 
   private tryAutoLogin() {

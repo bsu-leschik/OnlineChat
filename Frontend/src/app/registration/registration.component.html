@@ -1,8 +1,11 @@
 <div id="login-wrap">
   <div id="login-container">
-    <input type="text" id="nickname-input" class="input" [(ngModel)]="username" placeholder="Nickname" (keydown.enter)="onRegClicked()">
-    <input type="password" id="password-input" class="input" [(ngModel)]="password" placeholder="Password" (keydown.enter)="onRegClicked()">
-    <input type="button" id="register-button" (keydown.enter)="onRegClicked()" value="Register" (click)="onRegClicked()">
-    <p id="error-message" [hidden]="errorHidden">{{errorMessage}}</p>
+    <input type="text" id="nickname-input" class="input" [(ngModel)]="username" placeholder="Nickname" 
+    (keydown.enter)="onRegClicked()">
+    <input type="password" id="password-input" class="input" [(ngModel)]="password" placeholder="Password" 
+    (keydown.enter)="onRegClicked()">
+    <input type="button" id="register-button" value="Register" (click)="onRegClicked()"
+    (keydown.enter)="onRegClicked()">
+    <p id="error-message" [hidden]="errorMessage.length == 0">{{errorMessage}}</p>
   </div>
 </div>
