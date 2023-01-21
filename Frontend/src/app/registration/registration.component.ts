@@ -11,26 +11,28 @@ import {AuthenticationService} from "../shared/services/authentication.service";
 })
 export class RegistrationComponent implements OnInit {
 
+  public username: string = "";
+  public password: string = "";
+  public errorMessage: string = "";
+  public errorHidden: boolean = true;
+
   constructor(private httpClient: HttpClient,
               private router: Router,
               private authService: AuthenticationService) { }
 
   ngOnInit(): void {}
+
   onRegClicked() {
-    const usernameInput = document.getElementById('nickname-input') as HTMLInputElement;
-    const passwordInput = document.getElementById('password-input') as HTMLInputElement;
-    const username = usernameInput.value;
-    const password = passwordInput.value;
     this.httpClient.post<RegistrationResponse>(Constants.ApiUrl + '/registration', {
-      'username': username,
-      'password': password
+      'username': this.username,
+      'password': this.password
     }).subscribe(result => {
       console.log(result);
       if (result.reason != 'Success') {
         this.showErrorMessage(result.reason);
         return;
       }
-      this.authService.login(username, password).subscribe(result => {
+      this.authService.login(this.username, this.password).subscribe(result => {
         console.log('log');
         this.router.navigate(['chat-selector']);
       });
@@ -38,13 +40,8 @@ export class RegistrationComponent implements OnInit {
   }
 
   showErrorMessage(message: string) : void {
-    let element: HTMLParagraphElement = document.getElementById('error-message') as HTMLParagraphElement;
-    if (element == null) {
-      return;
-    }
-
-    element.textContent = message;
-    element.hidden = false;
+    this.errorMessage = message;
+    this.errorHidden = false;
   }
 }
 
