@@ -1,7 +1,6 @@
-﻿using BusinessLogic.Extensions;
-using BusinessLogic.Services;
-using Database;
+﻿using Database;
 using Database.Entities;
+using Extensions;
 using MediatR;
 
 namespace BusinessLogic.Commands.Auth.Registration;
@@ -17,13 +16,14 @@ public class RegistrationRequestHandler : IRequestHandler<RegistrationCommand, R
 
     public async Task<RegistrationResponse> Handle(RegistrationCommand command, CancellationToken cancellationToken)
     {
-        if (await _storageService.Contains(u => u.Username == command.Username, cancellationToken))
+        if (await _storageService.GetUsersAsync(cancellationToken)
+                                 .ContainsAsync(u => u.Username == command.Username, cancellationToken))
         {
             return new RegistrationResponse("Duplicate username");
         }
 
         var user = new User(command.Username, command.Password);
-        await _storageService.AddUser(user, cancellationToken);
+        await _storageService.AddUserAsync(user, cancellationToken);
         return new RegistrationResponse("Success");
     }
 }

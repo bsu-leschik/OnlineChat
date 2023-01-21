@@ -1,0 +1,37 @@
+<div id="create-chat-wrapper">
+  <div id="search-container">
+    <p id="filter-text">Filter by username</p>
+    <input type="text" id="search" (change)="onTextChanged()" [(ngModel)]="text">
+  </div>
+  <div id="create-chatroom-container">
+    <div id="users-to-add-list">
+      <p class="part-info">Users</p>
+      <div class="user" *ngFor="let username of usernames">
+        <p class="user-username">{{username}}</p>
+        <input type="button" class='user-action' id="add-button" value="Add" (click)="addUser(username)"
+               *ngIf="!addedUsers.includes(username)">
+        <p *ngIf="addedUsers.includes(username)" class="added-text">Added</p>
+      </div>
+      <p *ngIf='usernames.length == 0' id="warning-text">Nothing found!</p>
+    </div>
+
+    <div id="right">
+      <p class="part-info">Chat options</p>
+      <div id="added-users-list">
+        <div class='user' *ngFor="let username of addedUsers">
+          <p class="user-username">{{username}}</p>
+          <input type="button" class='user-action' id="remove-button" value="Remove" (click)="removeUser(username)">
+        </div>
+      </div>
+      <div id="public-private-selector" *ngIf="addedUsers.length == 1">
+        <input id='private-s' type="radio" name="p-p-s" [(ngModel)]="chatType" value="private" checked>
+        <label for="private-s">Private</label>
+        <br>
+        <input type="radio" name="p-p-s" id="public-s" [(ngModel)]="chatType" value="public" checked>
+        <label for="public-s">Public</label>
+      </div>
+    </div>
+  </div>
+  <p id="failed-to-create-chat" [hidden]="!showErrorMessage">Failed to create chat. Probably you didn't include any users or private chat with those users already exists</p>
+  <input type="button" value="Create!" (click)="onCreateClicked()" id='create-button'>
+</div>

@@ -1,14 +1,19 @@
 ﻿using BusinessLogic.Commands.CreateChatroom;
 using BusinessLogic.Queries.Chatrooms.GetChatrooms;
 using BusinessLogic.Queries.Messages.GetMessages;
+using Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace OnlineChat.Controllers;
 
+/// <summary>
+/// Controller, responsible for CRUD operations with chatrooms
+/// </summary>
+
 [ApiController]
-[Route("api/chatrooms/")]
+[Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
 public class ChatsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -18,22 +23,23 @@ public class ChatsController : ControllerBase
         _mediator = mediator;
     }
 
-    [Authorize]
-    [HttpGet("get-chatrooms")]
+    [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
+    [HttpGet($"{Routes.ChatroomsApi}/get-chatrooms")]
     public async Task<IActionResult> GetChatrooms()
     {
         return Ok(await _mediator.Send(new GetChatroomsRequest()));
     }
 
-    [Authorize]
-    [HttpPost("create")]
-    public async Task<IActionResult> CreateChatroom(CreateChatroomCommand command)
+    [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
+    [HttpPost($"{Routes.ChatroomsApi}/create")]
+    public async Task<IActionResult> CreateChatroom([FromBody] CreateChatroomCommand command)
     {
         return Ok(await _mediator.Send(command));
     }
 
-    [HttpGet("get-messages")]
-    public async Task<IActionResult> GetMessages(GetMessagesQuery request)
+    [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
+    [HttpGet($"{Routes.ChatroomsApi}/get-messages")]
+    public async Task<IActionResult> GetMessages([FromBody] GetMessagesQuery request)
     {
         return Ok(await _mediator.Send(request));
     }

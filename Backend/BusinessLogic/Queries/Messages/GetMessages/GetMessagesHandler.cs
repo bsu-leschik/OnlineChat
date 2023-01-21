@@ -1,5 +1,4 @@
 ﻿using System.Security.Claims;
-using BusinessLogic.Services;
 using Database;
 using MediatR;
 
@@ -16,11 +15,10 @@ public class GetMessagesHandler : IRequestHandler<GetMessagesQuery, GetMessagesR
 
     public async Task<GetMessagesResponse> Handle(GetMessagesQuery request, CancellationToken cancellationToken)
     {
-        var user = await UserFinder.FindUser(_storageService, ClaimsPrincipal.Current!, cancellationToken);
-        return new GetMessagesResponse
-                   {
-                       Messages = user?.Chatrooms.FirstOrDefault(c => c.Id == request.ChatId)
-                                      ?.Messages
-                   };
+        var user = await BusinessLogic.Users.FindUser(_storageService, ClaimsPrincipal.Current!, cancellationToken);
+        return new GetMessagesResponse(
+            user?.Chatrooms.FirstOrDefault(c => c.Id == request.ChatId)
+                ?.Messages
+        );
     }
 }

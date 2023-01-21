@@ -1,4 +1,5 @@
 ﻿using Database.Entities;
+using Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Database;
@@ -11,44 +12,46 @@ public class DatabaseStorageService : IStorageService
     {
         _database = database;
     }
-    
-    public Task<User?> GetUser(Func<User, bool> predicate, CancellationToken cancellationToken)
+
+    public Task<User?> GetUserAsync(Func<User, bool> predicate, CancellationToken cancellationToken)
     {
-        return Task.FromResult(_database.Users.Include(u => u.Chatrooms).FirstOrDefault(predicate));
+        return _database.Users
+                        .Include(u => u.Chatrooms)
+                        .AsAsyncEnumerable()
+                        .FirstOrDefaultAsync(predicate, cancellationToken);
     }
 
-    public Task<Chatroom?> GetChatroom(Func<Chatroom, bool> predicate, CancellationToken cancellationToken)
+    public Task<Chatroom?> GetChatroomAsync(Func<Chatroom, bool> predicate, CancellationToken cancellationToken)
     {
-        return Task.FromResult(_database.Chatrooms.Include(c => c.Users).FirstOrDefault(predicate));
+        return _database.Chatrooms
+                        .Include(c => c.Messages)
+                        .Include(c => c.Users)
+                        .AsAsyncEnumerable()
+                        .FirstOrDefaultAsync(predicate, cancellationToken);
     }
 
-    public async Task AddChatroom(Chatroom chatroom, CancellationToken cancellationToken)
+    public async Task AddChatroomAsync(Chatroom chatroom, CancellationToken cancellationToken)
     {
         await _database.Chatrooms.AddAsync(chatroom, cancellationToken);
         await _database.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task AddUser(User user, CancellationToken cancellationToken)
+    public async Task AddUserAsync(User user, CancellationToken cancellationToken)
     {
         await _database.Users.AddAsync(user, cancellationToken);
         await _database.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task Remove(User user, CancellationToken cancellationToken)
+    public async Task RemoveAsync(User user, CancellationToken cancellationToken)
     {
         _database.Users.Remove(user);
         await _database.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task Remove(Chatroom chatroom, CancellationToken cancellationToken)
+    public async Task RemoveAsync(Chatroom chatroom, CancellationToken cancellationToken)
     {
         _database.Chatrooms.Remove(chatroom);
         await _database.SaveChangesAsync(cancellationToken);
-    }
-
-    public Task<List<Chatroom>> GetChatrooms(CancellationToken cancellationToken)
-    {
-        return _database.Chatrooms.ToListAsync(cancellationToken);
     }
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken)
@@ -56,15 +59,18 @@ public class DatabaseStorageService : IStorageService
         await _database.SaveChangesAsync(cancellationToken);
     }
 
-    public Task Update(User u, CancellationToken cancellationToken)
+    public IAsyncEnumerable<Chatroom> GetChatroomsAsync(CancellationToken cancellationToken)
     {
-        _database.Users.Update(u);
-        return Task.CompletedTask;
+        return _database.Chatrooms
+                        .Include(c => c.Users)
+                        .Include(c => c.Messages)
+                        .AsAsyncEnumerable();
     }
 
-    public Task Update(Chatroom c, CancellationToken cancellationToken)
+    public IAsyncEnumerable<User> GetUsersAsync(CancellationToken cancellationToken)
     {
-        _database.Chatrooms.Update(c);
-        return Task.CompletedTask;
+        return _database.Users
+                        .Include(u => u.Chatrooms)
+                        .AsAsyncEnumerable();
     }
 }

@@ -10,4 +10,9 @@ public class CreateChatroomResponse
 
     public Guid ChatId { get; set; }
     public bool Created { get; set; }
+
+    public static CreateChatroomResponse Failed => new CreateChatroomResponse(
+        chatId: Guid.Empty,
+        created: false
+    );
 }

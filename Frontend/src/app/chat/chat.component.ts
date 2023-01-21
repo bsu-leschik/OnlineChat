@@ -1,6 +1,6 @@
 import {Component, HostListener, OnInit} from '@angular/core';
 import {HubConnection, HubConnectionBuilder} from '@microsoft/signalr';
-import {StorageService} from "../storage.service";
+import {StorageService} from "../shared/services/storage.service";
 import {Router} from "@angular/router";
 import {Constants} from "../constants";
 
@@ -12,14 +12,14 @@ import {Constants} from "../constants";
 
 export class ChatComponent implements OnInit {
   private readonly nickname: string;
-  private readonly chatId: number;
+  private readonly chatId: string;
   private hubConnection: HubConnection;
   public messages: Message[] = [];
 
   constructor(private storage: StorageService, private router: Router) {
     console.log('init');
     this.nickname = this.storage.get<string>('nickname');
-    this.chatId = this.storage.get<number>('chatId');
+    this.chatId = this.storage.get<string>('chatId');
     if (this.nickname == undefined || this.chatId == undefined) {
       this.router.navigate(['login']);
     }
@@ -33,16 +33,23 @@ export class ChatComponent implements OnInit {
 
   ngOnInit(): void {
     this.hubConnection.start().then(async () => {
-      const response = await this.hubConnection.invoke('Connect', this.nickname, this.chatId) as ConnectionResponse;
+      const response = await this.hubConnection.invoke('Connect', this.chatId) as ConnectionResponse;
+      console.log(response);
       if (response.response != ConnectionResponseCode.SuccessfullyConnected) {
         ChatComponent.switchResponseCode(response.response);
         return;
       }
-      for (let message of response.messages)
-        this.messages.push(message);
       let welcomeText: HTMLParagraphElement = document.getElementById('welcome-text') as HTMLParagraphElement;
-      welcomeText.textContent += this.nickname + '!';
-    }).catch(() => alert('Failed to start connection'));
+      const username = this.storage.get<string>(Constants.NicknameStorageField);
+      welcomeText.textContent += username + '!';
+      if (response.messages != null) {
+        for (let message of response.messages)
+          this.messages.push(message);
+      }
+    }).catch((error) => {
+      alert('Failed to start connection1');
+      console.log(error);
+    });
   }
 
   async onSendClicked(): Promise<void> {
@@ -52,7 +59,7 @@ export class ChatComponent implements OnInit {
       return;
     }
     input.value = '';
-    let value: number = await this.hubConnection.invoke('Send', message)
+    let value: number = await this.hubConnection.invoke('Send', this.chatId, message)
       .then()
       .catch(() => alert('Failed to send message'));
 

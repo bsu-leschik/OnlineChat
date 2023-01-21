@@ -6,15 +6,16 @@
   justify-content: center;
 }
 
-#nickname-input {
+.input {
   text-align: center;
   font-size: 25px;
   border-radius: 15px;
   padding: 5px 10px 5px 15px;
   transition: all 0.1s ease-in;
+  margin-top: 5px;
 }
 
-#nickname-input:hover {
+.input:hover {
   border-radius: 22px;
 }
 

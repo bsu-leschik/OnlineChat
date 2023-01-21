@@ -1,8 +1,9 @@
 import {Component, OnInit} from '@angular/core';
-import {StorageService} from "../storage.service";
+import {StorageService} from "../shared/services/storage.service";
 import {Constants} from "../constants";
 import {Router} from "@angular/router";
-import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {ChatroomInfo, ChatType} from "../shared/chatroom";
+import {ChatroomService} from "../shared/services/chatroom.service";
 
 @Component({
   selector: 'app-chat-selector',
@@ -11,9 +12,11 @@ import {HttpClient, HttpHeaders} from "@angular/common/http";
 })
 export class ChatSelectorComponent implements OnInit {
   public chatrooms: ChatroomInfo[] = [];
-  private intervalId;
+  private readonly intervalId;
 
-  constructor(private storage: StorageService, private httpClient: HttpClient, private router: Router) {
+  constructor(private storage: StorageService,
+              private router: Router,
+              private chatroomsService: ChatroomService) {
     if (storage.get<string>(Constants.NicknameStorageField) === undefined) {
       router.navigate(['login']);
     }
@@ -25,35 +28,39 @@ export class ChatSelectorComponent implements OnInit {
   }
 
   private updateChatrooms(): void {
-    this.httpClient.get<ChatroomInfo[]>(Constants.ChatroomsControllerUrl).subscribe(chatrooms => {
-      if (chatrooms != null)
-        this.chatrooms = chatrooms;
-    });
+    this.chatroomsService.getChatrooms()
+      .subscribe(chatrooms => {
+        if (chatrooms != null) {
+          const username = this.storage.get<string>(Constants.NicknameStorageField);
+          this.filter(chatrooms, username);
+          this.chatrooms = chatrooms;
+        }
+      });
   }
 
-  public joinChatroom(chatId: number) {
+  public joinChatroom(chatId: string) {
     this.storage.set(Constants.ChatIdStorageField, chatId);
     this.router.navigate(['chat']);
   }
 
   public createChatroom() {
-    const httpOptions = {
-      headers: new HttpHeaders({'Content-Type': 'application/json', 'accept': 'text/plain'})
-    }
-    let username = this.storage.get<string>(Constants.NicknameStorageField);
-    this.httpClient.post(Constants.CreateChatroomUrl, null).subscribe(result => {
-      this.chatrooms.push(new class implements ChatroomInfo {
-        id: number = result as number;
-        usersCount: number = 0;
-      });
-    });
+    this.router.navigate(['create-chat']);
   }
+
   public ngOnDestroy() {
     clearInterval(this.intervalId);
   }
-}
 
-interface ChatroomInfo {
-  id: number;
-  usersCount: number;
+  isPublic(room: ChatroomInfo) {
+    return room.chatType == ChatType.Public;
+  }
+
+  filter(chatrooms: ChatroomInfo[], username: string) {
+    chatrooms.forEach(c => {
+      let index = c.users.indexOf(username, 0);
+      if (index > -1) {
+        c.users.splice(index, 1);
+      }
+    });
+  }
 }

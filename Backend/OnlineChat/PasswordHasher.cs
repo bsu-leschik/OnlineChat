@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace OnlineChat;
 
+/// <summary>
+/// Temporary password hasher
+/// </summary>
 public class PasswordHasher : IPasswordHasher<User>
 {
     public string HashPassword(User user, string password)

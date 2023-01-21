@@ -4,13 +4,12 @@ public class Message
 {
     public Guid Id { get; set; }
 
-    public string Sender { get; set; }
+    public string Sender { get; set; } = string.Empty;
 
-    public string Text { get; set; }
+    public string Text { get; set; } = string.Empty;
 
     public Message(string sender, string text)
     {
-        Id = Guid.NewGuid();
         Sender = sender;
         Text = text;
     }

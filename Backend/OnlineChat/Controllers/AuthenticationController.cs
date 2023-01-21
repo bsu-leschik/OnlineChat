@@ -1,13 +1,17 @@
 ﻿using BusinessLogic.Commands.Auth.Login;
 using BusinessLogic.Commands.Auth.Logout;
+using BusinessLogic.Commands.Auth.TokenLogin;
+using Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace OnlineChat.Controllers;
 
+/// <summary>
+/// Controller, responsible for authentication (login, logout, auto-login)
+/// </summary>
 [ApiController]
-[Route("api/authentication")]
 public class AuthenticationController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -17,15 +21,22 @@ public class AuthenticationController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpPost("/login")]
+    [HttpGet($"{Routes.AuthenticationApi}/auto-login")]
     [AllowAnonymous]
-    public async Task<IActionResult> Login(LoginCommand command)
+    public async Task<IActionResult> LoginWithToken()
+    {
+        return Ok(await _mediator.Send(new TokenLoginCommand()));
+    }
+    
+    [HttpPost($"{Routes.AuthenticationApi}/login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Login([FromBody] LoginCommand command)
     {
         return Ok(await _mediator.Send(command));
     }
     
-    [Authorize]
-    [HttpPost("/logout")]
+    [HttpPost($"{Routes.AuthenticationApi}/logout")]
+    [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
     public async Task<IActionResult> Logout()
     {
         await _mediator.Send(new LogoutCommand());

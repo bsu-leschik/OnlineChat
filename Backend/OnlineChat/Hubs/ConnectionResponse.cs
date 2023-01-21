@@ -1,6 +1,6 @@
 ﻿using Database.Entities;
 
-namespace OnlineChat.Hubs.Response;
+namespace OnlineChat.Hubs;
 
 public class ConnectionResponse
 {
