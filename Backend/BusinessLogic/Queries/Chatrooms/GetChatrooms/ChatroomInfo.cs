@@ -1,4 +1,4 @@
-﻿using Database.Entities;
+﻿using Entities.Chatrooms;
 
 namespace BusinessLogic.Queries.Chatrooms.GetChatrooms;
 
@@ -7,7 +7,7 @@ public class ChatroomInfo
     public string Id { get; set; }
     public int UsersCount { get; set; }
     public List<string> Users { get; set; }
-    public Chatroom.ChatType ChatType { get; set; }
+    public ChatType ChatType { get; set; }
 
     public static ChatroomInfo Of(Chatroom room)
     {

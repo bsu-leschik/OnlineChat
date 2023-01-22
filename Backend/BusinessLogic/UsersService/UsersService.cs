@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using Constants;
 using Database;
-using Database.Entities;
+using Entities;
 
 namespace BusinessLogic.UsersService;
 

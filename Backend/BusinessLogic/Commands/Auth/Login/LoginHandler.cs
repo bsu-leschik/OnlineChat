@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using Constants;
 using Database;
-using Database.Entities;
+using Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;

@@ -1,4 +1,4 @@
-﻿using Database.Entities;
+﻿using Entities;
 using Microsoft.AspNetCore.Identity;
 using OnlineChat;
 

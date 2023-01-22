@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using Constants;
-using Database.Entities;
+using Entities;
 using Microsoft.AspNetCore.Identity;
 
 namespace OnlineChat;

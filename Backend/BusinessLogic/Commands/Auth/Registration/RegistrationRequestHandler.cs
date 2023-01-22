@@ -1,5 +1,5 @@
 ﻿using Database;
-using Database.Entities;
+using Entities;
 using Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;

@@ -2,7 +2,7 @@ using BusinessLogic.Queries.Chatrooms.GetChatrooms;
 using BusinessLogic.UsersService;
 using Constants;
 using Database;
-using Database.Entities;
+using Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

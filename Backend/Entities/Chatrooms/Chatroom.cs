@@ -1,19 +1,14 @@
 ﻿using System.Collections.Immutable;
 
-namespace Database.Entities;
+namespace Entities.Chatrooms;
 
-public class Chatroom
+public abstract class Chatroom
 {
-    public enum ChatType
-    {
-        Public = 0,
-        Private
-    }
-
     public Guid Id { get; set; }
     public List<User> Users { get; set; }
     public List<Message> Messages { get; set; }
-    public ChatType Type { get; set; }
+    public ChatType Type { get; }
+    public DateTime LastMessageTime { get; set; }
 
     public Chatroom(Guid id, ChatType type, List<User> users)
     {
@@ -40,5 +35,11 @@ public class Chatroom
     public bool IsEmpty()
     {
         return Users.Count == 0;
+    }
+
+    public void AddMessage(Message message)
+    {
+        Messages.Add(message);
+        LastMessageTime = DateTime.Now;
     }
 }

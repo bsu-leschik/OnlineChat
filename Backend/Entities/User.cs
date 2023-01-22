@@ -1,9 +1,11 @@
-﻿namespace Database.Entities;
+﻿using Entities.Chatrooms;
+
+namespace Entities;
 
 /// <summary>
 /// Data class
 /// </summary>
-public class User
+public class User : IEquatable<User>
 {
     public Guid Id { get; set; }
     public string Username { get; set; } = string.Empty;
@@ -27,16 +29,30 @@ public class User
 
     public override bool Equals(object? obj)
     {
-        if (obj is not User user)
-        {
-            return false;
-        }
-
-        return user.Id == Id;
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        return obj.GetType() == GetType() && Equals((User) obj);
     }
 
     public override int GetHashCode()
     {
-        return Id.GetHashCode();
+        return HashCode.Combine(Username);
+    }
+
+    public bool Equals(User? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Username == other.Username;
+    }
+
+    public static bool operator==(User a, User b)
+    {
+        return a.Equals(b);
+    }
+    
+    public static bool operator!=(User a, User b)
+    {
+        return !(a == b);
     }
 }
