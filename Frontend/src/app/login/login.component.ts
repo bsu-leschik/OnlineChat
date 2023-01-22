@@ -11,6 +11,10 @@ import {AuthenticationService, LoginResponse, TokenLoginResponseCode} from "../s
 })
 export class LoginComponent implements OnInit {
 
+  public username: string = "";
+  public password: string = "";
+  public errorMessage: string = "";
+
   constructor(private storage: StorageService,
               private router: Router,
               private authService: AuthenticationService) {
@@ -22,22 +26,18 @@ export class LoginComponent implements OnInit {
   }
 
   async onConnectClicked(): Promise<void> {
-    const usernameInput: HTMLInputElement = document.getElementById('nickname-input') as HTMLInputElement;
-    const passwordInput: HTMLInputElement = document.getElementById('password-input') as HTMLInputElement;
-    const username = usernameInput.value;
-    const password = passwordInput.value;
-    if (username == null || password == null) {
+    if (this.username == null || this.password == null) {
       this.showErrorMessage('Password or nickname is null.');
       return;
     }
-    if (!this.checkNickname(username)) {
+    if (!this.checkNickname(this.username)) {
       this.showErrorMessage('Invalid nickname');
       return;
     }
-    this.authService.login(username, password)
+    this.authService.login(this.username, this.password)
       .subscribe(response => {
       if (response == LoginResponse.Success) {
-        this.onLoggedIn(username);
+        this.onLoggedIn(this.username);
         return;
       }
       if (response == LoginResponse.WrongPassword) {
@@ -53,13 +53,7 @@ export class LoginComponent implements OnInit {
   }
 
   showErrorMessage(message: string) : void {
-    let element: HTMLParagraphElement = document.getElementById('error-message') as HTMLParagraphElement;
-    if (element == null) {
-      return;
-    }
-
-    element.textContent = message;
-    element.hidden = false;
+    this.errorMessage = message;
   }
 
   private tryAutoLogin() {
