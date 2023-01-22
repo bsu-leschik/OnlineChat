@@ -25,6 +25,7 @@
     <ItemGroup>
       <ProjectReference Include="..\BusinessLogic\BusinessLogic.csproj" />
       <ProjectReference Include="..\Database\Database.csproj" />
+      <ProjectReference Include="..\OnlineChat\OnlineChat.csproj" />
     </ItemGroup>
 
 </Project>
