@@ -1,22 +1,42 @@
-﻿using Database.Entities;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Constants;
+using Database.Entities;
 using Microsoft.AspNetCore.Identity;
 
 namespace OnlineChat;
 
-/// <summary>
-/// Temporary password hasher
-/// </summary>
 public class PasswordHasher : IPasswordHasher<User>
 {
     public string HashPassword(User user, string password)
     {
-        return password;
+        var salt = new byte[Security.SaltSize];
+        Random.Shared.NextBytes(salt);
+        var saltString = Convert.ToBase64String(salt);
+        var hash = HashPassword(password, salt);
+        return saltString + Convert.ToBase64String(hash);
     }
 
     public PasswordVerificationResult VerifyHashedPassword(User user, string hashedPassword, string providedPassword)
     {
-        return hashedPassword == providedPassword
+        var saltString = hashedPassword[..Security.SaltSize];
+        var actualHash = hashedPassword[Security.SaltSize..];
+        var salt = Convert.FromBase64String(saltString);
+
+        var providedHash = HashPassword(providedPassword, salt);
+        return providedHash.SequenceEqual(Convert.FromBase64String(actualHash))
             ? PasswordVerificationResult.Success
             : PasswordVerificationResult.Failed;
+    }
+
+    private static byte[] HashPassword(string password, byte[] salt)
+    {
+        return Rfc2898DeriveBytes.Pbkdf2(
+            password: Encoding.UTF8.GetBytes(password),
+            salt: salt,
+            iterations: Security.Iterations,
+            hashAlgorithm: HashAlgorithmName.SHA256,
+            outputLength: Security.OutputLength
+        );
     }
 }
