@@ -17,23 +17,34 @@ public class DatabaseStorageService : IStorageService
     public Task<User?> GetUserAsync(Func<User, bool> predicate, CancellationToken cancellationToken)
     {
         return _database.Users
-                        .Include(u => u.Chatrooms)
+                        .Include(u => u.PrivateChatrooms)
+                        .Include(u => u.PublicChatrooms)
                         .AsAsyncEnumerable()
                         .FirstOrDefaultAsync(predicate, cancellationToken);
     }
 
     public Task<Chatroom?> GetChatroomAsync(Func<Chatroom, bool> predicate, CancellationToken cancellationToken)
     {
-        return _database.Chatrooms
-                        .Include(c => c.Messages)
-                        .Include(c => c.Users)
-                        .AsAsyncEnumerable()
-                        .FirstOrDefaultAsync(predicate, cancellationToken);
+        return Chatrooms()
+               .Include(c => c.Messages)
+               .Include(c => c.Users)
+               .AsAsyncEnumerable()
+               .FirstOrDefaultAsync(predicate, cancellationToken);
     }
 
     public async Task AddChatroomAsync(Chatroom chatroom, CancellationToken cancellationToken)
     {
-        await _database.Chatrooms.AddAsync(chatroom, cancellationToken);
+        switch (chatroom)
+        {
+            case PublicChatroom pc:
+                await _database.PublicChatrooms.AddAsync(pc, cancellationToken);
+                break;
+            case PrivateChatroom prc:
+                await _database.PrivateChatrooms.AddAsync(prc, cancellationToken);
+                break;
+            default:
+                return;
+        }
         await _database.SaveChangesAsync(cancellationToken);
     }
 
@@ -51,7 +62,17 @@ public class DatabaseStorageService : IStorageService
 
     public async Task RemoveAsync(Chatroom chatroom, CancellationToken cancellationToken)
     {
-        _database.Chatrooms.Remove(chatroom);
+        switch (chatroom)
+        {
+            case PublicChatroom pc:
+                _database.PublicChatrooms.Remove(pc);
+                break;
+            case PrivateChatroom prc:
+                _database.PrivateChatrooms.Remove(prc);
+                break;
+            default:
+                return;
+        }
         await _database.SaveChangesAsync(cancellationToken);
     }
 
@@ -62,16 +83,22 @@ public class DatabaseStorageService : IStorageService
 
     public IAsyncEnumerable<Chatroom> GetChatroomsAsync(CancellationToken cancellationToken)
     {
-        return _database.Chatrooms
-                        .Include(c => c.Users)
-                        .Include(c => c.Messages)
-                        .AsAsyncEnumerable();
+        return Chatrooms()
+               .Include(c => c.Users)
+               .Include(c => c.Messages)
+               .AsAsyncEnumerable();
     }
 
     public IAsyncEnumerable<User> GetUsersAsync(CancellationToken cancellationToken)
     {
         return _database.Users
-                        .Include(u => u.Chatrooms)
+                        .Include(u => u.PrivateChatrooms)
+                        .Include(u => u.PublicChatrooms)
                         .AsAsyncEnumerable();
+    }
+
+    private IQueryable<Chatroom> Chatrooms()
+    {
+        return _database.PrivateChatrooms.Cast<Chatroom>().Union(_database.PublicChatrooms);
     }
 }

@@ -10,5 +10,6 @@ public class Database : DbContext
 
     public DbSet<User> Users { get; set; } = null!;
 
-    public DbSet<Chatroom> Chatrooms { get; set; } = null!;
+    public DbSet<PublicChatroom> PublicChatrooms { get; set; } = null!;
+    public DbSet<PrivateChatroom> PrivateChatrooms { get; set; } = null!;
 }

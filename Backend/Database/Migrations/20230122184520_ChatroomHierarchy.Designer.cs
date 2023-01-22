@@ -4,6 +4,7 @@ using Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Database.Migrations
 {
     [DbContext(typeof(Database))]
-    partial class DatabaseModelSnapshot : ModelSnapshot
+    [Migration("20230122184520_ChatroomHierarchy")]
+    partial class ChatroomHierarchy
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,36 +25,41 @@ namespace Database.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Entities.Chatrooms.PrivateChatroom", b =>
+            modelBuilder.Entity("ChatroomUser", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("ChatroomsId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastMessageTime")
-                        .HasColumnType("datetime2");
+                    b.Property<Guid>("UsersId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                    b.HasKey("ChatroomsId", "UsersId");
 
-                    b.ToTable("PrivateChatroom");
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("ChatroomUser");
                 });
 
-            modelBuilder.Entity("Entities.Chatrooms.PublicChatroom", b =>
+            modelBuilder.Entity("Entities.Chatrooms.Chatroom", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastMessageTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("Discriminator")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("LastMessageTime")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
-                    b.ToTable("PublicChatroom");
+                    b.ToTable("Chatroom");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Chatroom");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Entities.Message", b =>
@@ -60,10 +68,7 @@ namespace Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("PrivateChatroomId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("PublicChatroomId")
+                    b.Property<Guid?>("ChatroomId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Sender")
@@ -76,11 +81,9 @@ namespace Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PrivateChatroomId");
+                    b.HasIndex("ChatroomId");
 
-                    b.HasIndex("PublicChatroomId");
-
-                    b.ToTable("Messages");
+                    b.ToTable("Message");
                 });
 
             modelBuilder.Entity("Entities.User", b =>
@@ -92,6 +95,9 @@ namespace Database.Migrations
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("PublicChatroomId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Role")
                         .IsRequired()
@@ -106,88 +112,82 @@ namespace Database.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("PublicChatroomId");
+
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("PrivateChatroomUser", b =>
+            modelBuilder.Entity("Entities.Chatrooms.PrivateChatroom", b =>
                 {
-                    b.Property<Guid>("PrivateChatroomsId")
-                        .HasColumnType("uniqueidentifier");
+                    b.HasBaseType("Entities.Chatrooms.Chatroom");
 
-                    b.Property<Guid>("UsersId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("PrivateChatroomsId", "UsersId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("PrivateChatroomUser");
+                    b.HasDiscriminator().HasValue("PrivateChatroom");
                 });
 
-            modelBuilder.Entity("PublicChatroomUser", b =>
+            modelBuilder.Entity("Entities.Chatrooms.PublicChatroom", b =>
                 {
-                    b.Property<Guid>("PublicChatroomsId")
+                    b.HasBaseType("Entities.Chatrooms.Chatroom");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("UsersId")
-                        .HasColumnType("uniqueidentifier");
+                    b.HasIndex("OwnerId");
 
-                    b.HasKey("PublicChatroomsId", "UsersId");
+                    b.HasDiscriminator().HasValue("PublicChatroom");
+                });
 
-                    b.HasIndex("UsersId");
+            modelBuilder.Entity("ChatroomUser", b =>
+                {
+                    b.HasOne("Entities.Chatrooms.Chatroom", null)
+                        .WithMany()
+                        .HasForeignKey("ChatroomsId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
-                    b.ToTable("PublicChatroomUser");
+                    b.HasOne("Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Entities.Message", b =>
                 {
-                    b.HasOne("Entities.Chatrooms.PrivateChatroom", null)
+                    b.HasOne("Entities.Chatrooms.Chatroom", null)
                         .WithMany("Messages")
-                        .HasForeignKey("PrivateChatroomId");
+                        .HasForeignKey("ChatroomId");
+                });
 
+            modelBuilder.Entity("Entities.User", b =>
+                {
                     b.HasOne("Entities.Chatrooms.PublicChatroom", null)
-                        .WithMany("Messages")
+                        .WithMany("Moderators")
                         .HasForeignKey("PublicChatroomId");
                 });
 
-            modelBuilder.Entity("PrivateChatroomUser", b =>
+            modelBuilder.Entity("Entities.Chatrooms.PublicChatroom", b =>
                 {
-                    b.HasOne("Entities.Chatrooms.PrivateChatroom", null)
+                    b.HasOne("Entities.User", "Owner")
                         .WithMany()
-                        .HasForeignKey("PrivateChatroomsId")
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("PublicChatroomUser", b =>
-                {
-                    b.HasOne("Entities.Chatrooms.PublicChatroom", null)
-                        .WithMany()
-                        .HasForeignKey("PublicChatroomsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Entities.Chatrooms.PrivateChatroom", b =>
+            modelBuilder.Entity("Entities.Chatrooms.Chatroom", b =>
                 {
                     b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("Entities.Chatrooms.PublicChatroom", b =>
                 {
-                    b.Navigation("Messages");
+                    b.Navigation("Moderators");
                 });
 #pragma warning restore 612, 618
         }

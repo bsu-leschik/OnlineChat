@@ -1,10 +1,24 @@
-﻿namespace Entities.Chatrooms;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
+namespace Entities.Chatrooms;
+
+[Table(nameof(PublicChatroom))]
 public class PublicChatroom : Chatroom
 {
     public string Name { get; set; }
-    public User Owner { get; set; }
-    public List<User> Moderators { get; set; }
+
+    private Guid OwnerId { get; set; }
+
+    [NotMapped]
+    public User Owner
+    {
+        get => Users.First(u => u.Id == OwnerId);
+        set => OwnerId = value.Id;
+    }
+
+    private List<string> ModeratorsNicknames { get; }
+
+    [NotMapped] public IEnumerable<User> Moderators => Users.Where(u => ModeratorsNicknames.Contains(u.Username));
 
     public PublicChatroom(Guid id, List<User> users, User owner, string name) : base(id, ChatType.Public, users)
     {
@@ -12,8 +26,8 @@ public class PublicChatroom : Chatroom
         {
             throw new ArgumentException("owner must be in chat");
         }
-        Moderators = new List<User>();
-        Owner = owner;
+        ModeratorsNicknames = new List<string>();
+        OwnerId = owner.Id;
         Name = name;
     }
 
@@ -25,7 +39,7 @@ public class PublicChatroom : Chatroom
         {
             return false;
         }
-        
+
         ForceKick(user);
         return true;
     }
@@ -34,9 +48,19 @@ public class PublicChatroom : Chatroom
     {
         if (Moderators.Contains(user))
         {
-            Moderators.Remove(user);
+            ModeratorsNicknames.Remove(user.Username);
         }
         Users.Remove(user);
-        user.Chatrooms.Remove(this);
+        user.Leave(this);
+    }
+
+    public void AddModerator(User user)
+    {
+        ModeratorsNicknames.Add(user.Username);
+    }
+
+    public void RemoveModerator(User user)
+    {
+        ModeratorsNicknames.Remove(user.Username);
     }
 }

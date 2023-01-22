@@ -1,5 +1,8 @@
-﻿namespace Entities.Chatrooms;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
+namespace Entities.Chatrooms;
+
+[Table(nameof(PrivateChatroom))]
 public class PrivateChatroom : Chatroom
 {
     public PrivateChatroom(Guid id, User a, User b) : base(id, ChatType.Private, new List<User> { a, b }) {}

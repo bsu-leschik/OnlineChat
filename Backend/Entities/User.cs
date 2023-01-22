@@ -1,4 +1,6 @@
-﻿using Entities.Chatrooms;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Entities.Chatrooms;
 
 namespace Entities;
 
@@ -10,7 +12,10 @@ public class User : IEquatable<User>
     public Guid Id { get; set; }
     public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
-    public List<Chatroom> Chatrooms { get; } = new();
+    public List<PublicChatroom> PublicChatrooms { get; } = new();
+    public List<PrivateChatroom> PrivateChatrooms { get; } = new();
+
+    [NotMapped] public IEnumerable<Chatroom> Chatrooms => PublicChatrooms.Cast<Chatroom>().Union(PrivateChatrooms);
     public string Role { get; set; } = "User";
     public Guid Token { get; set; } = Guid.NewGuid();
 
@@ -18,13 +23,14 @@ public class User : IEquatable<User>
     {
         Token = Guid.NewGuid();
     }
+
     public User(string username, string password)
     {
         Id = Guid.NewGuid();
         Username = username;
         Password = password;
     }
-    
+
     public User() {}
 
     public override bool Equals(object? obj)
@@ -46,13 +52,32 @@ public class User : IEquatable<User>
         return Username == other.Username;
     }
 
-    public static bool operator==(User a, User b)
+    public static bool operator ==(User a, User b)
     {
         return a.Equals(b);
     }
-    
-    public static bool operator!=(User a, User b)
+
+    public static bool operator !=(User a, User b)
     {
         return !(a == b);
+    }
+
+    public bool Leave(Chatroom c)
+    {
+        return c.Type == ChatType.Private
+            ? PrivateChatrooms.Remove((c as PrivateChatroom)!)
+            : PublicChatrooms.Remove((c as PublicChatroom)!);
+    }
+
+    public void Join(Chatroom chatroom)
+    {
+        if (chatroom.Type == ChatType.Private)
+        {
+            PrivateChatrooms.Add((chatroom as PrivateChatroom)!);
+        }
+        else
+        {
+            PublicChatrooms.Add((chatroom as PublicChatroom)!);
+        }
     }
 }
