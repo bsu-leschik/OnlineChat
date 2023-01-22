@@ -1,7 +1,7 @@
 ﻿using Database.Entities;
 using MediatR;
 
-namespace BusinessLogic.Commands.CreateChatroom;
+namespace BusinessLogic.Commands.Chatrooms.CreateChatroom;
 
 public class CreateChatroomCommand : IRequest<CreateChatroomResponse>
 {

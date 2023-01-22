@@ -1,4 +1,4 @@
-﻿namespace BusinessLogic.Commands.CreateChatroom;
+﻿namespace BusinessLogic.Commands.Chatrooms.CreateChatroom;
 
 public class CreateChatroomResponse
 {

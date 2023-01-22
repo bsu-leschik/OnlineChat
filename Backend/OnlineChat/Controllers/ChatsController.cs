@@ -1,4 +1,4 @@
-﻿using BusinessLogic.Commands.CreateChatroom;
+﻿using BusinessLogic.Commands.Chatrooms.CreateChatroom;
 using BusinessLogic.Queries.Chatrooms.GetChatrooms;
 using BusinessLogic.Queries.Messages.GetMessages;
 using Constants;

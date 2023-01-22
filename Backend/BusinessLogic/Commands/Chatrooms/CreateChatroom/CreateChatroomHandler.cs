@@ -5,7 +5,7 @@ using Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace BusinessLogic.Commands.CreateChatroom;
+namespace BusinessLogic.Commands.Chatrooms.CreateChatroom;
 
 public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, CreateChatroomResponse>
 {
