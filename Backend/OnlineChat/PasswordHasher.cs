@@ -19,8 +19,8 @@ public class PasswordHasher : IPasswordHasher<User>
 
     public PasswordVerificationResult VerifyHashedPassword(User user, string hashedPassword, string providedPassword)
     {
-        var saltString = hashedPassword[..Security.SaltSize];
-        var actualHash = hashedPassword[Security.SaltSize..];
+        var saltString = hashedPassword[..Security.InStringSaltSize];
+        var actualHash = hashedPassword[Security.InStringSaltSize..];
         var salt = Convert.FromBase64String(saltString);
 
         var providedHash = HashPassword(providedPassword, salt);
