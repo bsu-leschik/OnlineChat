@@ -47,7 +47,7 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
 
             if (users.Count == 2
                 && request.Type == ChatType.Private
-                && await IsDuplicateChatroomAsync(users, request.Type, cancellationToken))
+                && IsDuplicatePrivateChatroom(user, users.First(u => u != user)))
             {
                 return CreateChatroomResponse.Failed;
             }
@@ -58,27 +58,20 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
                 : new PrivateChatroom(id, users);
             foreach (var u in users)
             {
-                u.Chatrooms.Add(chatroom);
+                u.Join(chatroom);
             }
             await _storageService.AddChatroomAsync(chatroom, cancellationToken);
             await _storageService.SaveChangesAsync(cancellationToken);
             return new CreateChatroomResponse(chatroom.Id);
         }
-        catch (Exception)
+        catch (Exception e)
         {
             return CreateChatroomResponse.Failed;
         }
     }
 
-    private Task<bool> IsDuplicateChatroomAsync(List<User> users, ChatType type,
-        CancellationToken cancellationToken)
+    private static bool IsDuplicatePrivateChatroom(User user, User second)
     {
-        if (type == ChatType.Public)
-        {
-            return Task.FromResult(false);
-        }
-
-        return _storageService.GetChatroomsAsync(cancellationToken)
-                              .ContainsAsync(c => ListExtensions.EqualAsSets(c.Users, users), cancellationToken);
+        return user.PrivateChatrooms.Contains(c => c.Users.Contains(second));
     }
 }

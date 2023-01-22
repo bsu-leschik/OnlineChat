@@ -49,7 +49,7 @@ public class SetUsersRoleHandler : IRequestHandler<SetUsersRoleRequest, SetUsers
 
         if (request.NewRole != UsersRole.Moderator)
         {
-            chat.Moderators.Remove(toSetRole);
+            chat.RemoveModerator(toSetRole);
         }
 
         return SetUsersRoleResponse.Success;

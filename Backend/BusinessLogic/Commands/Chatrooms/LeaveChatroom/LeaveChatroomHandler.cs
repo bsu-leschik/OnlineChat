@@ -28,7 +28,7 @@ public class LeaveChatroomHandler : IRequestHandler<LeaveChatroomCommand, LeaveC
             return LeaveChatroomResponse.BadRequest;
         }
 
-        var chatroom = user.Chatrooms.Find(c => c.Id == request.ChatId);
+        var chatroom = user.Chatrooms.FirstOrDefault(c => c.Id == request.ChatId);
         if (chatroom is null)
         {
             return LeaveChatroomResponse.NotInChatroom;
@@ -53,7 +53,7 @@ public class LeaveChatroomHandler : IRequestHandler<LeaveChatroomCommand, LeaveC
 
         if (chat.Users.Count == 1)
         {
-            user.Chatrooms.Remove(chat);
+            user.Leave(chat);
             await _storageService.RemoveAsync(chat, cancellationToken);
             await _storageService.SaveChangesAsync(cancellationToken);
             return LeaveChatroomResponse.Success;

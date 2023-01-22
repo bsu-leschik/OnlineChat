@@ -1,7 +1,12 @@
-﻿namespace Entities;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
+namespace Entities;
+
+[Table("Messages")]
 public class Message
 {
+    [Key]
     public Guid Id { get; set; }
 
     public string Sender { get; set; } = string.Empty;
