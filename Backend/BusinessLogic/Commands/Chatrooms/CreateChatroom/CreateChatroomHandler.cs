@@ -1,6 +1,7 @@
 ﻿using BusinessLogic.UsersService;
 using Database;
-using Database.Entities;
+using Entities;
+using Entities.Chatrooms;
 using Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -13,7 +14,8 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
     private readonly IHttpContextAccessor _contextAccessor;
     private readonly IUsersService _usersService;
 
-    public CreateChatroomHandler(IStorageService storageService, IHttpContextAccessor contextAccessor, IUsersService usersService)
+    public CreateChatroomHandler(IStorageService storageService, IHttpContextAccessor contextAccessor,
+        IUsersService usersService)
     {
         _storageService = storageService;
         _contextAccessor = contextAccessor;
@@ -22,47 +24,39 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
 
     public async Task<CreateChatroomResponse> Handle(CreateChatroomCommand request, CancellationToken cancellationToken)
     {
-        if (request.Usernames.Count != 2 && request.Type != Chatroom.ChatType.Public)
+        if (request.Usernames.Count != 2 && request.Type != ChatType.Public || request.Usernames.Count == 0)
+        {
+            return CreateChatroomResponse.Failed;
+        }
+        if (request.Type == ChatType.Public && request.Name is null)
         {
             return CreateChatroomResponse.Failed;
         }
         try
         {
-            // Task<User?> GetUserByName(string username) => _storageService.GetUserAsync(u => u.Username == username,
-            // cancellationToken);
             var user = await _usersService.FindUser(_contextAccessor.HttpContext!.User, cancellationToken);
             if (user is null || !request.Usernames.Contains(user.Username))
             {
                 return CreateChatroomResponse.Failed;
             }
 
-            List<User> users = await _storageService.GetUsersAsync(cancellationToken)
-                                                    .WhereAsync(u => request.Usernames.Contains(u.Username),
-                                                        cancellationToken)
-                                                    .ToListAsync(cancellationToken);
-            // List<User> users = request.Usernames
-            //                           .Select(username =>
-            //                           {
-            //                               var task = GetUserByName(username);
-            //                               task.Wait(cancellationToken);
-            //                               return task.Result;
-            //                           })
-            //                           .Where(user => user is not null)
-            //                           .ToList()!;
+            var users = await _storageService.GetUsersAsync(cancellationToken)
+                                             .WhereAsync(u => request.Usernames.Contains(u.Username),
+                                                 cancellationToken)
+                                             .ToListAsync(cancellationToken);
 
             if (users.Count == 2
-                && request.Type == Chatroom.ChatType.Private
+                && request.Type == ChatType.Private
                 && await IsDuplicateChatroomAsync(users, request.Type, cancellationToken))
             {
                 return CreateChatroomResponse.Failed;
             }
 
-            var chatroom = new Chatroom(
-                id: Guid.NewGuid(),
-                type: request.Type,
-                users: users
-            );
-            foreach (var u in users.Where(us => !us.Chatrooms.Contains(chatroom)))
+            var id = Guid.NewGuid();
+            Chatroom chatroom = request.Type == ChatType.Public
+                ? new PublicChatroom(id, users, owner: user, name: request.Name!)
+                : new PrivateChatroom(id, users);
+            foreach (var u in users)
             {
                 u.Chatrooms.Add(chatroom);
             }
@@ -76,10 +70,10 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
         }
     }
 
-    private Task<bool> IsDuplicateChatroomAsync(List<User> users, Chatroom.ChatType type,
+    private Task<bool> IsDuplicateChatroomAsync(List<User> users, ChatType type,
         CancellationToken cancellationToken)
     {
-        if (type == Chatroom.ChatType.Public)
+        if (type == ChatType.Public)
         {
             return Task.FromResult(false);
         }

@@ -1,6 +1,6 @@
 ﻿using BusinessLogic.Commands.Auth.Registration;
 using Database;
-using Database.Entities;
+using Entities;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 

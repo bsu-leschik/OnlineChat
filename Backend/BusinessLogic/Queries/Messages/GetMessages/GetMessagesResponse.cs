@@ -1,5 +1,4 @@
-﻿using BusinessLogic.Queries.Users.GetUsernames;
-using Database.Entities;
+﻿using Entities;
 
 namespace BusinessLogic.Queries.Messages.GetMessages;
 

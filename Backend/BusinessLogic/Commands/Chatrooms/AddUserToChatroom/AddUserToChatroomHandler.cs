@@ -1,6 +1,6 @@
 ﻿using BusinessLogic.UsersService;
 using Database;
-using Database.Entities;
+using Entities.Chatrooms;
 using Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -34,7 +34,7 @@ public class AddUserToChatroomHandler : IRequestHandler<AddUserToChatroomCommand
             return AddUserToChatroomResponse.ChatroomDoesntExist;
         }
 
-        if (chatroom.Type == Chatroom.ChatType.Private)
+        if (chatroom.Type == ChatType.Private)
         {
             return AddUserToChatroomResponse.ChatIsPrivate;
         }

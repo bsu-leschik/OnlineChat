@@ -1,4 +1,5 @@
-﻿using Database.Entities;
+﻿using Entities;
+using Entities.Chatrooms;
 using Extensions;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using Database.Entities;
+using Entities;
 
 namespace BusinessLogic.UsersService;
 

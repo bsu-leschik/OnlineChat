@@ -1,6 +1,7 @@
 ﻿using BusinessLogic.UsersService;
 using Database;
-using Database.Entities;
+using Entities;
+using Entities.Chatrooms;
 using Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Http;

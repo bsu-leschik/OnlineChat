@@ -11,6 +11,8 @@ Backend/Extensions/bin/
 Backend/Extensions/obj/
 Backend/UnitTests/bin/
 Backend/UnitTests/obj/
+Backend/Entities/bin/
+Backend/Entities/obj/
 
 *.dll
 *.pdb

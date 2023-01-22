@@ -1,4 +1,4 @@
-﻿using Database.Entities;
+﻿using Entities;
 
 namespace OnlineChat.Hubs;
 
