@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Entities.Chatrooms;
 
 namespace Entities;
 
@@ -14,7 +13,7 @@ public class Message
 
     public string Text { get; set; } = string.Empty;
 
-    public Message(string sender, string text, Guid chatroomId)
+    public Message(string sender, string text)
     {
         Sender = sender;
         Text = text;

@@ -30,15 +30,14 @@ builder.Services.AddAuthentication(Schemes.DefaultCookieScheme)
                return Task.CompletedTask;
            };
        });
-
+Console.WriteLine(ConnectionStrings.SqlConnectionString);
 builder.Services.AddAuthorization();
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher>();
 builder.Services.AddDbContextPool<Database.Database>(options =>
-    options.UseSqlServer("Server=.;Database=ChatDb;Trusted_Connection=True;Encrypt=False"));
+    options.UseSqlServer(ConnectionStrings.SqlConnectionString));
 builder.Services.AddScoped<IStorageService, DatabaseStorageService>(
     sp => new DatabaseStorageService(sp.GetRequiredService<Database.Database>())
 );

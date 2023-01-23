@@ -30,6 +30,8 @@ public class CreateChatroomTests
         Chatroom created = null!;
         _storageServiceMock.Setup(s => s.AddChatroomAsync(Any<Chatroom>(), Any<CancellationToken>()))
                            .Callback<Chatroom, CancellationToken>((chat, _) => created = chat);
+        _storageServiceMock.Setup(s => s.SaveChangesAsync(Any<CancellationToken>()))
+                           .Returns(Task.CompletedTask);
 
         var handler = new CreateChatroomHandler(
             _storageServiceMock.Object,
@@ -70,7 +72,8 @@ public class CreateChatroomTests
         Chatroom created = null!;
         _storageServiceMock.Setup(s => s.AddChatroomAsync(Any<Chatroom>(), Any<CancellationToken>()))
                            .Callback<Chatroom, CancellationToken>((chat, _) => created = chat);
-
+        _storageServiceMock.Setup(s => s.SaveChangesAsync(Any<CancellationToken>()))
+                           .Returns(Task.CompletedTask);
         var handler = new CreateChatroomHandler(
             _storageServiceMock.Object,
             new HttpContextAccessorMock(),
@@ -114,6 +117,7 @@ public class CreateChatroomTests
     {
         var users = CreateNUsers(2).ToList();
         var chatroom = new PrivateChatroom(Guid.NewGuid(), users);
+        users.ForEach(u => u.Join(chatroom));
 
         _usersServiceMock.Setup(u => u.FindUser(Any<ClaimsPrincipal>(), Any<CancellationToken>()))
                          .Returns(Task.FromResult(users.First())!);
@@ -183,8 +187,7 @@ public class CreateChatroomTests
             _usersServiceMock.Object);
         var request = new CreateChatroomCommand
                           {
-                              Usernames = users.Select(u => u.Username).ToList(),
-                              Type = ChatType.Public
+                              Usernames = users.Select(u => u.Username).ToList(), Type = ChatType.Public
                           };
 
         var result = await handler.Handle(request, CancellationToken.None);
@@ -193,6 +196,7 @@ public class CreateChatroomTests
         _storageServiceMock.Verify(s => s.AddChatroomAsync(Any<Chatroom>(), Any<CancellationToken>()),
             Times.Never());
     }
+
     private static IEnumerable<User> CreateNUsers(int count)
     {
         return Enumerable.Range(1, count).Select(n => new User(n.ToString(), n.ToString()));

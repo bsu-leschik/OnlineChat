@@ -11,7 +11,6 @@ namespace OnlineChat.Controllers;
 /// <summary>
 /// Controller, responsible for CRUD operations with chatrooms
 /// </summary>
-
 [ApiController]
 [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
 public class ChatsController : ControllerBase
@@ -38,9 +37,9 @@ public class ChatsController : ControllerBase
     }
 
     [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
-    [HttpGet($"{Routes.ChatroomsApi}/get-messages")]
-    public async Task<IActionResult> GetMessages([FromBody] GetMessagesQuery request)
+    [HttpGet($"{Routes.ChatroomsApi}/get-messages/{{chatId}}")]
+    public async Task<IActionResult> GetMessages([FromRoute] Guid chatId)
     {
-        return Ok(await _mediator.Send(request));
+        return Ok(await _mediator.Send(new GetMessagesQuery { ChatId = chatId }));
     }
 }

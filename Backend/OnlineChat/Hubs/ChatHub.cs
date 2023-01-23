@@ -100,7 +100,7 @@ public class ChatHub : Hub
         }
 
         var username = Context.User.Claims.FirstOrDefault(c => c.Type == Claims.Name)!.Value;
-        var messageObject = new Message(username, message, id);
+        var messageObject = new Message(username, message);
         await SendMessageToChat(id, messageObject);
     }
 
@@ -112,7 +112,7 @@ public class ChatHub : Hub
             return result;
         }
 
-        await SendMessageToChat(chatId, new Message("", $"User {username} joined the chat", chatId));
+        await SendMessageToChat(chatId, new Message("", $"User {username} joined the chat"));
         return result;
     }
 
@@ -124,7 +124,7 @@ public class ChatHub : Hub
             return result;
         }
         
-        await SendMessageToChat(chatId, new Message("", $"User {username} was kicked from the chat", chatId));
+        await SendMessageToChat(chatId, new Message("", $"User {username} was kicked from the chat"));
         return result;
     }
 
@@ -137,7 +137,7 @@ public class ChatHub : Hub
         }
 
         var (username, _) = await _usersService.Decompose(Context.User!, CancellationToken.None);
-        await SendMessageToChat(chatId, new Message("", $"User {username} left the chat", chatId));
+        await SendMessageToChat(chatId, new Message("", $"User {username} left the chat"));
         return result;
     }
 }
