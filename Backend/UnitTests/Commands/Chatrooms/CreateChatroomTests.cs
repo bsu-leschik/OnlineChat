@@ -52,7 +52,7 @@ public class CreateChatroomTests
         Assert.True(created is PublicChatroom);
         var c = created as PublicChatroom;
         Assert.Equal(c!.Name, chatName);
-        Assert.Equal(c.Owner, users.First());
+        Assert.Equal(c.Administrators.Owner, users.First());
     }
 
     [Theory]

@@ -72,6 +72,7 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
 
     private static bool IsDuplicatePrivateChatroom(User user, User second)
     {
-        return user.PrivateChatrooms.Contains(c => c.Users.Contains(second));
+        return user.Chatrooms.OfType<PrivateChatroom>().Contains(c => c.Users.Contains(second));
+        // return user.PrivateChatrooms.Contains(c => c.Users.Contains(second));
     }
 }

@@ -46,7 +46,7 @@ public class LeaveChatroomHandler : IRequestHandler<LeaveChatroomCommand, LeaveC
             return LeaveChatroomResponse.Success;
         }
 
-        if (chat.Owner != user)
+        if (chat.Administrators.Owner != user)
         {
             return LeaveChatroomResponse.BadRequest;
         }
@@ -59,10 +59,10 @@ public class LeaveChatroomHandler : IRequestHandler<LeaveChatroomCommand, LeaveC
             return LeaveChatroomResponse.Success;
         }
 
-        var newOwner = chat.Moderators.FirstOrDefault() ?? chat.Users.First();
+        var newOwner = chat.Administrators.Moderators.FirstOrDefault() ?? chat.Users.First();
 
         chat.ForceKick(user);
-        chat.Owner = newOwner;
+        chat.Administrators.Owner = newOwner;
         await _storageService.SaveChangesAsync(cancellationToken);
         return LeaveChatroomResponse.Success;
     }

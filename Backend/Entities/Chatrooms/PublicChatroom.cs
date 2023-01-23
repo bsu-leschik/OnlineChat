@@ -6,19 +6,7 @@ namespace Entities.Chatrooms;
 public class PublicChatroom : Chatroom
 {
     public string Name { get; set; }
-
-    private Guid OwnerId { get; set; }
-
-    [NotMapped]
-    public User Owner
-    {
-        get => Users.First(u => u.Id == OwnerId);
-        set => OwnerId = value.Id;
-    }
-
-    private List<string> ModeratorsNicknames { get; }
-
-    [NotMapped] public IEnumerable<User> Moderators => Users.Where(u => ModeratorsNicknames.Contains(u.Username));
+    public Administrators Administrators { get; set; }
 
     public PublicChatroom(Guid id, List<User> users, User owner, string name) : base(id, ChatType.Public, users)
     {
@@ -26,8 +14,7 @@ public class PublicChatroom : Chatroom
         {
             throw new ArgumentException("owner must be in chat");
         }
-        ModeratorsNicknames = new List<string>();
-        OwnerId = owner.Id;
+        Administrators = new Administrators(owner: owner, moderators: new List<User>(), this);
         Name = name;
     }
 
@@ -35,7 +22,7 @@ public class PublicChatroom : Chatroom
 
     public bool Kick(User user)
     {
-        if (!Users.Contains(user) || user == Owner)
+        if (!Users.Contains(user) || user == Administrators.Owner)
         {
             return false;
         }
@@ -46,9 +33,9 @@ public class PublicChatroom : Chatroom
 
     public void ForceKick(User user)
     {
-        if (Moderators.Contains(user))
+        if (Administrators.Moderators.Contains(user))
         {
-            ModeratorsNicknames.Remove(user.Username);
+            Administrators.Moderators.Remove(user);
         }
         Users.Remove(user);
         user.Leave(this);
@@ -56,11 +43,30 @@ public class PublicChatroom : Chatroom
 
     public void AddModerator(User user)
     {
-        ModeratorsNicknames.Add(user.Username);
+        Administrators.Moderators.Add(user);
     }
 
     public void RemoveModerator(User user)
     {
-        ModeratorsNicknames.Remove(user.Username);
+        Administrators.Moderators.Add(user);
+    }
+}
+
+public class Administrators
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid PublicChatroomId { get; set; }
+    public User Owner { get; set; }
+
+    public List<User> Moderators { get; set; }
+    public PublicChatroom PublicChatroom { get; set; }
+
+    public Administrators() {}
+
+    public Administrators(User owner, List<User> moderators, PublicChatroom chatroom)
+    {
+        Owner = owner;
+        Moderators = moderators;
+        PublicChatroom = chatroom;
     }
 }

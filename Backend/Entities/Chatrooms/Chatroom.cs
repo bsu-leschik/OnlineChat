@@ -15,6 +15,7 @@ public abstract class Chatroom
         Id = id;
         Type = type;
         Messages = new List<Message>();
+        LastMessageTime = DateTime.Now;
         Users = new List<User>(
             type == ChatType.Private
                 ? users.ToImmutableList()

@@ -17,8 +17,9 @@ public class DatabaseStorageService : IStorageService
     public Task<User?> GetUserAsync(Func<User, bool> predicate, CancellationToken cancellationToken)
     {
         return _database.Users
-                        .Include(u => u.PrivateChatrooms)
-                        .Include(u => u.PublicChatrooms)
+                        // .Include(u => u.PrivateChatrooms)
+                        // .Include(u => u.PublicChatrooms)
+                        .Include(u => u.Chatrooms)
                         .AsAsyncEnumerable()
                         .FirstOrDefaultAsync(predicate, cancellationToken);
     }
@@ -34,17 +35,18 @@ public class DatabaseStorageService : IStorageService
 
     public async Task AddChatroomAsync(Chatroom chatroom, CancellationToken cancellationToken)
     {
-        switch (chatroom)
-        {
-            case PublicChatroom pc:
-                await _database.PublicChatrooms.AddAsync(pc, cancellationToken);
-                break;
-            case PrivateChatroom prc:
-                await _database.PrivateChatrooms.AddAsync(prc, cancellationToken);
-                break;
-            default:
-                return;
-        }
+        // switch (chatroom)
+        // {
+        //     case PublicChatroom pc:
+        //         await _database.PublicChatrooms.AddAsync(pc, cancellationToken);
+        //         break;
+        //     case PrivateChatroom prc:
+        //         await _database.PrivateChatrooms.AddAsync(prc, cancellationToken);
+        //         break;
+        //     default:
+        //         return;
+        // }
+        await _database.AddAsync(chatroom, cancellationToken);
         await _database.SaveChangesAsync(cancellationToken);
     }
 
@@ -62,17 +64,18 @@ public class DatabaseStorageService : IStorageService
 
     public async Task RemoveAsync(Chatroom chatroom, CancellationToken cancellationToken)
     {
-        switch (chatroom)
-        {
-            case PublicChatroom pc:
-                _database.PublicChatrooms.Remove(pc);
-                break;
-            case PrivateChatroom prc:
-                _database.PrivateChatrooms.Remove(prc);
-                break;
-            default:
-                return;
-        }
+        // switch (chatroom)
+        // {
+        //     case PublicChatroom pc:
+        //         _database.PublicChatrooms.Remove(pc);
+        //         break;
+        //     case PrivateChatroom prc:
+        //         _database.PrivateChatrooms.Remove(prc);
+        //         break;
+        //     default:
+        //         return;
+        // }
+        _database.Remove(chatroom);
         await _database.SaveChangesAsync(cancellationToken);
     }
 
@@ -84,21 +87,33 @@ public class DatabaseStorageService : IStorageService
     public IAsyncEnumerable<Chatroom> GetChatroomsAsync(CancellationToken cancellationToken)
     {
         return Chatrooms()
-               .Include(c => c.Users)
-               .Include(c => c.Messages)
-               .AsAsyncEnumerable();
+            .AsAsyncEnumerable();
     }
 
     public IAsyncEnumerable<User> GetUsersAsync(CancellationToken cancellationToken)
     {
         return _database.Users
-                        .Include(u => u.PrivateChatrooms)
-                        .Include(u => u.PublicChatrooms)
+                        // .Include(u => u.PrivateChatrooms)
+                        // .Include(u => u.PublicChatrooms)
+                        .Include(u => u.Chatrooms)
                         .AsAsyncEnumerable();
     }
 
     private IQueryable<Chatroom> Chatrooms()
     {
-        return _database.PrivateChatrooms.Cast<Chatroom>().Union(_database.PublicChatrooms);
+        // return _database.PrivateChatrooms
+        // .Include(c => c.Messages)
+        // .Include(c => c.Users)
+        // .Cast<Chatroom>()
+        // .Union(_database.PublicChatrooms
+        // .Include(c => c.Users)
+        // .Include(c => c.Messages)
+        // .Include(c => c.Administrators)
+        // .Cast<Chatroom>());
+        return _database.Chatroom
+                        .Include(c => c.Users)
+                        .Include(c => c.Messages)
+                        .Include(c => (c as PublicChatroom).Administrators)
+                        .ThenInclude(c => c.Moderators);
     }
 }

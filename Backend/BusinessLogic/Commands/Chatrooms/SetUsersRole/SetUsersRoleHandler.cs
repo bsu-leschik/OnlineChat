@@ -36,7 +36,7 @@ public class SetUsersRoleHandler : IRequestHandler<SetUsersRoleRequest, SetUsers
         }
 
         var chat = (chatroom as PublicChatroom)!;
-        if (chat.Owner != user!)
+        if (chat.Administrators.Owner != user!)
         {
             return SetUsersRoleResponse.AccessDenied;
         }

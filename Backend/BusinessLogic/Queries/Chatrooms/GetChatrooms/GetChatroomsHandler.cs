@@ -1,4 +1,5 @@
-﻿using BusinessLogic.UsersService;
+﻿using System.Diagnostics;
+using BusinessLogic.UsersService;
 using Database;
 using Entities;
 using Entities.Chatrooms;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace BusinessLogic.Queries.Chatrooms.GetChatrooms;
 
-public class GetChatroomsHandler : IRequestHandler<GetChatroomsRequest, List<ChatroomInfo>>
+public class GetChatroomsHandler : IRequestHandler<GetChatroomsRequest, List<object>>
 {
     private readonly IStorageService _storageService;
     private readonly IHttpContextAccessor _accessor;
@@ -21,7 +22,7 @@ public class GetChatroomsHandler : IRequestHandler<GetChatroomsRequest, List<Cha
         _usersService = usersService;
     }
 
-    public async Task<List<ChatroomInfo>> Handle(GetChatroomsRequest request, CancellationToken cancellationToken)
+    public async Task<List<object>> Handle(GetChatroomsRequest request, CancellationToken cancellationToken)
     {
         bool IsInChat(Chatroom chatroom, User user)
         {
@@ -29,17 +30,22 @@ public class GetChatroomsHandler : IRequestHandler<GetChatroomsRequest, List<Cha
         }
 
         var user = await _usersService.FindUser(_accessor.HttpContext!.User, cancellationToken);
-        if (user == null)
+        if (user is null)
         {
-            return new List<ChatroomInfo>();
+            return new List<object>();
         }
 
         return await _storageService.GetChatroomsAsync(cancellationToken)
                               .WhereAsync(chat => IsInChat(chat, user), cancellationToken)
-                              .SelectAsync(ChatroomInfo.Of, cancellationToken)
+                              .SelectAsync<Chatroom, object>(c =>
+                              {
+                                  return c switch
+                                      {
+                                          PublicChatroom pu => PublicChatroomInfo.Of(pu),
+                                          PrivateChatroom pr => PrivateChatroomInfo.Of(pr),
+                                          _ => throw new UnreachableException()
+                                      };
+                              }, cancellationToken)
                               .ToListAsync(cancellationToken);
-        return user.Chatrooms
-                   .Select(ChatroomInfo.Of)
-                   .ToList();
     }
 }

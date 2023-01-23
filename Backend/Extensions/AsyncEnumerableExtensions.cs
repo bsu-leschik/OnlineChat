@@ -49,10 +49,33 @@ public static class AsyncEnumerableExtensions
         }
     }
 
+    public async static IAsyncEnumerable<TResult> CastAsync<TValue, TResult>(this IAsyncEnumerable<TValue> enumerable,
+        [EnumeratorCancellation] CancellationToken cancellationToken) where TValue : class, TResult 
+                                                                      where TResult : class
+    {
+        await foreach (var x in enumerable.WithCancellation(cancellationToken))
+        {
+            yield return x as TResult;
+        }
+    }
+
     public async static Task<bool> ContainsAsync<T>(this IAsyncEnumerable<T> enumerable, Func<T, bool> predicate,
         CancellationToken cancellationToken)
     {
         var result = await enumerable.FirstOrDefaultAsync(predicate, cancellationToken);
         return result is not null;
+    }
+
+    public async static IAsyncEnumerable<T> Append<T>(this IAsyncEnumerable<T> a, IAsyncEnumerable<T> b,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        await foreach (var item in a.WithCancellation(cancellationToken))
+        {
+            yield return item;
+        }
+        await foreach (var item in b.WithCancellation(cancellationToken))
+        {
+            yield return item;
+        }
     }
 }
