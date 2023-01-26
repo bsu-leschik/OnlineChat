@@ -22,7 +22,7 @@ public class SetUsersRoleHandler : IRequestHandler<SetUsersRoleRequest, SetUsers
 
     public async Task<SetUsersRoleResponse> Handle(SetUsersRoleRequest request, CancellationToken cancellationToken)
     {
-        var user = await _usersService.FindUser(_accessor.HttpContext!.User, cancellationToken);
+        var user = await _usersService.GetCurrentUser(cancellationToken);
 
         var chatroom = user?.Chatrooms.FirstOrDefault(c => c.Id == request.ChatId);
         if (chatroom is null)

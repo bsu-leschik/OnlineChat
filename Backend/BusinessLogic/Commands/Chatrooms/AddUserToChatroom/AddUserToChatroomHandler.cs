@@ -11,18 +11,16 @@ public class AddUserToChatroomHandler : IRequestHandler<AddUserToChatroomCommand
 {
     private readonly IStorageService _storageService;
     private readonly IUsersService _usersService;
-    private readonly IHttpContextAccessor _accessor;
 
     public AddUserToChatroomHandler(IStorageService storageService, IUsersService usersService, IHttpContextAccessor accessor)
     {
         _storageService = storageService;
         _usersService = usersService;
-        _accessor = accessor;
     }
 
     public async Task<AddUserToChatroomResponse> Handle(AddUserToChatroomCommand request, CancellationToken cancellationToken)
     {
-        var (currentUsername, currentToken) = await _usersService.Decompose(_accessor.HttpContext!.User, cancellationToken);
+        var (currentUsername, currentToken) = await _usersService.DecomposeCurrentPrincipal(cancellationToken);
         if (currentUsername is null || currentToken is null)
         {
             return AddUserToChatroomResponse.AccessDenied;

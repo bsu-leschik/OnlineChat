@@ -41,7 +41,7 @@ public class ChatHub : Hub
         {
             return new ConnectionResponse(messages: null, ConnectionResponseCode.AccessDenied);
         }
-        var user = await _usersService.FindUser(Context.User, CancellationToken.None);
+        var user = await _usersService.GetCurrentUser(CancellationToken.None);
         if (user is null)
         {
             return new ConnectionResponse(messages: null, ConnectionResponseCode.AccessDenied);
@@ -91,7 +91,7 @@ public class ChatHub : Hub
             return;
         }
 
-        var user = await _usersService.FindUser(Context.User, CancellationToken.None);
+        var user = await _usersService.GetCurrentUser(CancellationToken.None);
 
         var chatroom = user?.Chatrooms.FirstOrDefault(c => c.Id == id);
         if (chatroom is null)
@@ -136,7 +136,7 @@ public class ChatHub : Hub
             return result;
         }
 
-        var (username, _) = await _usersService.Decompose(Context.User!, CancellationToken.None);
+        var (username, _) = await _usersService.DecomposeCurrentPrincipal(CancellationToken.None);
         await SendMessageToChat(chatId, new Message("", $"User {username} left the chat"));
         return result;
     }

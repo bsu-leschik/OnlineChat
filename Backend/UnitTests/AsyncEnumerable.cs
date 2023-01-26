@@ -1,6 +1,4 @@
-﻿using Extensions;
-
-namespace UnitTests;
+﻿namespace UnitTests;
 
 public static class AsyncEnumerable
 {

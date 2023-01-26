@@ -11,14 +11,12 @@ namespace BusinessLogic.Commands.Chatrooms.CreateChatroom;
 public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, CreateChatroomResponse>
 {
     private readonly IStorageService _storageService;
-    private readonly IHttpContextAccessor _contextAccessor;
     private readonly IUsersService _usersService;
 
     public CreateChatroomHandler(IStorageService storageService, IHttpContextAccessor contextAccessor,
         IUsersService usersService)
     {
         _storageService = storageService;
-        _contextAccessor = contextAccessor;
         _usersService = usersService;
     }
 
@@ -34,7 +32,7 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
         }
         try
         {
-            var user = await _usersService.FindUser(_contextAccessor.HttpContext!.User, cancellationToken);
+            var user = await _usersService.GetCurrentUser(cancellationToken);
             if (user is null || !request.Usernames.Contains(user.Username))
             {
                 return CreateChatroomResponse.Failed;

@@ -35,7 +35,7 @@ public class PasswordHasher : IPasswordHasher<User>
             password: Encoding.UTF8.GetBytes(password),
             salt: salt,
             iterations: Security.Iterations,
-            hashAlgorithm: HashAlgorithmName.SHA256,
+            hashAlgorithm: Security.HashAlgorithm,
             outputLength: Security.OutputLength
         );
     }

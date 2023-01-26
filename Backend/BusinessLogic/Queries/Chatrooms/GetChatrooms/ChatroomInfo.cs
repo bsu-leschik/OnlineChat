@@ -13,8 +13,7 @@ public class PrivateChatroomInfo
     {
         return new PrivateChatroomInfo
                    {
-                       Users = pc.Users.Select(u => u.Username).ToList(),
-                       LastMessageTime = pc.LastMessageTime
+                       Users = pc.Users.Select(u => u.Username).ToList(), LastMessageTime = pc.LastMessageTime
                    };
     }
 }
@@ -22,7 +21,7 @@ public class PrivateChatroomInfo
 public class PublicChatroomInfo
 {
     public List<string> Users { get; set; } = null!;
-    public string Owner { get; set; }= null!;
+    public string Owner { get; set; } = null!;
     public List<string> Moderators { get; set; } = null!;
     public ChatType Type { get; set; } = ChatType.Public;
     public DateTime LastMessageTime { get; set; }

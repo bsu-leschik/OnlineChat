@@ -10,19 +10,17 @@ public class LeaveChatroomHandler : IRequestHandler<LeaveChatroomCommand, LeaveC
 {
     private readonly IUsersService _usersService;
     private readonly IStorageService _storageService;
-    private readonly IHttpContextAccessor _accessor;
 
     public LeaveChatroomHandler(IUsersService usersService, IStorageService storageService,
         IHttpContextAccessor accessor)
     {
         _usersService = usersService;
         _storageService = storageService;
-        _accessor = accessor;
     }
 
     public async Task<LeaveChatroomResponse> Handle(LeaveChatroomCommand request, CancellationToken cancellationToken)
     {
-        var user = await _usersService.FindUser(_accessor.HttpContext!.User, cancellationToken);
+        var user = await _usersService.GetCurrentUser(cancellationToken);
         if (user is null)
         {
             return LeaveChatroomResponse.BadRequest;

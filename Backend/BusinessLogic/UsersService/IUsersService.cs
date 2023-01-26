@@ -5,8 +5,7 @@ namespace BusinessLogic.UsersService;
 
 public interface IUsersService
 {
-    public Task<User?> FindUser(ClaimsPrincipal claimsPrincipal, CancellationToken cancellationToken);
+    public Task<User?> GetCurrentUser(CancellationToken cancellationToken);
 
-    public Task<(string? Username, Guid? Token)> Decompose(ClaimsPrincipal claimsPrincipal,
-        CancellationToken cancellationToken);
+    public Task<(string? Username, Guid? Token)> DecomposeCurrentPrincipal(CancellationToken cancellationToken);
 }

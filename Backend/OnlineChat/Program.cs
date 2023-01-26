@@ -22,6 +22,7 @@ builder.Services.AddAuthentication(Schemes.DefaultCookieScheme)
            pb.SlidingExpiration = true;
            pb.Cookie.Name = "dl";
            pb.Cookie.SameSite = SameSiteMode.None;
+           pb.Cookie.HttpOnly = true;
            pb.Cookie.IsEssential = true;
            pb.Events.OnRedirectToLogin = context =>
            {
@@ -67,12 +68,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseRouting();
 app.UseHttpsRedirection();
+app.UseRouting();
+app.UseCors(myPolicy);
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors(myPolicy);
 app.MapHub<ChatHub>("/chat");
 app.MapControllers();
 

@@ -23,7 +23,7 @@ public class CreateChatroomTests
     public async void CreateChatroom_CreatesPublicChatroom(int usersCount)
     {
         var users = CreateNUsers(usersCount).ToList();
-        _usersServiceMock.Setup(u => u.FindUser(Any<ClaimsPrincipal>(), Any<CancellationToken>()))
+        _usersServiceMock.Setup(u => u.GetCurrentUser(Any<CancellationToken>()))
                          .Returns(Task.FromResult(users.First())!);
         _storageServiceMock.Setup(s => s.GetUsersAsync(Any<CancellationToken>()))
                            .Returns(users.AsAsyncEnumerable());
@@ -63,7 +63,7 @@ public class CreateChatroomTests
     public async void CreateChatroom_CreatesPrivateChatroom(string? name)
     {
         var users = CreateNUsers(2).ToList();
-        _usersServiceMock.Setup(u => u.FindUser(Any<ClaimsPrincipal>(), Any<CancellationToken>()))
+        _usersServiceMock.Setup(u => u.GetCurrentUser(Any<CancellationToken>()))
                          .Returns(Task.FromResult(users.First())!);
         _storageServiceMock.Setup(s => s.GetUsersAsync(Any<CancellationToken>()))
                            .Returns(users.AsAsyncEnumerable());
@@ -119,7 +119,7 @@ public class CreateChatroomTests
         var chatroom = new PrivateChatroom(Guid.NewGuid(), users);
         users.ForEach(u => u.Join(chatroom));
 
-        _usersServiceMock.Setup(u => u.FindUser(Any<ClaimsPrincipal>(), Any<CancellationToken>()))
+        _usersServiceMock.Setup(u => u.GetCurrentUser(Any<CancellationToken>()))
                          .Returns(Task.FromResult(users.First())!);
         _storageServiceMock.Setup(s => s.GetUsersAsync(Any<CancellationToken>()))
                            .Returns(users.AsAsyncEnumerable());
@@ -152,7 +152,7 @@ public class CreateChatroomTests
     {
         var users = CreateNUsers(usersCount).ToList();
 
-        _usersServiceMock.Setup(u => u.FindUser(Any<ClaimsPrincipal>(), Any<CancellationToken>()))
+        _usersServiceMock.Setup(u => u.GetCurrentUser(Any<CancellationToken>()))
                          .Returns(Task.FromResult(users.First())!);
         _storageServiceMock.Setup(s => s.GetUsersAsync(Any<CancellationToken>()))
                            .Returns(users.AsAsyncEnumerable());

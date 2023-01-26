@@ -12,13 +12,11 @@ namespace BusinessLogic.Queries.Chatrooms.GetChatrooms;
 public class GetChatroomsHandler : IRequestHandler<GetChatroomsRequest, List<object>>
 {
     private readonly IStorageService _storageService;
-    private readonly IHttpContextAccessor _accessor;
     private readonly IUsersService _usersService;
 
     public GetChatroomsHandler(IStorageService storageService, IHttpContextAccessor accessor, IUsersService usersService)
     {
         _storageService = storageService;
-        _accessor = accessor;
         _usersService = usersService;
     }
 
@@ -29,7 +27,7 @@ public class GetChatroomsHandler : IRequestHandler<GetChatroomsRequest, List<obj
             return chatroom.Users.Contains(u => u.Username == user.Username);
         }
 
-        var user = await _usersService.FindUser(_accessor.HttpContext!.User, cancellationToken);
+        var user = await _usersService.GetCurrentUser(cancellationToken);
         if (user is null)
         {
             return new List<object>();

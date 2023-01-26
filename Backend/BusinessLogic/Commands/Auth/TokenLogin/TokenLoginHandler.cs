@@ -28,7 +28,7 @@ public class TokenLoginHandler : IRequestHandler<TokenLoginCommand, TokenLoginRe
             return TokenLoginResponse.Error(TokenLoginResponseCode.BadRequest);
         }
 
-        var (username, token) = await _usersService.Decompose(principal, cancellationToken);
+        var (username, token) = await _usersService.DecomposeCurrentPrincipal(cancellationToken);
         if (username is null)
         {
             return TokenLoginResponse.Error(TokenLoginResponseCode.BadRequest);

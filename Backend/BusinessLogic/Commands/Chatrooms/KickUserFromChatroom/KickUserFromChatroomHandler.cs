@@ -11,14 +11,12 @@ public class KickUserFromChatroomHandler : IRequestHandler<KickUserFromChatroomC
 {
     private readonly IStorageService _storageService;
     private readonly IUsersService _usersService;
-    private readonly IHttpContextAccessor _accessor;
 
     public KickUserFromChatroomHandler(IStorageService storageService, IUsersService usersService,
         IHttpContextAccessor accessor)
     {
         _storageService = storageService;
         _usersService = usersService;
-        _accessor = accessor;
     }
 
     public async Task<KickUserFromChatroomResponse> Handle(KickUserFromChatroomCommand request,
@@ -30,7 +28,7 @@ public class KickUserFromChatroomHandler : IRequestHandler<KickUserFromChatroomC
             return KickUserFromChatroomResponse.BadRequest;
         }
         
-        var user = await _usersService.FindUser(_accessor.HttpContext!.User, cancellationToken);
+        var user = await _usersService.GetCurrentUser(cancellationToken);
         if (user is null)
         {
             return KickUserFromChatroomResponse.BadRequest;
