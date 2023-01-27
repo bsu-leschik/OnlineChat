@@ -22,13 +22,13 @@ public class RegistrationRequestHandler : IRequestHandler<RegistrationCommand, R
         if (await _storageService.GetUsersAsync(cancellationToken)
                                  .ContainsAsync(u => u.Username == command.Username, cancellationToken))
         {
-            return new RegistrationResponse("Duplicate username");
+            return RegistrationResponse.DuplicateUsername;
         }
 
         var user = new User(command.Username, command.Password);
         var password = _passwordHasher.HashPassword(user, command.Password);
         user.Password = password;
         await _storageService.AddUserAsync(user, cancellationToken);
-        return new RegistrationResponse("Success");
+        return RegistrationResponse.Success;
     }
 }

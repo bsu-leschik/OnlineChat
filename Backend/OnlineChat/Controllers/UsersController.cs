@@ -16,14 +16,8 @@ public class UsersController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpGet($"{Routes.UsersApi}/get-users")]
-    public Task<IActionResult> GetUsers()
-    {
-        return GetUsers("");
-    }
-    
     [HttpGet($"{Routes.UsersApi}/get-users/{{startingWith}}")]
-    public async Task<IActionResult> GetUsers([FromRoute] string startingWith)
+    public async Task<IActionResult> GetUsers([FromRoute] string startingWith = "")
     {
         return Ok(await _mediator.Send(new GetUsernamesQuery
                                            {

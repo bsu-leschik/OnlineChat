@@ -1,4 +1,8 @@
-﻿using BusinessLogic.Commands.Chatrooms.CreateChatroom;
+﻿using BusinessLogic.Commands.Chatrooms.AddUserToChatroom;
+using BusinessLogic.Commands.Chatrooms.CreateChatroom;
+using BusinessLogic.Commands.Chatrooms.KickUserFromChatroom;
+using BusinessLogic.Commands.Chatrooms.LeaveChatroom;
+using BusinessLogic.Commands.Chatrooms.SetUsersRole;
 using BusinessLogic.Queries.Chatrooms.GetChatrooms;
 using BusinessLogic.Queries.Messages.GetMessages;
 using Constants;
@@ -41,5 +45,33 @@ public class ChatsController : ControllerBase
     public async Task<IActionResult> GetMessages([FromRoute] Guid chatId)
     {
         return Ok(await _mediator.Send(new GetMessagesQuery { ChatId = chatId }));
+    }
+
+    [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
+    [HttpPost($"{Routes.ChatroomsApi}/add-user")]
+    public async Task<IActionResult> AddUserToChatroom(AddUserToChatroomCommand command)
+    {
+        return Ok(await _mediator.Send(command));
+    }
+
+    [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
+    [HttpPost($"{Routes.ChatroomsApi}/kick-user")]
+    public async Task<IActionResult> KickUserFromChatroom(KickUserFromChatroomCommand command)
+    {
+        return Ok(await _mediator.Send(command));
+    }
+    
+    [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
+    [HttpPost($"{Routes.ChatroomsApi}/leave-chat")]
+    public async Task<IActionResult> LeaveChatroom(LeaveChatroomCommand command)
+    {
+        return Ok(await _mediator.Send(command));
+    }
+    
+    [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
+    [HttpPost($"{Routes.ChatroomsApi}/set-role")]
+    public async Task<IActionResult> SetUsersRole(SetUsersRoleRequest command)
+    {
+        return Ok(await _mediator.Send(command));
     }
 }

@@ -2,6 +2,7 @@
 using Constants;
 using Database;
 using Entities;
+using Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -31,7 +32,7 @@ public class LoginHandler : IRequestHandler<LoginCommand, LoginResponse>
             return LoginResponse.WrongUsername;
         }
 
-        var verifyResult = _passwordHasher.VerifyHashedPassword(user, 
+        var verifyResult = _passwordHasher.VerifyHashedPassword(user,
             providedPassword: command.Password,
             hashedPassword: user.Password);
 
@@ -40,11 +41,10 @@ public class LoginHandler : IRequestHandler<LoginCommand, LoginResponse>
             return LoginResponse.WrongPassword;
         }
 
-        var claims = new List<Claim>
-                         {
-                             new(Claims.Name, user.Username), 
-                             new(Claims.Token, user.Token.ToString())
-                         };
+        var claims = ListExtensions.Of(
+            new Claim(Claims.Name, user.Username),
+            new Claim(Claims.Token, user.Token.ToString())
+        );
         var identity = new ClaimsIdentity(claims, authenticationType: Schemes.DefaultCookieScheme);
         var principal = new ClaimsPrincipal(identity);
         await _accessor.HttpContext!.SignInAsync(principal);

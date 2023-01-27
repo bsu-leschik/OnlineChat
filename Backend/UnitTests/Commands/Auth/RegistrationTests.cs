@@ -19,7 +19,7 @@ public class RegistrationTests
         var request = new RegistrationCommand { Username = "123", Password = "232" };
         var result = await handler.Handle(request, CancellationToken.None);
         _storageMock.Verify(s => s.AddUserAsync(Any<User>(), Any<CancellationToken>()), Times.Once);
-        Assert.Equal(result.Reason, "Success");
+        Assert.Equal(result, RegistrationResponse.Success);
     }
 
     [Fact]
@@ -38,7 +38,7 @@ public class RegistrationTests
                           };
         var result = await handler.Handle(request, CancellationToken.None);
         _storageMock.Verify(s => s.AddUserAsync(Any<User>(), Any<CancellationToken>()), Times.Never);
-        Assert.Equal(result.Reason, "Duplicate username");
+        Assert.Equal(result, RegistrationResponse.DuplicateUsername);
     }
 
     private static T Any<T>()

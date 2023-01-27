@@ -21,36 +21,14 @@ public class TokenLoginHandler : IRequestHandler<TokenLoginCommand, TokenLoginRe
 
     public async Task<TokenLoginResponse> Handle(TokenLoginCommand request, CancellationToken cancellationToken)
     {
-        var principal = _contextAccessor.HttpContext?.User;
-
-        if (principal is null)
-        {
-            return TokenLoginResponse.Error(TokenLoginResponseCode.BadRequest);
-        }
-
-        var (username, token) = await _usersService.DecomposeCurrentPrincipal(cancellationToken);
-        if (username is null)
-        {
-            return TokenLoginResponse.Error(TokenLoginResponseCode.BadRequest);
-        }
-
-        if (token is null)
-        {
-            return TokenLoginResponse.Error(TokenLoginResponseCode.TokenExpired);
-        }
-
-        var user = await _storageService.GetUserAsync(u => u.Username == username, CancellationToken.None);
+        var principal = _contextAccessor.HttpContext!.User;
+        var user = await _usersService.GetCurrentUser(cancellationToken);
         if (user is null)
         {
-            return TokenLoginResponse.Error(TokenLoginResponseCode.BadRequest);
-        }
-
-        if (user.Token != token)
-        {
             return TokenLoginResponse.Error(TokenLoginResponseCode.TokenExpired);
         }
-
+        
         await _contextAccessor.HttpContext!.SignInAsync(principal);
-        return TokenLoginResponse.Success(username);
+        return TokenLoginResponse.Success(user.Username);
     }
 }

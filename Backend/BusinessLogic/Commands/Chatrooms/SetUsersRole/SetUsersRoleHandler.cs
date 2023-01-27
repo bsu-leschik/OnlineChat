@@ -8,16 +8,12 @@ namespace BusinessLogic.Commands.Chatrooms.SetUsersRole;
 
 public class SetUsersRoleHandler : IRequestHandler<SetUsersRoleRequest, SetUsersRoleResponse>
 {
-    private readonly IStorageService _storageService;
     private readonly IUsersService _usersService;
-    private readonly IHttpContextAccessor _accessor;
 
     public SetUsersRoleHandler(IStorageService storageService, IUsersService usersService,
         IHttpContextAccessor accessor)
     {
-        _storageService = storageService;
         _usersService = usersService;
-        _accessor = accessor;
     }
 
     public async Task<SetUsersRoleResponse> Handle(SetUsersRoleRequest request, CancellationToken cancellationToken)

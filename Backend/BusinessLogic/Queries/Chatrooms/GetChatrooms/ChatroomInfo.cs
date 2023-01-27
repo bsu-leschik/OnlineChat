@@ -5,6 +5,7 @@ namespace BusinessLogic.Queries.Chatrooms.GetChatrooms;
 
 public class PrivateChatroomInfo
 {
+    public Guid Id { get; set; }
     public List<string> Users { get; set; }
     public ChatType Type { get; set; } = ChatType.Private;
     public DateTime LastMessageTime { get; set; }
@@ -13,6 +14,7 @@ public class PrivateChatroomInfo
     {
         return new PrivateChatroomInfo
                    {
+                       Id = pc.Id,
                        Users = pc.Users.Select(u => u.Username).ToList(), LastMessageTime = pc.LastMessageTime
                    };
     }
@@ -20,6 +22,7 @@ public class PrivateChatroomInfo
 
 public class PublicChatroomInfo
 {
+    public Guid Id { get; set; }
     public List<string> Users { get; set; } = null!;
     public string Owner { get; set; } = null!;
     public List<string> Moderators { get; set; } = null!;
@@ -30,6 +33,7 @@ public class PublicChatroomInfo
     {
         return new PublicChatroomInfo
                    {
+                       Id = pc.Id,
                        Users = pc.Users.Select(u => u.Username).ToList(),
                        Owner = pc.Administrators.Owner.Username,
                        Moderators = pc.Administrators.Moderators.Select(u => u.Username).ToList(),

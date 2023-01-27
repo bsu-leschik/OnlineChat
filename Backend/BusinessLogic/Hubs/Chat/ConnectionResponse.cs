@@ -1,6 +1,6 @@
 ﻿using Entities;
 
-namespace OnlineChat.Hubs;
+namespace BusinessLogic.Hubs.Chat;
 
 public class ConnectionResponse
 {

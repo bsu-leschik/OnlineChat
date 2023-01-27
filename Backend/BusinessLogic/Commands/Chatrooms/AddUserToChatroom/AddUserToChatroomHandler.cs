@@ -1,9 +1,11 @@
-﻿using BusinessLogic.UsersService;
+﻿using BusinessLogic.Hubs.Chat;
+using BusinessLogic.UsersService;
 using Database;
 using Entities.Chatrooms;
 using Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BusinessLogic.Commands.Chatrooms.AddUserToChatroom;
 
@@ -11,11 +13,13 @@ public class AddUserToChatroomHandler : IRequestHandler<AddUserToChatroomCommand
 {
     private readonly IStorageService _storageService;
     private readonly IUsersService _usersService;
+    private readonly IHubContext<ChatHub> _hubContext;
 
-    public AddUserToChatroomHandler(IStorageService storageService, IUsersService usersService, IHttpContextAccessor accessor)
+    public AddUserToChatroomHandler(IStorageService storageService, IUsersService usersService, IHttpContextAccessor accessor, IHubContext<ChatHub> hubContext)
     {
         _storageService = storageService;
         _usersService = usersService;
+        _hubContext = hubContext;
     }
 
     public async Task<AddUserToChatroomResponse> Handle(AddUserToChatroomCommand request, CancellationToken cancellationToken)
@@ -52,9 +56,11 @@ public class AddUserToChatroomHandler : IRequestHandler<AddUserToChatroomCommand
         {
             return AddUserToChatroomResponse.UserDoesntExist;
         }
-        
+
+        var notifyTask = _hubContext.NotifyUserAdded(chatId: chatroom.Id.ToString(), currentUsername, cancellationToken);
         chatroom.Users.Add(user);
-        await _storageService.SaveChangesAsync(cancellationToken);
+        var saveTask = _storageService.SaveChangesAsync(cancellationToken);
+        await Task.WhenAll(notifyTask, saveTask);
         return AddUserToChatroomResponse.Success;
     }
 }

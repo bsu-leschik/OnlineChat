@@ -1,4 +1,6 @@
-﻿namespace Extensions;
+﻿using System.Security.Claims;
+
+namespace Extensions;
 
 public static class ListExtensions
 {
@@ -27,5 +29,16 @@ public static class ListExtensions
         }
 
         return a.All(b.Contains) && b.All(a.Contains);
+    }
+
+    public static bool ContainsClaims(this IEnumerable<Claim> claims, params string[] types)
+    {
+        var array = claims.ToArray();
+        return types.All(t => array.Contains(c => c.Type == t));
+    }
+
+    public static List<T> Of<T>(params T[] values)
+    {
+        return new List<T>(values);
     }
 }

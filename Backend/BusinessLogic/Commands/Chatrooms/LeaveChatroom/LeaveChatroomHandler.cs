@@ -1,8 +1,9 @@
-﻿using BusinessLogic.UsersService;
+﻿using BusinessLogic.Hubs.Chat;
+using BusinessLogic.UsersService;
 using Database;
 using Entities.Chatrooms;
 using MediatR;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BusinessLogic.Commands.Chatrooms.LeaveChatroom;
 
@@ -10,12 +11,13 @@ public class LeaveChatroomHandler : IRequestHandler<LeaveChatroomCommand, LeaveC
 {
     private readonly IUsersService _usersService;
     private readonly IStorageService _storageService;
+    private readonly IHubContext<ChatHub> _hubContext;
 
-    public LeaveChatroomHandler(IUsersService usersService, IStorageService storageService,
-        IHttpContextAccessor accessor)
+    public LeaveChatroomHandler(IUsersService usersService, IStorageService storageService, IHubContext<ChatHub> hubContext)
     {
         _usersService = usersService;
         _storageService = storageService;
+        _hubContext = hubContext;
     }
 
     public async Task<LeaveChatroomResponse> Handle(LeaveChatroomCommand request, CancellationToken cancellationToken)
@@ -40,7 +42,9 @@ public class LeaveChatroomHandler : IRequestHandler<LeaveChatroomCommand, LeaveC
         var chat = (chatroom as PublicChatroom)!;
         if (chat.Kick(user))
         {
-            await _storageService.SaveChangesAsync(cancellationToken);
+            var savingTask = _storageService.SaveChangesAsync(cancellationToken);
+            var sendingTask = _hubContext.NotifyUserLeft(chat.Id.ToString(), user.Username, cancellationToken);
+            await Task.WhenAll(savingTask, sendingTask);
             return LeaveChatroomResponse.Success;
         }
 
@@ -61,7 +65,9 @@ public class LeaveChatroomHandler : IRequestHandler<LeaveChatroomCommand, LeaveC
 
         chat.ForceKick(user);
         chat.Administrators.Owner = newOwner;
-        await _storageService.SaveChangesAsync(cancellationToken);
+        var saving = _storageService.SaveChangesAsync(cancellationToken);
+        var sending = _hubContext.NotifyUserLeft(chat.Id.ToString(), user.Username, cancellationToken);
+        await Task.WhenAll(saving, sending);
         return LeaveChatroomResponse.Success;
     }
 }

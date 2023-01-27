@@ -1,3 +1,4 @@
+using BusinessLogic.Hubs.Chat;
 using BusinessLogic.Queries.Chatrooms.GetChatrooms;
 using BusinessLogic.UsersService;
 using Constants;
@@ -7,7 +8,6 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OnlineChat;
-using OnlineChat.Hubs;
 
 const string myPolicy = "MyPolicy";
 
@@ -74,6 +74,7 @@ app.UseCors(myPolicy);
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.CheckClaimsIfNotAuthenticated(Claims.Name, Claims.Token);
 app.MapHub<ChatHub>("/chat");
 app.MapControllers();
 
