@@ -153,3 +153,11 @@ public static class ChatHubExtensions
             new object?[] { new Message("", message) }, cancellationToken);
     }
 }
+
+public enum ConnectionResponseCode
+{
+    SuccessfullyConnected = 0,
+    AccessDenied,
+    Error,
+    RoomDoesntExist
+}
