@@ -2,7 +2,7 @@
 
 public enum RegistrationResponse
 {
-    Success,
+    Success = 0,
     DuplicateUsername,
     Error
 }

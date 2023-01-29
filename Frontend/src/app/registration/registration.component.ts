@@ -27,12 +27,11 @@ export class RegistrationComponent implements OnInit {
       'password': this.password
     }).subscribe(result => {
       console.log(result);
-      if (result.reason != 'Success') {
-        this.showErrorMessage(result.reason);
+      if (result != RegistrationResponse.Success) {
+        this.showErrorMessage("Failed to registrate");
         return;
       }
       this.authService.login(this.username, this.password).subscribe(result => {
-        console.log('log');
         this.router.navigate(['chat-selector']);
       });
     })
@@ -43,6 +42,9 @@ export class RegistrationComponent implements OnInit {
   }
 }
 
-interface RegistrationResponse {
-  reason: string;
+enum RegistrationResponse
+{
+  Success = 0,
+  DuplicateUsername,
+  Error
 }

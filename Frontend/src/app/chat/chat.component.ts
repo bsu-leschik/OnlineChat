@@ -1,8 +1,9 @@
-import {Component, HostListener, OnInit} from '@angular/core';
+import {Component, HostListener, OnDestroy, OnInit} from '@angular/core';
 import {HubConnection, HubConnectionBuilder} from '@microsoft/signalr';
 import {StorageService} from "../shared/services/storage.service";
 import {Router} from "@angular/router";
 import {Constants} from "../constants";
+import {ChatroomService} from "../shared/services/chatroom.service";
 
 @Component({
   selector: 'app-chat',
@@ -10,14 +11,16 @@ import {Constants} from "../constants";
   styleUrls: ['./chat.component.css']
 })
 
-export class ChatComponent implements OnInit {
+export class ChatComponent implements OnInit, OnDestroy {
   private readonly nickname: string;
   private readonly chatId: string;
   private hubConnection: HubConnection;
   public messages: Message[] = [];
 
-  constructor(private storage: StorageService, private router: Router) {
-    console.log('init');
+  constructor(private storage: StorageService,
+              private router: Router,
+              private chatService: ChatroomService) {
+    // console.log('init');
     this.nickname = this.storage.get<string>('nickname');
     this.chatId = this.storage.get<string>('chatId');
     if (this.nickname == undefined || this.chatId == undefined) {
@@ -31,23 +34,24 @@ export class ChatComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.hubConnection.stop();
+  }
   ngOnInit(): void {
+    this.chatService.getMessages(this.chatId).subscribe(result => {
+      this.messages = result.messages;
+    });
     this.hubConnection.start().then(async () => {
-      const response = await this.hubConnection.invoke('Connect', this.chatId) as ConnectionResponse;
-      console.log(response);
-      if (response.response != ConnectionResponseCode.SuccessfullyConnected) {
-        ChatComponent.switchResponseCode(response.response);
+      const response = await this.hubConnection.invoke('Connect', this.chatId) as ConnectionResponseCode;
+      if (response != ConnectionResponseCode.SuccessfullyConnected) {
+        ChatComponent.switchResponseCode(response);
         return;
       }
       let welcomeText: HTMLParagraphElement = document.getElementById('welcome-text') as HTMLParagraphElement;
       const username = this.storage.get<string>(Constants.NicknameStorageField);
       welcomeText.textContent += username + '!';
-      if (response.messages != null) {
-        for (let message of response.messages)
-          this.messages.push(message);
-      }
     }).catch((error) => {
-      alert('Failed to start connection1');
+      alert('Failed to start connection');
       console.log(error);
     });
   }
@@ -84,6 +88,7 @@ export class ChatComponent implements OnInit {
     text.textContent = message;
     text.hidden = false;
   }
+
   private static hideErrorMessage() {
     const text = document.getElementById('error-text') as HTMLParagraphElement;
     text.hidden = true;
@@ -103,6 +108,7 @@ export class ChatComponent implements OnInit {
 export interface Message {
   sender: String;
   text: String;
+  sendingTime: Date;
 }
 
 enum ConnectionResponseCode {
@@ -113,9 +119,4 @@ enum ConnectionResponseCode {
   RoomIsFull,
   WrongNickname,
   RoomDoesntExist
-}
-
-interface ConnectionResponse {
-  messages: Message[];
-  response: ConnectionResponseCode;
 }

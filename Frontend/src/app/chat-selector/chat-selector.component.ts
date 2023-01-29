@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {StorageService} from "../shared/services/storage.service";
 import {Constants} from "../constants";
 import {Router} from "@angular/router";
@@ -10,9 +10,9 @@ import {ChatroomService} from "../shared/services/chatroom.service";
   templateUrl: './chat-selector.component.html',
   styleUrls: ['./chat-selector.component.css']
 })
-export class ChatSelectorComponent implements OnInit {
+export class ChatSelectorComponent implements OnInit, OnDestroy {
   public chatrooms: StandardChatroomInfo[] = [];
-  private readonly intervalId;
+  // private readonly intervalId;
 
   constructor(private storage: StorageService,
               private router: Router,
@@ -20,7 +20,7 @@ export class ChatSelectorComponent implements OnInit {
     if (storage.get<string>(Constants.NicknameStorageField) === undefined) {
       router.navigate(['login']);
     }
-    this.intervalId = setInterval(() => this.updateChatrooms(), 1000)
+    // this.intervalId = setInterval(() => this.updateChatrooms(), 1000)
   }
 
   ngOnInit(): void {
@@ -49,7 +49,7 @@ export class ChatSelectorComponent implements OnInit {
   }
 
   public ngOnDestroy() {
-    clearInterval(this.intervalId);
+    // clearInterval(this.intervalId);
   }
 
   isPublic(room: StandardChatroomInfo) {
