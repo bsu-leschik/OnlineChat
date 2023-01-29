@@ -47,6 +47,12 @@ public class ChatHub : Hub<IChatClientInterface>
         return ConnectionResponseCode.SuccessfullyConnected;
     }
 
+    [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
+    public Task Disconnect(Guid chatId)
+    {
+        return Groups.RemoveFromGroupAsync(Context.ConnectionId, chatId.ToString());
+    }
+
     /// <summary>
     /// Method for users to send messages
     /// </summary>
