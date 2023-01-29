@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {StorageService} from "../shared/services/storage.service";
 import {Constants} from "../constants";
 import {Router} from "@angular/router";
-import {ChatroomInfo, ChatType} from "../shared/chatroom";
+import {ChatType, MinimumChatroomInfo, StandardChatroomInfo} from "../shared/chatroom";
 import {ChatroomService} from "../shared/services/chatroom.service";
 
 @Component({
@@ -11,7 +11,7 @@ import {ChatroomService} from "../shared/services/chatroom.service";
   styleUrls: ['./chat-selector.component.css']
 })
 export class ChatSelectorComponent implements OnInit {
-  public chatrooms: ChatroomInfo[] = [];
+  public chatrooms: StandardChatroomInfo[] = [];
   private readonly intervalId;
 
   constructor(private storage: StorageService,
@@ -29,9 +29,10 @@ export class ChatSelectorComponent implements OnInit {
 
   private updateChatrooms(): void {
     this.chatroomsService.getChatrooms()
-      .subscribe(chatrooms => {
-        if (chatrooms != null) {
+      .subscribe(rawChatrooms => {
+        if (rawChatrooms != null) {
           const username = this.storage.get<string>(Constants.NicknameStorageField);
+          let chatrooms = this.processRawChatrooms(rawChatrooms);
           this.filter(chatrooms, username);
           this.chatrooms = chatrooms;
         }
@@ -51,11 +52,24 @@ export class ChatSelectorComponent implements OnInit {
     clearInterval(this.intervalId);
   }
 
-  isPublic(room: ChatroomInfo) {
+  isPublic(room: StandardChatroomInfo) {
     return room.chatType == ChatType.Public;
   }
 
-  filter(chatrooms: ChatroomInfo[], username: string) {
+  processRawChatrooms(rawChatrooms : any[]) : StandardChatroomInfo[]{
+    let processedChatrooms : StandardChatroomInfo[] = [];
+    rawChatrooms.forEach(
+      chat => {
+        let temp = chat as StandardChatroomInfo;
+        //if (temp.chatType == ChatType.Private){
+          processedChatrooms.push(temp);
+        //}
+      }
+    );
+    return processedChatrooms;
+  }
+
+  filter(chatrooms: StandardChatroomInfo[], username: string) {
     chatrooms.forEach(c => {
       let index = c.users.indexOf(username, 0);
       if (index > -1) {

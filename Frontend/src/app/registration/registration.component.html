@@ -6,6 +6,6 @@
     (keydown.enter)="onRegClicked()">
     <input type="button" id="register-button" value="Register" (click)="onRegClicked()"
     (keydown.enter)="onRegClicked()">
-    <p id="error-message" [hidden]="errorMessage.length == 0">{{errorMessage}}</p>
+    <p id="error-message" [hidden]="errorMessage == null || errorMessage.length == 0">{{errorMessage}}</p>
   </div>
 </div>

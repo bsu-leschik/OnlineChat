@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {ChatroomInfo, ChatType} from "../chatroom";
+import {ChatType, StandardChatroomInfo} from "../chatroom";
 import {Constants} from "../../constants";
+import { nextTick } from 'process';
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +13,8 @@ export class ChatroomService {
   private readonly _api = Constants.ApiUrl + '/chatrooms';
   constructor(private httpClient: HttpClient) {}
 
-  public getChatrooms() : Observable<ChatroomInfo[]> {
-    return this.httpClient.get<ChatroomInfo[]>(this._api + '/get-chatrooms', {
+  public getChatrooms() : Observable<any[]> {
+    return this.httpClient.get<any[]>(this._api + '/get-chatrooms', {
       withCredentials: true
     });
   }
@@ -26,6 +27,15 @@ export class ChatroomService {
       }, {
         withCredentials: true
       });
+  }
+
+  filter(chatrooms: StandardChatroomInfo[], username: string) {
+    chatrooms.forEach(c => {
+      let index = c.users.indexOf(username, 0);
+      if (index > -1) {
+        c.users.splice(index, 1);
+      }
+    });
   }
 }
 
