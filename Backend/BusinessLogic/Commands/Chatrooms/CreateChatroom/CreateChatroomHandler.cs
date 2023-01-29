@@ -26,7 +26,7 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
         {
             return CreateChatroomResponse.Failed;
         }
-        if (request.Type == ChatType.Public && request.Name is null)
+        if (request is { Type: ChatType.Public, Name: null })
         {
             return CreateChatroomResponse.Failed;
         }

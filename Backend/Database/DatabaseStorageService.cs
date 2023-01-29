@@ -7,16 +7,16 @@ namespace Database;
 
 public class DatabaseStorageService : IStorageService
 {
-    private readonly Database _database;
+    private readonly ChatDatabase _chatDatabase;
 
-    public DatabaseStorageService(Database database)
+    public DatabaseStorageService(ChatDatabase chatDatabase)
     {
-        _database = database;
+        _chatDatabase = chatDatabase;
     }
 
     public Task<User?> GetUserAsync(Func<User, bool> predicate, CancellationToken cancellationToken)
     {
-        return _database.Users
+        return _chatDatabase.Users
                         .Include(u => u.Chatrooms)
                         .AsAsyncEnumerable()
                         .FirstOrDefaultAsync(predicate, cancellationToken);
@@ -31,52 +31,51 @@ public class DatabaseStorageService : IStorageService
 
     public async Task AddChatroomAsync(Chatroom chatroom, CancellationToken cancellationToken)
     {
-        await _database.AddAsync(chatroom, cancellationToken);
-        await _database.SaveChangesAsync(cancellationToken);
+        await _chatDatabase.AddAsync(chatroom, cancellationToken);
+        await _chatDatabase.SaveChangesAsync(cancellationToken);
     }
 
     public async Task AddUserAsync(User user, CancellationToken cancellationToken)
     {
-        await _database.Users.AddAsync(user, cancellationToken);
-        await _database.SaveChangesAsync(cancellationToken);
+        await _chatDatabase.Users.AddAsync(user, cancellationToken);
+        await _chatDatabase.SaveChangesAsync(cancellationToken);
     }
 
     public async Task RemoveAsync(User user, CancellationToken cancellationToken)
     {
-        _database.Users.Remove(user);
-        await _database.SaveChangesAsync(cancellationToken);
+        _chatDatabase.Users.Remove(user);
+        await _chatDatabase.SaveChangesAsync(cancellationToken);
     }
 
     public async Task RemoveAsync(Chatroom chatroom, CancellationToken cancellationToken)
     {
-        _database.Remove(chatroom);
-        await _database.SaveChangesAsync(cancellationToken);
+        _chatDatabase.Remove(chatroom);
+        await _chatDatabase.SaveChangesAsync(cancellationToken);
     }
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken)
     {
-        await _database.SaveChangesAsync(cancellationToken);
+        await _chatDatabase.SaveChangesAsync(cancellationToken);
     }
 
     public IAsyncEnumerable<Chatroom> GetChatroomsAsync(CancellationToken cancellationToken)
     {
-        return Chatrooms()
-            .AsAsyncEnumerable();
+        return Chatrooms().AsAsyncEnumerable();
     }
 
     public IAsyncEnumerable<User> GetUsersAsync(CancellationToken cancellationToken)
     {
-        return _database.Users
+        return _chatDatabase.Users
                         .Include(u => u.Chatrooms)
                         .AsAsyncEnumerable();
     }
 
     private IQueryable<Chatroom> Chatrooms()
     {
-        return _database.Chatroom
+        return _chatDatabase.Chatroom
                         .Include(c => c.Users)
                         .Include(c => c.Messages)
-                        .Include(c => (c as PublicChatroom).Administrators)
+                        .Include(c => (c as PublicChatroom)!.Administrators)
                         .ThenInclude(c => c.Moderators);
     }
 }

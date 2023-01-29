@@ -27,12 +27,9 @@ public class GetMessagesHandler : IRequestHandler<GetMessagesQuery, GetMessagesR
             return EmptyResponse;
         }
 
-        if (!_usersService.TryGetClaim(Claims.Name, out var name))
-        {
-            return EmptyResponse;
-        }
+        var username = _usersService.GetUsername()!;
 
-        if (!chatroom.Users.Contains(u => u.Username == name))
+        if (!chatroom.Users.Contains(u => u.Username == username))
         {
             return EmptyResponse;
         }

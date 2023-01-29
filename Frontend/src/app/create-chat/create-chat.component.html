@@ -30,7 +30,7 @@
         <input type="radio" name="p-p-s" id="public-s" [(ngModel)]="chatType" value="public" checked>
         <label for="public-s">Public</label>
       </div>
-      <input type="text" [(ngModel)]="chatName" *ngIf="chatType == 'private' && addedUsers.length > 0"
+      <input type="text" [(ngModel)]="chatName" *ngIf="chatType == 'public' && addedUsers.length > 0"
              placeholder="Chatroom name"/>
     </div>
   </div>

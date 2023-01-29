@@ -4,20 +4,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Database;
 
-public class Database : DbContext
+public class ChatDatabase : DbContext
 {
-    public Database(DbContextOptions options) : base(options) {}
+    public ChatDatabase(DbContextOptions options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<PublicChatroom>()
                     .HasOne(c => c.Administrators)
                     .WithOne(a => a.PublicChatroom)
-                    .HasForeignKey<Administrators>(a => a.PublicChatroomId);
+                    .HasForeignKey<Administrators>(a => a.PublicChatroomId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Administrators>()
                     .HasOne(a => a.Owner)
-                    .WithMany();
+                    .WithMany()
+                    .OnDelete(DeleteBehavior.NoAction);
         
         modelBuilder.Entity<Administrators>()
                     .HasMany(a => a.Moderators)

@@ -3,13 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
 namespace Database;
-public class DatabaseContextFactory : IDesignTimeDbContextFactory<Database>
+public class DatabaseContextFactory : IDesignTimeDbContextFactory<ChatDatabase>
 {
-    public Database CreateDbContext(string[] args)
+    public ChatDatabase CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<Database>();
+        var optionsBuilder = new DbContextOptionsBuilder<ChatDatabase>();
         optionsBuilder.UseSqlServer(ConnectionStrings.SqlConnectionString);
 
-        return new Database(optionsBuilder.Options);
+        return new ChatDatabase(optionsBuilder.Options);
     }
 }

@@ -39,10 +39,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher>();
-builder.Services.AddDbContextPool<Database.Database>(options =>
+builder.Services.AddDbContextPool<Database.ChatDatabase>(options =>
     options.UseSqlServer(ConnectionStrings.SqlConnectionString));
 builder.Services.AddScoped<IStorageService, DatabaseStorageService>(
-    sp => new DatabaseStorageService(sp.GetRequiredService<Database.Database>())
+    sp => new DatabaseStorageService(sp.GetRequiredService<Database.ChatDatabase>())
 );
 builder.Services.AddScoped<IUsersService, UsersService>();
 

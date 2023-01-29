@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Database.Migrations
 {
     [DbContext(typeof(ChatDatabase))]
-    [Migration("20230123092609_NewlyInit")]
-    partial class NewlyInit
+    [Migration("20230129161347_RelationshipFixes2")]
+    partial class RelationshipFixes2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -106,6 +106,9 @@ namespace Database.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("SendingTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -196,7 +199,7 @@ namespace Database.Migrations
                     b.HasOne("Entities.User", "Owner")
                         .WithMany()
                         .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Entities.Chatrooms.PublicChatroom", "PublicChatroom")

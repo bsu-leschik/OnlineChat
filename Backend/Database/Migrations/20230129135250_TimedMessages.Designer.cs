@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Database.Migrations
 {
-    [DbContext(typeof(Database))]
+    [DbContext(typeof(ChatDatabase))]
     [Migration("20230129135250_TimedMessages")]
     partial class TimedMessages
     {
@@ -184,13 +184,13 @@ namespace Database.Migrations
                     b.HasOne("Entities.Chatrooms.Chatroom", null)
                         .WithMany()
                         .HasForeignKey("ChatroomsId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
