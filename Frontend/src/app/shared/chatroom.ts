@@ -3,9 +3,18 @@ export enum ChatType {
   Private
 }
 
-export interface ChatroomInfo {
-  id: string;
-  usersCount: number;
+export interface MinimumChatroomInfo{
+  id: string
   users: string[];
-  chatType: ChatType;
+  chatType: ChatType.Private
+  lastMessageDate: Date;
+}
+
+export interface StandardChatroomInfo{
+  id: string
+  users: string[];
+  owner: string;
+  moderators: string;
+  chatType: ChatType.Public
+  lastMessageDate: Date;
 }
