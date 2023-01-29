@@ -1,6 +1,6 @@
 using BusinessLogic.Hubs.Chat;
 using BusinessLogic.Queries.Chatrooms.GetChatrooms;
-using BusinessLogic.UsersService;
+using BusinessLogic.Services.UsersService;
 using Constants;
 using Database;
 using Entities;
@@ -8,6 +8,8 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OnlineChat;
+using IUserConnectionIdTracker = BusinessLogic.Services.IUserConnectionIdTracker;
+using UserConnectionIdTracker = BusinessLogic.Services.UserConnectionIdTracker;
 
 const string myPolicy = "MyPolicy";
 
@@ -55,6 +57,8 @@ builder.Services.AddCors(options =>
              .AllowCredentials();
         });
 });
+
+builder.Services.AddSingleton<IUserConnectionIdTracker, UserConnectionIdTracker>();
 
 
 builder.Services.AddSignalR();

@@ -31,7 +31,7 @@ public abstract class Chatroom
         }
     }
 
-    public Chatroom() {}
+    protected Chatroom() {}
 
     public bool IsEmpty()
     {

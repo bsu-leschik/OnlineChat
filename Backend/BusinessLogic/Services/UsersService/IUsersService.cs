@@ -1,6 +1,6 @@
 ﻿using Entities;
 
-namespace BusinessLogic.UsersService;
+namespace BusinessLogic.Services.UsersService;
 
 public interface IUsersService
 {

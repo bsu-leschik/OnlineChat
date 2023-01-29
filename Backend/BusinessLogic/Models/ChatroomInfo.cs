@@ -1,7 +1,17 @@
-﻿using Entities;
+﻿using System.Diagnostics;
 using Entities.Chatrooms;
 
-namespace BusinessLogic.Queries.Chatrooms.GetChatrooms;
+namespace BusinessLogic.Models;
+
+public static class ChatroomInfo
+{
+    public static object Of(Chatroom chatroom) => chatroom switch
+        {
+            PublicChatroom pc => PublicChatroomInfo.Of(pc),
+            PrivateChatroom pr => PrivateChatroomInfo.Of(pr),
+            _ => throw new UnreachableException()
+        };
+}
 
 public class PrivateChatroomInfo
 {
@@ -15,7 +25,8 @@ public class PrivateChatroomInfo
         return new PrivateChatroomInfo
                    {
                        Id = pc.Id,
-                       Users = pc.Users.Select(u => u.Username).ToList(), LastMessageTime = pc.LastMessageTime
+                       Users = pc.Users.Select(u => u.Username).ToList(),
+                       LastMessageTime = pc.LastMessageTime
                    };
     }
 }

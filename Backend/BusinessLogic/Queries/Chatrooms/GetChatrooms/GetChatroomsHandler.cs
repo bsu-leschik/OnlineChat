@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
-using BusinessLogic.UsersService;
+using BusinessLogic.Models;
+using BusinessLogic.Services.UsersService;
 using Database;
 using Entities;
 using Entities.Chatrooms;
@@ -35,15 +36,7 @@ public class GetChatroomsHandler : IRequestHandler<GetChatroomsRequest, List<obj
 
         return await _storageService.GetChatroomsAsync(cancellationToken)
                               .WhereAsync(chat => IsInChat(chat, user), cancellationToken)
-                              .SelectAsync<Chatroom, object>(c =>
-                              {
-                                  return c switch
-                                      {
-                                          PublicChatroom pu => PublicChatroomInfo.Of(pu),
-                                          PrivateChatroom pr => PrivateChatroomInfo.Of(pr),
-                                          _ => throw new UnreachableException()
-                                      };
-                              }, cancellationToken)
+                              .SelectAsync(ChatroomInfo.Of, cancellationToken)
                               .ToListAsync(cancellationToken);
     }
 }

@@ -1,7 +1,9 @@
-﻿using BusinessLogic.UsersService;
+﻿using BusinessLogic.Services;
+using BusinessLogic.Services.UsersService;
 using Constants;
 using Database;
 using Entities;
+using Entities.Chatrooms;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
@@ -15,11 +17,13 @@ public class ChatHub : Hub<IChatClientInterface>
 {
     private readonly IStorageService _storageService;
     private readonly IUsersService _usersService;
+    private readonly IUserConnectionIdTracker _idTracker;
 
-    public ChatHub(IStorageService storageService, IUsersService usersService)
+    public ChatHub(IStorageService storageService, IUsersService usersService, IUserConnectionIdTracker idTracker)
     {
         _storageService = storageService;
         _usersService = usersService;
+        _idTracker = idTracker;
     }
 
     /// <summary>
@@ -41,16 +45,29 @@ public class ChatHub : Hub<IChatClientInterface>
         }
 
         var user = await _usersService.GetCurrentUser(CancellationToken.None);
-
         var chatroom = user?.Chatrooms.FirstOrDefault(c => c.Id == id);
         if (chatroom is null)
         {
             return;
         }
-        
+
         var username = Context.User.Claims.FirstOrDefault(c => c.Type == Claims.Name)!.Value;
         var messageObject = new Message(username, message);
         await SendMessageToChat(id, messageObject);
+    }
+
+    [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
+    public override async Task OnConnectedAsync()
+    {
+        _idTracker.Add(username: _usersService.GetUsername()!, connectionId: Context.ConnectionId);
+        await base.OnConnectedAsync();
+    }
+
+    [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        _idTracker.Remove(_usersService.GetUsername()!);
+        await base.OnDisconnectedAsync(exception);
     }
 
     /// <summary>
@@ -71,34 +88,47 @@ public class ChatHub : Hub<IChatClientInterface>
         var sending = Clients
                       .Group(chatId.ToString())
                       .Receive(message, chatroom.Id.ToString());
+        var promoting = PromoteChatToTop(chatroom);
         
-        await Task.WhenAll(saving, sending);
+        await Task.WhenAll(saving, sending, promoting);
     }
 
-    public override async Task OnConnectedAsync()
+    private async Task PromoteChatToTop(Chatroom chatroom)
     {
-        await base.OnConnectedAsync();
+        List<string> connectionIds = chatroom.Users
+                                .Select(u => u.Username)
+                                .Select(n => _idTracker.GetConnectionId(n))
+                                .Where(c => c is not null)
+                                .ToList()!;
+        
+        await Clients.Clients(connectionIds).PromoteToTop(chatroom.Id.ToString());
     }
+    
+    
 }
 
 public static class ChatHubExtensions
 {
-    public static Task NotifyUserAdded(this IHubContext<ChatHub> context, string chatId, string username, CancellationToken cancellationToken)
+    public static Task NotifyUserAdded(this IHubContext<ChatHub> context, string chatId, string username,
+        CancellationToken cancellationToken)
     {
         return NotifyAll(context, chatId, $"User {username} joined the chat", cancellationToken);
     }
 
-    public static Task NotifyUserKicked(this IHubContext<ChatHub> context, string chatId, string username, CancellationToken cancellationToken)
+    public static Task NotifyUserKicked(this IHubContext<ChatHub> context, string chatId, string username,
+        CancellationToken cancellationToken)
     {
         return NotifyAll(context, chatId, $"User {username} was kicked from the chat", cancellationToken);
     }
-    
-    public static Task NotifyUserLeft(this IHubContext<ChatHub> context, string chatId, string username, CancellationToken cancellationToken)
+
+    public static Task NotifyUserLeft(this IHubContext<ChatHub> context, string chatId, string username,
+        CancellationToken cancellationToken)
     {
         return NotifyAll(context, chatId, $"User {username} left the chat", cancellationToken);
     }
 
-    private static Task NotifyAll(this IHubContext<ChatHub> context, string chatId, string message, CancellationToken cancellationToken)
+    private static Task NotifyAll(this IHubContext<ChatHub> context, string chatId, string message,
+        CancellationToken cancellationToken)
     {
         return context.Clients.Group(chatId).SendCoreAsync(nameof(IChatClientInterface.Receive),
             new object?[] { new Message("", message) }, cancellationToken);

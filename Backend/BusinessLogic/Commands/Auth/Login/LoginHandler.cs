@@ -41,7 +41,7 @@ public class LoginHandler : IRequestHandler<LoginCommand, LoginResponse>
             return LoginResponse.WrongPassword;
         }
 
-        var claims = ListExtensions.Of(
+        var claims = List.Of(
             new Claim(Claims.Name, user.Username),
             new Claim(Claims.Token, user.Token.ToString())
         );

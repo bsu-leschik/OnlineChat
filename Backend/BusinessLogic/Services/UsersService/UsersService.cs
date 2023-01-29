@@ -4,7 +4,7 @@ using Database;
 using Entities;
 using Microsoft.AspNetCore.Http;
 
-namespace BusinessLogic.UsersService;
+namespace BusinessLogic.Services.UsersService;
 
 public class UsersService : IUsersService
 {

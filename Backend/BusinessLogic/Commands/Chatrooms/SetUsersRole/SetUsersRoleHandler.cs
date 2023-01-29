@@ -1,4 +1,4 @@
-﻿using BusinessLogic.UsersService;
+﻿using BusinessLogic.Services.UsersService;
 using Database;
 using Entities.Chatrooms;
 using MediatR;

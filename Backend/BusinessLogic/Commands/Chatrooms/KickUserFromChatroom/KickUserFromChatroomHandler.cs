@@ -1,5 +1,5 @@
 ﻿using BusinessLogic.Hubs.Chat;
-using BusinessLogic.UsersService;
+using BusinessLogic.Services.UsersService;
 using Database;
 using Entities;
 using Entities.Chatrooms;

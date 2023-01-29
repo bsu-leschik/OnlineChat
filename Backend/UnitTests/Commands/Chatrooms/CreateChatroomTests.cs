@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 using BusinessLogic.Commands.Chatrooms.CreateChatroom;
-using BusinessLogic.UsersService;
+using BusinessLogic.Services.UsersService;
 using Database;
 using Entities;
 using Entities.Chatrooms;

@@ -36,7 +36,10 @@ public static class ListExtensions
         var array = claims.ToArray();
         return types.All(t => array.Contains(c => c.Type == t));
     }
+}
 
+public static class List
+{
     public static List<T> Of<T>(params T[] values)
     {
         return new List<T>(values);

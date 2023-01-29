@@ -1,4 +1,4 @@
-﻿using BusinessLogic.UsersService;
+﻿using BusinessLogic.Services.UsersService;
 using Constants;
 using Database;
 using Extensions;
