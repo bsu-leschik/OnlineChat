@@ -17,6 +17,7 @@ export class CreateChatComponent implements OnInit {
   text: string = '';
   showErrorMessage: boolean = false;
   chatType: string = 'private';
+  chatName: string = '';
 
   constructor(private storage: StorageService,
               private userService: UsersCommunicatorService,
@@ -52,7 +53,7 @@ export class CreateChatComponent implements OnInit {
       : this.chatType == 'private'
         ? ChatType.Private
         : ChatType.Public;
-    this.chatService.createChatroom(type, users).subscribe(result => {
+    this.chatService.createChatroom(type, users, this.chatName).subscribe(result => {
       if (result.created) {
         this.storage.set(Constants.ChatIdStorageField, result.chatId);
         this.router.navigate(['chat']);

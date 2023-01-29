@@ -2,4 +2,4 @@
 
 namespace BusinessLogic.Queries.Chatrooms.GetChatrooms;
 
-public struct GetChatroomsRequest : IRequest<List<object>> {}
+public struct GetChatroomsRequest : IRequest<GetChatroomsResult> {}

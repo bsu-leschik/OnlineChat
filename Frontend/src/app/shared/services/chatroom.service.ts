@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {ChatType, StandardChatroomInfo} from "../chatroom";
+import {ChatroomInfoBase, ChatType, PrivateChatroomInfo} from "../chatroom";
 import {Constants} from "../../constants";
-import { nextTick } from 'process';
 import { Message } from 'src/app/chat/chat.component';
 
 @Injectable({
@@ -19,23 +18,24 @@ export class ChatroomService {
       withCredentials: true
     });
   }
-  public getChatrooms() : Observable<any[]> {
-    return this.httpClient.get<any[]>(this._api + '/get-chatrooms', {
+  public getChatrooms() : Observable<GetChatroomsResponse> {
+    return this.httpClient.get<GetChatroomsResponse>(this._api + '/get-chatrooms', {
       withCredentials: true
     });
   }
 
-  public createChatroom(chatType: ChatType, users: string[]) : Observable<CreateChatroomResponse> {
+  public createChatroom(chatType: ChatType, users: string[], chatName: string) : Observable<CreateChatroomResponse> {
     return this.httpClient.post<CreateChatroomResponse>(this._api + '/create',
       {
         'type': chatType,
-        'usernames': users
+        'usernames': users,
+        'name': chatName
       }, {
         withCredentials: true
       });
   }
 
-  filter(chatrooms: StandardChatroomInfo[], username: string) {
+  filter(chatrooms: PrivateChatroomInfo[], username: string) {
     chatrooms.forEach(c => {
       let index = c.users.indexOf(username, 0);
       if (index > -1) {
@@ -52,4 +52,8 @@ export interface CreateChatroomResponse {
 
 export interface GetMessagesResponse {
   messages: Message[];
+}
+
+export interface GetChatroomsResponse {
+  chatrooms: ChatroomInfoBase[];
 }

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using BusinessLogic.Models;
+﻿using BusinessLogic.Models;
 using BusinessLogic.Services.UsersService;
 using Database;
 using Entities;
@@ -10,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace BusinessLogic.Queries.Chatrooms.GetChatrooms;
 
-public class GetChatroomsHandler : IRequestHandler<GetChatroomsRequest, List<object>>
+public class GetChatroomsHandler : IRequestHandler<GetChatroomsRequest, GetChatroomsResult>
 {
     private readonly IStorageService _storageService;
     private readonly IUsersService _usersService;
@@ -21,22 +20,18 @@ public class GetChatroomsHandler : IRequestHandler<GetChatroomsRequest, List<obj
         _usersService = usersService;
     }
 
-    public async Task<List<object>> Handle(GetChatroomsRequest request, CancellationToken cancellationToken)
+    public async Task<GetChatroomsResult> Handle(GetChatroomsRequest request, CancellationToken cancellationToken)
     {
-        bool IsInChat(Chatroom chatroom, User user)
+        var username = _usersService.GetUsername()!;
+        
+        bool IsInChat(Chatroom chatroom)
         {
-            return chatroom.Users.Contains(u => u.Username == user.Username);
+            return chatroom.Users.Contains(u => u.Username == username);
         }
-
-        var user = await _usersService.GetCurrentUser(cancellationToken);
-        if (user is null)
-        {
-            return new List<object>();
-        }
-
-        return await _storageService.GetChatroomsAsync(cancellationToken)
-                              .WhereAsync(chat => IsInChat(chat, user), cancellationToken)
+        
+        return new GetChatroomsResult(await _storageService.GetChatroomsAsync(cancellationToken)
+                              .WhereAsync(IsInChat, cancellationToken)
                               .SelectAsync(ChatroomInfo.Of, cancellationToken)
-                              .ToListAsync(cancellationToken);
+                              .ToListAsync(cancellationToken));
     }
 }

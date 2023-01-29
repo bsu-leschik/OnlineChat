@@ -39,7 +39,7 @@ public class PublicChatroomInfo
     public List<string> Moderators { get; set; } = null!;
     public ChatType Type { get; set; } = ChatType.Public;
     public DateTime LastMessageTime { get; set; }
-
+    public string Name { get; set; }
     public static PublicChatroomInfo Of(PublicChatroom pc)
     {
         return new PublicChatroomInfo
@@ -48,7 +48,8 @@ public class PublicChatroomInfo
                        Users = pc.Users.Select(u => u.Username).ToList(),
                        Owner = pc.Administrators.Owner.Username,
                        Moderators = pc.Administrators.Moderators.Select(u => u.Username).ToList(),
-                       LastMessageTime = pc.LastMessageTime
+                       LastMessageTime = pc.LastMessageTime,
+                       Name = pc.Name
                    };
     }
 }

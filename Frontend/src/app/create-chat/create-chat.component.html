@@ -30,6 +30,8 @@
         <input type="radio" name="p-p-s" id="public-s" [(ngModel)]="chatType" value="public" checked>
         <label for="public-s">Public</label>
       </div>
+      <input type="text" [(ngModel)]="chatName" *ngIf="chatType == 'private' && addedUsers.length > 0"
+             placeholder="Chatroom name"/>
     </div>
   </div>
   <p id="failed-to-create-chat" [hidden]="!showErrorMessage">Failed to create chat. Probably you didn't include any users or private chat with those users already exists</p>

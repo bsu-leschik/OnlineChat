@@ -1,18 +1,17 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {StorageService} from "../shared/services/storage.service";
 import {Constants} from "../constants";
 import {Router} from "@angular/router";
-import {ChatType, MinimumChatroomInfo, StandardChatroomInfo} from "../shared/chatroom";
 import {ChatroomService} from "../shared/services/chatroom.service";
+import {ChatroomInfoBase, ChatType, PrivateChatroomInfo, PublicChatroomInfo} from "../shared/chatroom";
 
 @Component({
   selector: 'app-chat-selector',
   templateUrl: './chat-selector.component.html',
   styleUrls: ['./chat-selector.component.css']
 })
-export class ChatSelectorComponent implements OnInit, OnDestroy {
-  public chatrooms: StandardChatroomInfo[] = [];
-  // private readonly intervalId;
+export class ChatSelectorComponent implements OnInit {
+  public chatrooms: ChatroomInfoBase[] = [];
 
   constructor(private storage: StorageService,
               private router: Router,
@@ -20,7 +19,6 @@ export class ChatSelectorComponent implements OnInit, OnDestroy {
     if (storage.get<string>(Constants.NicknameStorageField) === undefined) {
       router.navigate(['login']);
     }
-    // this.intervalId = setInterval(() => this.updateChatrooms(), 1000)
   }
 
   ngOnInit(): void {
@@ -29,14 +27,20 @@ export class ChatSelectorComponent implements OnInit, OnDestroy {
 
   private updateChatrooms(): void {
     this.chatroomsService.getChatrooms()
-      .subscribe(rawChatrooms => {
-        if (rawChatrooms != null) {
-          const username = this.storage.get<string>(Constants.NicknameStorageField);
-          let chatrooms = this.processRawChatrooms(rawChatrooms);
-          this.filter(chatrooms, username);
-          this.chatrooms = chatrooms;
+      .subscribe(result => {
+        if (result == null || result.chatrooms == null) {
+          alert('error');
         }
+        this.chatrooms = result!.chatrooms;
       });
+  }
+
+  getRoomName(room: ChatroomInfoBase) : string {
+    console.log('hi!' + room);
+    if (room.type == ChatType.Public) {
+      return (room as PublicChatroomInfo).name;
+    }
+    return 'Private chat with ' + this.getSecondUserForPrivateChat(room as PrivateChatroomInfo);
   }
 
   public joinChatroom(chatId: string) {
@@ -48,33 +52,19 @@ export class ChatSelectorComponent implements OnInit, OnDestroy {
     this.router.navigate(['create-chat']);
   }
 
-  public ngOnDestroy() {
-    // clearInterval(this.intervalId);
+  isPublic(room: ChatroomInfoBase) {
+    return room.type == ChatType.Public;
   }
 
-  isPublic(room: StandardChatroomInfo) {
-    return room.chatType == ChatType.Public;
-  }
 
-  processRawChatrooms(rawChatrooms : any[]) : StandardChatroomInfo[]{
-    let processedChatrooms : StandardChatroomInfo[] = [];
-    rawChatrooms.forEach(
-      chat => {
-        let temp = chat as StandardChatroomInfo;
-        //if (temp.chatType == ChatType.Private){
-          processedChatrooms.push(temp);
-        //}
+  getSecondUserForPrivateChat(room: PrivateChatroomInfo): string {
+    const username = this.storage.get<string>(Constants.NicknameStorageField);
+    for (let user of room.users) {
+      if (user != username) {
+        return user;
       }
-    );
-    return processedChatrooms;
-  }
+    }
 
-  filter(chatrooms: StandardChatroomInfo[], username: string) {
-    chatrooms.forEach(c => {
-      let index = c.users.indexOf(username, 0);
-      if (index > -1) {
-        c.users.splice(index, 1);
-      }
-    });
+    return "";
   }
 }
