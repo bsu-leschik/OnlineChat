@@ -4,6 +4,7 @@ using Constants;
 using Database;
 using Entities;
 using Entities.Chatrooms;
+using Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
@@ -24,6 +25,26 @@ public class ChatHub : Hub<IChatClientInterface>
         _storageService = storageService;
         _usersService = usersService;
         _idTracker = idTracker;
+    }
+
+    [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
+    public async Task<ConnectionResponseCode> Connect(Guid chatId)
+    {
+        var chat = await _storageService.GetChatroomAsync(c => c.Id == chatId, CancellationToken.None);
+        if (chat is null)
+        {
+            return ConnectionResponseCode.RoomDoesntExist;
+        }
+
+        var username = _usersService.GetUsername()!;
+        if (!chat.Users.Contains(u => u.Username == username))
+        {
+            return ConnectionResponseCode.AccessDenied;
+        }
+
+        await Groups.AddToGroupAsync(connectionId: Context.ConnectionId,
+            groupName: chatId.ToString());
+        return ConnectionResponseCode.SuccessfullyConnected;
     }
 
     /// <summary>
@@ -89,22 +110,20 @@ public class ChatHub : Hub<IChatClientInterface>
                       .Group(chatId.ToString())
                       .Receive(message, chatroom.Id.ToString());
         var promoting = PromoteChatToTop(chatroom);
-        
+
         await Task.WhenAll(saving, sending, promoting);
     }
 
     private async Task PromoteChatToTop(Chatroom chatroom)
     {
         List<string> connectionIds = chatroom.Users
-                                .Select(u => u.Username)
-                                .Select(n => _idTracker.GetConnectionId(n))
-                                .Where(c => c is not null)
-                                .ToList()!;
-        
+                                             .Select(u => u.Username)
+                                             .Select(n => _idTracker.GetConnectionId(n))
+                                             .Where(c => c is not null)
+                                             .ToList()!;
+
         await Clients.Clients(connectionIds).PromoteToTop(chatroom.Id.ToString());
     }
-    
-    
 }
 
 public static class ChatHubExtensions

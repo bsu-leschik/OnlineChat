@@ -2,7 +2,6 @@
 using Constants;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 
 namespace OnlineChat.Controllers;
 
@@ -21,7 +20,7 @@ public class UsersController : ControllerBase
     {
         return Ok(await _mediator.Send(new GetUsernamesQuery
                                            {
-                                               StartingWith = startingWith.IsNullOrEmpty()
+                                               StartingWith = string.IsNullOrEmpty(startingWith)
                                                    ? null
                                                    : startingWith
                                            }));
