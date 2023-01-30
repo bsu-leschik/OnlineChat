@@ -35,7 +35,6 @@ public class CreateChatroomTests
 
         var handler = new CreateChatroomHandler(
             _storageServiceMock.Object,
-            new HttpContextAccessorMock(),
             _usersServiceMock.Object);
 
         const string chatName = "some name";
@@ -76,7 +75,6 @@ public class CreateChatroomTests
                            .Returns(Task.CompletedTask);
         var handler = new CreateChatroomHandler(
             _storageServiceMock.Object,
-            new HttpContextAccessorMock(),
             _usersServiceMock.Object);
 
         var request = new CreateChatroomCommand
@@ -102,7 +100,6 @@ public class CreateChatroomTests
                           };
         var handler = new CreateChatroomHandler(
             _storageServiceMock.Object,
-            new HttpContextAccessorMock(),
             _usersServiceMock.Object);
 
         var result = await handler.Handle(request, CancellationToken.None);
@@ -133,7 +130,6 @@ public class CreateChatroomTests
 
         var handler = new CreateChatroomHandler(
             _storageServiceMock.Object,
-            new HttpContextAccessorMock(),
             _usersServiceMock.Object);
 
         var result = await handler.Handle(request, CancellationToken.None);
@@ -166,8 +162,8 @@ public class CreateChatroomTests
 
         var handler = new CreateChatroomHandler(
             _storageServiceMock.Object,
-            new HttpContextAccessorMock(),
-            _usersServiceMock.Object);
+            _usersServiceMock.Object
+        );
 
         var result = await handler.Handle(request, CancellationToken.None);
 
@@ -183,7 +179,6 @@ public class CreateChatroomTests
         var users = CreateNUsers(10).ToList();
         var handler = new CreateChatroomHandler(
             _storageServiceMock.Object,
-            new HttpContextAccessorMock(),
             _usersServiceMock.Object);
         var request = new CreateChatroomCommand
                           {

@@ -4,7 +4,6 @@ using Entities;
 using Entities.Chatrooms;
 using Extensions;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 
 namespace BusinessLogic.Commands.Chatrooms.CreateChatroom;
 
@@ -13,7 +12,7 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
     private readonly IStorageService _storageService;
     private readonly IUsersService _usersService;
 
-    public CreateChatroomHandler(IStorageService storageService, IHttpContextAccessor contextAccessor,
+    public CreateChatroomHandler(IStorageService storageService,
         IUsersService usersService)
     {
         _storageService = storageService;
