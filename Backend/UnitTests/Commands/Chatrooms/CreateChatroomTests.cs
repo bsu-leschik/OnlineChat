@@ -48,7 +48,7 @@ public class CreateChatroomTests
         Assert.True(result.Created);
         Assert.NotEqual(result.ChatId, Guid.Empty);
         Assert.NotNull(created);
-        Assert.True(ListExtensions.EqualAsSets(created.Users, users));
+        Assert.True(ListExtensions.EqualAsSets(created.Users.ToList(), users));
         Assert.Equal(created.Type, ChatType.Public);
         Assert.True(created is PublicChatroom);
         var c = created as PublicChatroom;
@@ -84,7 +84,7 @@ public class CreateChatroomTests
         var result = await handler.Handle(request, CancellationToken.None);
         Assert.True(result.Created);
         Assert.NotEqual(result.ChatId, Guid.Empty);
-        Assert.True(ListExtensions.EqualAsSets(created.Users, users));
+        Assert.True(ListExtensions.EqualAsSets(created.Users.ToList(), users));
         Assert.Equal(created.Type, ChatType.Private);
         Assert.True(created is PrivateChatroom);
     }

@@ -36,7 +36,6 @@ export class ChatSelectorComponent implements OnInit {
   }
 
   getRoomName(room: ChatroomInfoBase) : string {
-    console.log('hi!' + room);
     if (room.type == ChatType.Public) {
       return (room as PublicChatroomInfo).name;
     }

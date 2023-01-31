@@ -16,7 +16,6 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit(): void {
     this.username = this.storage.get<string>(Constants.NicknameStorageField);
-    console.log(this.username)
     this.storage.isLoggedIn = this.username != null;
   }
 

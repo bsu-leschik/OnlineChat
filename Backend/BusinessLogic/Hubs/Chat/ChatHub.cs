@@ -42,6 +42,7 @@ public class ChatHub : Hub<IChatClientInterface>
             return ConnectionResponseCode.AccessDenied;
         }
 
+        chat.UserTickets.FirstOrDefault(t => t.User.Username == username)!.LastMessageRead = chat.Messages.Count;
         await Groups.AddToGroupAsync(connectionId: Context.ConnectionId,
             groupName: chatId.ToString());
         return ConnectionResponseCode.SuccessfullyConnected;

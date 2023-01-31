@@ -32,10 +32,32 @@ public class ChatDatabase : DbContext
                     .HasBaseType<Chatroom>();
 
         modelBuilder.Entity<Chatroom>()
-                    .HasMany(c => c.Messages);
-        modelBuilder.Entity<Chatroom>()
-                    .HasMany(c => c.Users)
-                    .WithMany(u => u.Chatrooms);
+                    .HasMany(c => c.Messages)
+                    .WithOne()
+                    .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<User>()
+                    .HasMany(u => u.ChatroomTickets)
+                    .WithOne(t => t.User)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ChatroomTicket>()
+                    .HasKey(t => new
+                                     {
+                                         t.UserId, t.ChatroomId
+                                     });
+                    // .HasNoKey();
+
+        modelBuilder.Entity<ChatroomTicket>()
+                    .HasOne(u => u.User)
+                    .WithMany(u => u.ChatroomTickets)
+                    .OnDelete(DeleteBehavior.NoAction);
+        
+        modelBuilder.Entity<ChatroomTicket>()
+                    .HasOne(u => u.Chatroom)
+                    .WithMany(u => u.UserTickets)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
     }
 
     public DbSet<User> Users { get; set; } = null!;

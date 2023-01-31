@@ -58,7 +58,7 @@ public class AddUserToChatroomHandler : IRequestHandler<AddUserToChatroomCommand
         }
 
         var notifyTask = _hubContext.NotifyUserAdded(chatId: chatroom.Id.ToString(), currentUsername, cancellationToken);
-        chatroom.Users.Add(user);
+        user.Join(chatroom);
         var saveTask = _storageService.SaveChangesAsync(cancellationToken);
         await Task.WhenAll(notifyTask, saveTask);
         return AddUserToChatroomResponse.Success;
