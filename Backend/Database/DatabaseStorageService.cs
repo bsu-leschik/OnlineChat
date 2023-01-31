@@ -17,10 +17,11 @@ public class DatabaseStorageService : IStorageService
     public Task<User?> GetUserAsync(Func<User, bool> predicate, CancellationToken cancellationToken)
     {
         return _chatDatabase.Users
-                        .Include(u => u.ChatroomTickets)
-                        .ThenInclude(t => t.Chatroom)
-                        .AsAsyncEnumerable()
-                        .FirstOrDefaultAsync(predicate, cancellationToken);
+                            .Include(u => u.ChatroomTickets)
+                            .ThenInclude(t => t.Chatroom)
+                            .ThenInclude(c => c.Messages)
+                            .AsAsyncEnumerable()
+                            .FirstOrDefaultAsync(predicate, cancellationToken);
     }
 
     public Task<Chatroom?> GetChatroomAsync(Func<Chatroom, bool> predicate, CancellationToken cancellationToken)
@@ -67,18 +68,19 @@ public class DatabaseStorageService : IStorageService
     public IAsyncEnumerable<User> GetUsersAsync(CancellationToken cancellationToken)
     {
         return _chatDatabase.Users
-                        .Include(u => u.ChatroomTickets)
-                        .ThenInclude(t => t.Chatroom)
-                        .AsAsyncEnumerable();
+                            .Include(u => u.ChatroomTickets)
+                            .ThenInclude(t => t.Chatroom)
+                            .ThenInclude(c => c.Messages)
+                            .AsAsyncEnumerable();
     }
 
     private IQueryable<Chatroom> Chatrooms()
     {
         return _chatDatabase.Chatroom
-                        .Include(c => c.Users)
-                        .ThenInclude(u => u.ChatroomTickets)
-                        .Include(c => c.Messages)
-                        .Include(c => (c as PublicChatroom)!.Administrators)
-                        .ThenInclude(c => c.Moderators);
+                            .Include(c => c.UserTickets)
+                            .ThenInclude(t => t.User)
+                            .Include(c => c.Messages)
+                            .Include(c => (c as PublicChatroom)!.Administrators)
+                            .ThenInclude(c => c.Moderators);
     }
 }

@@ -70,6 +70,6 @@ public class User : IEquatable<User>
     {
         var ticket = new ChatroomTicket(this, chatroom);
         ChatroomTickets.Add(ticket);
-        chatroom.UserTickets.Add(ticket);
+        // chatroom.UserTickets.Add(ticket);
     }
 }

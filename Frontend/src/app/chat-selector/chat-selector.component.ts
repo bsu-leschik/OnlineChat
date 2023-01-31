@@ -37,9 +37,9 @@ export class ChatSelectorComponent implements OnInit {
 
   getRoomName(room: ChatroomInfoBase) : string {
     if (room.type == ChatType.Public) {
-      return (room as PublicChatroomInfo).name;
+      return (room as PublicChatroomInfo).name + ' ' + room.unreadMessages;
     }
-    return 'Private chat with ' + this.getSecondUserForPrivateChat(room as PrivateChatroomInfo);
+    return 'Private chat with ' + this.getSecondUserForPrivateChat(room as PrivateChatroomInfo) + ' ' + room.unreadMessages;
   }
 
   public joinChatroom(chatId: string) {

@@ -53,10 +53,6 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
             Chatroom chatroom = request.Type == ChatType.Public
                 ? new PublicChatroom(id, users, owner: user, name: request.Name!)
                 : new PrivateChatroom(id, users);
-            foreach (var u in users)
-            {
-                u.Join(chatroom);
-            }
             await _storageService.AddChatroomAsync(chatroom, cancellationToken);
             await _storageService.SaveChangesAsync(cancellationToken);
             return new CreateChatroomResponse(chatroom.Id);

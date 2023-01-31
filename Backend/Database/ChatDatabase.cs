@@ -20,7 +20,7 @@ public class ChatDatabase : DbContext
                     .HasOne(a => a.Owner)
                     .WithMany()
                     .OnDelete(DeleteBehavior.NoAction);
-        
+
         modelBuilder.Entity<Administrators>()
                     .HasMany(a => a.Moderators)
                     .WithMany();
@@ -42,22 +42,31 @@ public class ChatDatabase : DbContext
                     .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<ChatroomTicket>()
-                    .HasKey(t => new
-                                     {
-                                         t.UserId, t.ChatroomId
-                                     });
-                    // .HasNoKey();
+                    .HasKey(t => new { t.UserId, t.ChatroomId });
 
-        modelBuilder.Entity<ChatroomTicket>()
-                    .HasOne(u => u.User)
-                    .WithMany(u => u.ChatroomTickets)
-                    .OnDelete(DeleteBehavior.NoAction);
-        
-        modelBuilder.Entity<ChatroomTicket>()
-                    .HasOne(u => u.Chatroom)
-                    .WithMany(u => u.UserTickets)
-                    .OnDelete(DeleteBehavior.Cascade);
-                    
+        // modelBuilder.Entity<ChatroomTicket>()
+        // .HasOne(u => u.User)
+        // .WithMany(u => u.ChatroomTickets)
+        // .HasForeignKey(t => t.UserId)
+        // .OnDelete(DeleteBehavior.NoAction);
+
+        // modelBuilder.Entity<ChatroomTicket>()
+        // .HasNoKey();
+
+        // modelBuilder.Entity<ChatroomTicket>()
+        // .HasOne(u => u.Chatroom)
+        // .WithMany(c => c.UserTickets)
+        // .HasForeignKey(t => t.ChatroomId)
+        // .OnDelete(DeleteBehavior.NoAction);
+
+        // modelBuilder.Entity<Chatroom>()
+        // .HasMany(c => c.Users)
+        // .WithMany();
+
+        modelBuilder.Entity<Chatroom>()
+                    .HasMany<User>()
+                    .WithMany()
+                    .UsingEntity<ChatroomTicket>();
     }
 
     public DbSet<User> Users { get; set; } = null!;

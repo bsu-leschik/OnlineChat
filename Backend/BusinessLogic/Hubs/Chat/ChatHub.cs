@@ -42,9 +42,13 @@ public class ChatHub : Hub<IChatClientInterface>
             return ConnectionResponseCode.AccessDenied;
         }
 
-        chat.UserTickets.FirstOrDefault(t => t.User.Username == username)!.LastMessageRead = chat.Messages.Count;
-        await Groups.AddToGroupAsync(connectionId: Context.ConnectionId,
+        var user = await _usersService.GetCurrentUser(CancellationToken.None);
+        var ticket = user!.ChatroomTickets.FirstOrDefault(t => t.Chatroom == chat);
+        ticket.LastMessageRead = chat.Messages.Count;
+        var saving = _storageService.SaveChangesAsync(CancellationToken.None);
+        var adding = Groups.AddToGroupAsync(connectionId: Context.ConnectionId,
             groupName: chatId.ToString());
+        await Task.WhenAll(saving, adding);
         return ConnectionResponseCode.SuccessfullyConnected;
     }
 
