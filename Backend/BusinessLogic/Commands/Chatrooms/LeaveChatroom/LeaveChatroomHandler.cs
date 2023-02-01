@@ -56,7 +56,7 @@ public class LeaveChatroomHandler : IRequestHandler<LeaveChatroomCommand, LeaveC
         if (chat.UsersCount == 1)
         {
             user.Leave(chat);
-            await _storageService.RemoveAsync(chat, cancellationToken);
+            await _storageService.RemoveChatroomAsync(chat, cancellationToken);
             await _storageService.SaveChangesAsync(cancellationToken);
             return LeaveChatroomResponse.Success;
         }

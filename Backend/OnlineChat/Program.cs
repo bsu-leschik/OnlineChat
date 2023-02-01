@@ -39,10 +39,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher>();
-builder.Services.AddDbContextPool<Database.ChatDatabase>(options =>
+builder.Services.AddDbContext<ChatDatabase>(options =>
     options.UseSqlServer(ConnectionStrings.SqlConnectionString));
 builder.Services.AddScoped<IStorageService, DatabaseStorageService>(
-    sp => new DatabaseStorageService(sp.GetRequiredService<Database.ChatDatabase>())
+    sp => new DatabaseStorageService(sp.GetRequiredService<ChatDatabase>())
 );
 builder.Services.AddScoped<IUsersService, UsersService>();
 
@@ -78,7 +78,7 @@ app.UseCors(myPolicy);
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.CheckClaimsIfNotAuthenticated(Claims.Name, Claims.Token);
+app.CheckClaimsIfNotAuthenticated(Claims.Name, Claims.Token, Claims.UserId);
 app.MapHub<ChatHub>("/chat");
 app.MapControllers();
 

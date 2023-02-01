@@ -18,8 +18,21 @@ public static class UsersServiceExtensions
         return usersService.GetClaim(Claims.Name);
     }
 
-    public static string? GetToken(this IUsersService usersService)
+    public static Guid? GetToken(this IUsersService usersService)
     {
-        return usersService.GetClaim(Claims.Token);
+        if (Guid.TryParse(usersService.GetClaim(Claims.Token), out var token))
+        {
+            return token;
+        }
+        return null;
+    }
+
+    public static Guid? GetId(this IUsersService usersService)
+    {
+        if (usersService.TryGetClaim(Claims.UserId, out var id))
+        {
+            return Guid.Parse(id);
+        }
+        return null;
     }
 }

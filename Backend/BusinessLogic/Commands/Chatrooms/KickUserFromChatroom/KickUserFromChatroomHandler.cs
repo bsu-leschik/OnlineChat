@@ -27,7 +27,7 @@ public class KickUserFromChatroomHandler : IRequestHandler<KickUserFromChatroomC
     public async Task<KickUserFromChatroomResponse> Handle(KickUserFromChatroomCommand request,
         CancellationToken cancellationToken)
     {
-        var chatroom = await _storageService.GetChatroomAsync(c => c.Id == request.ChatId, cancellationToken);
+        var chatroom = await _storageService.GetChatroomById(request.ChatId, cancellationToken);
         if (chatroom is null || chatroom.Type == ChatType.Private)
         {
             return KickUserFromChatroomResponse.BadRequest;

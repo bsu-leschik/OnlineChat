@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Entities.Chatrooms;
 
@@ -10,9 +9,11 @@ public abstract class Chatroom : IEquatable<Chatroom>
 
     [NotMapped] public IEnumerable<User> Users => UserTickets.Select(t => t.User);
     [NotMapped] public int UsersCount => UserTickets.Count;
-    public List<Message> Messages { get; set; }
+    public int MessagesCount { get; set; }
     public ChatType Type { get; }
     public DateTime LastMessageTime { get; set; }
+    [NotMapped] public IEnumerable<Message> Messages => _messages;
+    private List<Message> _messages;
 
     public Chatroom(Guid id, ChatType type, List<User> users)
     {
@@ -23,7 +24,8 @@ public abstract class Chatroom : IEquatable<Chatroom>
         
         Id = id;
         Type = type;
-        Messages = new List<Message>();
+        MessagesCount = 0;
+        _messages = new List<Message>();
         LastMessageTime = DateTime.Now;
         UserTickets = users.Select(u => new ChatroomTicket(u, this)).ToList();
     }
@@ -37,7 +39,8 @@ public abstract class Chatroom : IEquatable<Chatroom>
 
     public void AddMessage(Message message)
     {
-        Messages.Add(message);
+        _messages.Add(message);
+        ++MessagesCount;
         LastMessageTime = DateTime.Now;
     }
 

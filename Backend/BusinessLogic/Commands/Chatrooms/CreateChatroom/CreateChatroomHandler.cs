@@ -4,6 +4,7 @@ using Entities;
 using Entities.Chatrooms;
 using Extensions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Commands.Chatrooms.CreateChatroom;
 
@@ -37,9 +38,7 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
                 return CreateChatroomResponse.Failed;
             }
 
-            var users = await _storageService.GetUsersAsync(cancellationToken)
-                                             .WhereAsync(u => request.Usernames.Contains(u.Username),
-                                                 cancellationToken)
+            var users = await _storageService.GetUsersByUsername(request.Usernames, cancellationToken)
                                              .ToListAsync(cancellationToken);
 
             if (users.Count == 2
@@ -66,6 +65,5 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
     private static bool IsDuplicatePrivateChatroom(User user, User second)
     {
         return user.Chatrooms.OfType<PrivateChatroom>().Contains(c => c.Users.Contains(second));
-        // return user.PrivateChatrooms.Contains(c => c.Users.Contains(second));
     }
 }

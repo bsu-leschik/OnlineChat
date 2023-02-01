@@ -21,7 +21,8 @@ public class GetMessagesHandler : IRequestHandler<GetMessagesQuery, GetMessagesR
 
     public async Task<GetMessagesResponse> Handle(GetMessagesQuery request, CancellationToken cancellationToken)
     {
-        var chatroom = await _storageService.GetChatroomAsync(c => c.Id == request.ChatId, cancellationToken);
+        var chatroom = await _storageService.GetChatroomWithMessages(request.ChatId, cancellationToken,
+            offset: request.Offset, count: request.Count);
         if (chatroom is null)
         {
             return EmptyResponse;
@@ -35,7 +36,7 @@ public class GetMessagesHandler : IRequestHandler<GetMessagesQuery, GetMessagesR
         }
 
         return new GetMessagesResponse(
-            messages: chatroom.Messages
+            messages: chatroom.Messages.ToList()
         );
     }
 }

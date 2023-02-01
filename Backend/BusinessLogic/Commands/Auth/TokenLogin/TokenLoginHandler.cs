@@ -1,5 +1,4 @@
 ﻿using BusinessLogic.Services.UsersService;
-using Database;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -11,7 +10,7 @@ public class TokenLoginHandler : IRequestHandler<TokenLoginCommand, TokenLoginRe
     private readonly IHttpContextAccessor _contextAccessor;
     private readonly IUsersService _usersService;
 
-    public TokenLoginHandler(IStorageService storageService, IHttpContextAccessor contextAccessor, IUsersService usersService)
+    public TokenLoginHandler(IHttpContextAccessor contextAccessor, IUsersService usersService)
     {
         _contextAccessor = contextAccessor;
         _usersService = usersService;

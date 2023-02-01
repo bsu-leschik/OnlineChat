@@ -15,22 +15,18 @@ public class AddUserToChatroomHandler : IRequestHandler<AddUserToChatroomCommand
     private readonly IUsersService _usersService;
     private readonly IHubContext<ChatHub> _hubContext;
 
-    public AddUserToChatroomHandler(IStorageService storageService, IUsersService usersService, IHttpContextAccessor accessor, IHubContext<ChatHub> hubContext)
+    public AddUserToChatroomHandler(IStorageService storageService, IUsersService usersService,
+        IHttpContextAccessor accessor, IHubContext<ChatHub> hubContext)
     {
         _storageService = storageService;
         _usersService = usersService;
         _hubContext = hubContext;
     }
 
-    public async Task<AddUserToChatroomResponse> Handle(AddUserToChatroomCommand request, CancellationToken cancellationToken)
+    public async Task<AddUserToChatroomResponse> Handle(AddUserToChatroomCommand request,
+        CancellationToken cancellationToken)
     {
-        var (currentUsername, currentToken) = await _usersService.DecomposeCurrentPrincipal(cancellationToken);
-        if (currentUsername is null || currentToken is null)
-        {
-            return AddUserToChatroomResponse.AccessDenied;
-        }
-        
-        var chatroom = await _storageService.GetChatroomAsync(c => c.Id == request.ChatId, cancellationToken);
+        var chatroom = await _storageService.GetChatroomById(request.ChatId, cancellationToken);
         if (chatroom is null)
         {
             return AddUserToChatroomResponse.ChatroomDoesntExist;
@@ -40,7 +36,9 @@ public class AddUserToChatroomHandler : IRequestHandler<AddUserToChatroomCommand
         {
             return AddUserToChatroomResponse.ChatIsPrivate;
         }
-        
+
+        var currentUsername = _usersService.GetUsername()!;
+        var currentToken = _usersService.GetToken()!;
         if (!chatroom.Users.Contains(u => u.Username == currentUsername && u.Token == currentToken))
         {
             return AddUserToChatroomResponse.AccessDenied;
@@ -51,13 +49,14 @@ public class AddUserToChatroomHandler : IRequestHandler<AddUserToChatroomCommand
             return AddUserToChatroomResponse.UserIsAlreadyInTheChat;
         }
 
-        var user = await _storageService.GetUserAsync(u => u.Username == request.Username, cancellationToken);
+        var user = await _storageService.GetUserByUsername(request.Username, cancellationToken);
         if (user is null)
         {
             return AddUserToChatroomResponse.UserDoesntExist;
         }
 
-        var notifyTask = _hubContext.NotifyUserAdded(chatId: chatroom.Id.ToString(), currentUsername, cancellationToken);
+        var notifyTask =
+            _hubContext.NotifyUserAdded(chatId: chatroom.Id.ToString(), currentUsername, cancellationToken);
         user.Join(chatroom);
         var saveTask = _storageService.SaveChangesAsync(cancellationToken);
         await Task.WhenAll(notifyTask, saveTask);

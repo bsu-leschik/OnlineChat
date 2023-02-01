@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-using Constants;
-using Database;
+﻿using Database;
 using Entities;
 using Microsoft.AspNetCore.Http;
 
@@ -24,21 +22,21 @@ public class UsersService : IUsersService
         {
             return _user;
         }
-        var (username, token) = Decompose(_accessor.HttpContext!.User);
-        if (username is null || token is null)
+        var id = this.GetId();
+        if (id is null)
         {
             return null;
         }
-        var user = await _storageService.GetUserAsync(u => u.Username == username, cancellationToken);
-        _user = user?.Token == token
-            ? user
-            : null;
-        return _user;
-    }
 
-    public Task<(string? Username, Guid? Token)> DecomposeCurrentPrincipal(CancellationToken cancellationToken)
-    {
-        return Task.FromResult(Decompose(_accessor.HttpContext!.User));
+        var user = await _storageService.GetUserById(id.Value, cancellationToken);
+        if (user is null)
+        {
+            return null;
+        }
+
+        return user.Token == this.GetToken()
+            ? (_user = user)
+            : null;
     }
 
     public bool TryGetClaim(string claimName, out string result)
@@ -47,17 +45,5 @@ public class UsersService : IUsersService
         var claim = claims.FirstOrDefault(c => c.Type == claimName);
         result = claim?.Value!;
         return claim is not null;
-    }
-
-    private static (string? Username, Guid? Token) Decompose(ClaimsPrincipal principal)
-    {
-        string? username = principal.FindFirstValue(Claims.Name);
-        Guid? token = null;
-        string? guid = principal.FindFirstValue(Claims.Token);
-        if (Guid.TryParse(guid, out var id))
-        {
-            token = id;
-        }
-        return (username, token);
     }
 }

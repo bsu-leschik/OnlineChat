@@ -26,7 +26,7 @@ public class LoginHandler : IRequestHandler<LoginCommand, LoginResponse>
 
     public async Task<LoginResponse> Handle(LoginCommand command, CancellationToken cancellationToken)
     {
-        var user = await _storageService.GetUserAsync(u => u.Username == command.Username, cancellationToken);
+        var user = await _storageService.GetUserByUsername(command.Username, cancellationToken);
         if (user is null)
         {
             return LoginResponse.WrongUsername;
@@ -43,7 +43,8 @@ public class LoginHandler : IRequestHandler<LoginCommand, LoginResponse>
 
         var claims = List.Of(
             new Claim(Claims.Name, user.Username),
-            new Claim(Claims.Token, user.Token.ToString())
+            new Claim(Claims.Token, user.Token.ToString()),
+            new Claim(Claims.UserId, user.Id.ToString())
         );
         var identity = new ClaimsIdentity(claims, authenticationType: Schemes.DefaultCookieScheme);
         var principal = new ClaimsPrincipal(identity);

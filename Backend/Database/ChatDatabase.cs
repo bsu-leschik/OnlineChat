@@ -1,6 +1,8 @@
 ﻿using Entities;
 using Entities.Chatrooms;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Database;
 
@@ -44,32 +46,27 @@ public class ChatDatabase : DbContext
         modelBuilder.Entity<ChatroomTicket>()
                     .HasKey(t => new { t.UserId, t.ChatroomId });
 
-        // modelBuilder.Entity<ChatroomTicket>()
-        // .HasOne(u => u.User)
-        // .WithMany(u => u.ChatroomTickets)
-        // .HasForeignKey(t => t.UserId)
-        // .OnDelete(DeleteBehavior.NoAction);
-
-        // modelBuilder.Entity<ChatroomTicket>()
-        // .HasNoKey();
-
-        // modelBuilder.Entity<ChatroomTicket>()
-        // .HasOne(u => u.Chatroom)
-        // .WithMany(c => c.UserTickets)
-        // .HasForeignKey(t => t.ChatroomId)
-        // .OnDelete(DeleteBehavior.NoAction);
-
-        // modelBuilder.Entity<Chatroom>()
-        // .HasMany(c => c.Users)
-        // .WithMany();
-
         modelBuilder.Entity<Chatroom>()
                     .HasMany<User>()
                     .WithMany()
                     .UsingEntity<ChatroomTicket>();
+
+        modelBuilder.Entity<PublicChatroom>()
+                    .Navigation(c => c.Administrators)
+                    .AutoInclude();
+
+        modelBuilder.Entity<Administrators>()
+                    .Navigation(a => a.Owner)
+                    .AutoInclude();
+        modelBuilder.Entity<Administrators>()
+                    .Navigation(a => a.Moderators)
+                    .AutoInclude();
     }
 
     public DbSet<User> Users { get; set; } = null!;
 
     public DbSet<Chatroom> Chatroom { get; set; } = null!;
+    public DbSet<ChatroomTicket> ChatroomTicket { get; set; } = null!;
+    public DbSet<Administrators> Administrators { get; set; } = null!;
+    public DbSet<Message> Messages { get; set; }
 }

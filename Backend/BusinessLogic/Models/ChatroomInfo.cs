@@ -40,7 +40,7 @@ public class PrivateChatroomInfo : ChatroomInfoBase
             id: pc.Id,
             users: pc.Users.Select(u => u.Username).ToList(),
             lastMessageTime: pc.LastMessageTime,
-            unreadMessages: pc.Messages.Count - messagesRead
+            unreadMessages: pc.MessagesCount - messagesRead
         );
     }
 
@@ -58,9 +58,9 @@ public class PublicChatroomInfo : ChatroomInfoBase
     {
         return new PublicChatroomInfo(
             id: pc.Id,
-            users: pc.Users.Select(u => u.Username).ToList(),
+            users: Enumerable.Empty<string>().ToList(),
             lastMessageTime: pc.LastMessageTime,
-            unreadMessages: pc.Messages.Count - messagesRead,
+            unreadMessages: pc.MessagesCount - messagesRead,
             owner: pc.Administrators.Owner.Username,
             moderators: pc.Administrators.Moderators.Select(m => m.Username).ToList(),
             name: pc.Name);

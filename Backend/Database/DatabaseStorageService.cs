@@ -1,6 +1,5 @@
 ﻿using Entities;
 using Entities.Chatrooms;
-using Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Database;
@@ -14,73 +13,114 @@ public class DatabaseStorageService : IStorageService
         _chatDatabase = chatDatabase;
     }
 
-    public Task<User?> GetUserAsync(Func<User, bool> predicate, CancellationToken cancellationToken)
+    public Task<User?> GetUserByUsername(string username, CancellationToken cancellationToken)
     {
         return _chatDatabase.Users
-                            .Include(u => u.ChatroomTickets)
-                            .ThenInclude(t => t.Chatroom)
-                            .ThenInclude(c => c.Messages)
-                            .AsAsyncEnumerable()
-                            .FirstOrDefaultAsync(predicate, cancellationToken);
+                            .Where(u => u.Username == username)
+                            .IncludeChatrooms()
+                            .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public Task<Chatroom?> GetChatroomAsync(Func<Chatroom, bool> predicate, CancellationToken cancellationToken)
+    public Task<User?> GetUserById(Guid id, CancellationToken cancellationToken)
     {
-        return Chatrooms()
-               .AsAsyncEnumerable()
-               .FirstOrDefaultAsync(predicate, cancellationToken);
+        return _chatDatabase.Users.Where(u => u.Id == id)
+                            .IncludeChatrooms()
+                            .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task AddChatroomAsync(Chatroom chatroom, CancellationToken cancellationToken)
+    public IQueryable<User> GetUsersById(IEnumerable<Guid> ids, CancellationToken cancellationToken)
     {
-        await _chatDatabase.AddAsync(chatroom, cancellationToken);
+        return _chatDatabase.Users
+                            .Where(u => ids.Any(s => s == u.Id));
+    }
+
+    public IQueryable<User> GetUsersByUsername(IEnumerable<string> names, CancellationToken cancellationToken)
+    {
+        return _chatDatabase.Users
+                            .Where(u => names.Any(n => n == u.Username))
+                            .IncludeChatrooms();
+    }
+
+    public Task<Chatroom?> GetChatroomById(Guid id, CancellationToken cancellationToken)
+    {
+        return _chatDatabase.Chatroom
+                            .Where(c => c.Id == id)
+                            .IncludeUsers()
+                            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public IQueryable<ChatroomTicket> GetUsersChatroomTickets(Guid userId, CancellationToken cancellationToken)
+    {
+        return _chatDatabase.ChatroomTicket
+                            .Where(c => c.UserId == userId)
+                            .Include(t => t.Chatroom)
+                            .ThenInclude(c => c.UserTickets)
+                            .ThenInclude(t => t.User);
+    }
+
+    public IQueryable<ChatroomTicket> GetChatroomUsers(Guid chatId, CancellationToken cancellationToken)
+    {
+        return _chatDatabase.ChatroomTicket
+                            .Where(t => t.ChatroomId == chatId)
+                            .Include(t => t.User);
+    }
+
+    public Task<Chatroom?> GetChatroomWithMessages(Guid chatId, CancellationToken cancellationToken, int offset = 0,
+        int count = 100)
+    {
+        return _chatDatabase.Chatroom
+                            .Where(c => c.Id == chatId)
+                            .Include(c => c.Messages.Skip(offset).Take(count))
+                            .IncludeUsers()
+                            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public IQueryable<User> GetUsers()
+    {
+        return _chatDatabase.Users;
+    }
+
+    public async Task AddChatroomAsync(Chatroom chatroom, CancellationToken cancellationToken = default)
+    {
+        await _chatDatabase.Chatroom.AddAsync(chatroom, cancellationToken);
         await _chatDatabase.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task AddUserAsync(User user, CancellationToken cancellationToken)
+    public async Task AddUserAsync(User user, CancellationToken cancellationToken = default)
     {
         await _chatDatabase.Users.AddAsync(user, cancellationToken);
         await _chatDatabase.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task RemoveAsync(User user, CancellationToken cancellationToken)
+    public Task RemoveUserAsync(User user, CancellationToken cancellationToken = default)
     {
         _chatDatabase.Users.Remove(user);
-        await _chatDatabase.SaveChangesAsync(cancellationToken);
+        return SaveChangesAsync(cancellationToken);
     }
 
-    public async Task RemoveAsync(Chatroom chatroom, CancellationToken cancellationToken)
+    public Task RemoveChatroomAsync(Chatroom chatroom, CancellationToken cancellationToken = default)
     {
-        _chatDatabase.Remove(chatroom);
-        await _chatDatabase.SaveChangesAsync(cancellationToken);
+        _chatDatabase.Chatroom.Remove(chatroom);
+        return SaveChangesAsync(cancellationToken);
     }
 
-    public async Task SaveChangesAsync(CancellationToken cancellationToken)
+    public Task SaveChangesAsync(CancellationToken cancellationToken)
     {
-        await _chatDatabase.SaveChangesAsync(cancellationToken);
+        return _chatDatabase.SaveChangesAsync(cancellationToken);
+    }
+}
+
+file static class Extensions
+{
+    public static IQueryable<Chatroom> IncludeUsers(this IQueryable<Chatroom> q)
+    {
+        return q.Include(c => c.UserTickets)
+                .ThenInclude(t => t.User);
     }
 
-    public IAsyncEnumerable<Chatroom> GetChatroomsAsync(CancellationToken cancellationToken)
+    public static IQueryable<User> IncludeChatrooms(this IQueryable<User> q)
     {
-        return Chatrooms().AsAsyncEnumerable();
-    }
-
-    public IAsyncEnumerable<User> GetUsersAsync(CancellationToken cancellationToken)
-    {
-        return _chatDatabase.Users
-                            .Include(u => u.ChatroomTickets)
-                            .ThenInclude(t => t.Chatroom)
-                            .ThenInclude(c => c.Messages)
-                            .AsAsyncEnumerable();
-    }
-
-    private IQueryable<Chatroom> Chatrooms()
-    {
-        return _chatDatabase.Chatroom
-                            .Include(c => c.UserTickets)
-                            .ThenInclude(t => t.User)
-                            .Include(c => c.Messages)
-                            .Include(c => (c as PublicChatroom)!.Administrators)
-                            .ThenInclude(c => c.Moderators);
+        return q.Include(u => u.ChatroomTickets)
+                .ThenInclude(t => t.Chatroom);
     }
 }
