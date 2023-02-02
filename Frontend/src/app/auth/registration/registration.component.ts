@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Router} from "@angular/router";
-import {Constants} from "../constants";
-import {AuthenticationService} from "../shared/services/authentication.service";
+import {Constants} from "../../constants";
+import {AuthenticationService} from "../../shared/services/authentication.service";
 
 @Component({
   selector: 'app-registration',
@@ -32,7 +32,7 @@ export class RegistrationComponent implements OnInit {
         return;
       }
       this.authService.login(this.username, this.password).subscribe(result => {
-        this.router.navigate(['chat-selector']);
+        this.router.navigate(['chats']);
       });
     })
   }

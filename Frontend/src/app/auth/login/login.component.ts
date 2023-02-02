@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import {StorageService} from "../shared/services/storage.service";
+import {StorageService} from "../../shared/services/storage.service";
 import {Router} from "@angular/router";
-import {Constants} from "../constants";
-import {AuthenticationService, LoginResponse, TokenLoginResponseCode} from "../shared/services/authentication.service";
+import {Constants} from "../../constants";
+import {AuthenticationService, LoginResponse, TokenLoginResponseCode} from "../../shared/services/authentication.service";
 
 @Component({
   selector: 'app-login',
@@ -71,6 +71,6 @@ export class LoginComponent implements OnInit {
   private onLoggedIn(username: string) {
     this.storage.isLoggedIn = true;
     this.storage.set(Constants.NicknameStorageField, username);
-    this.router.navigate(['select-chat']);
+    this.router.navigate(['chats']);
   }
 }

@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
-import {StorageService} from "../shared/services/storage.service";
-import {Constants} from "../constants";
+import {StorageService} from "../../shared/services/storage.service";
+import {Constants} from "../../constants";
 import {Router} from "@angular/router";
-import {ChatroomService} from "../shared/services/chatroom.service";
-import {ChatroomInfoBase, ChatType, PrivateChatroomInfo, PublicChatroomInfo} from "../shared/chatroom";
+import {ChatroomService} from "../../shared/services/chatroom.service";
+import {ChatroomInfoBase, ChatType, PrivateChatroomInfo, PublicChatroomInfo} from "../../shared/chatroom";
 
 @Component({
   selector: 'app-chat-selector',
@@ -45,11 +45,11 @@ export class ChatSelectorComponent implements OnInit {
 
   public joinChatroom(chatId: string) {
     this.storage.set(Constants.ChatIdStorageField, chatId);
-    this.router.navigate(['chat']);
+    this.router.navigate(['chats/chat']);
   }
 
   public createChatroom() {
-    this.router.navigate(['create-chat']);
+    this.router.navigate(['chats/create']);
   }
 
   isPublic(room: ChatroomInfoBase) {

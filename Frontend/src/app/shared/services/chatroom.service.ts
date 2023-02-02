@@ -3,7 +3,7 @@ import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {ChatroomInfoBase, ChatType, PrivateChatroomInfo} from "../chatroom";
 import {Constants} from "../../constants";
-import { Message } from 'src/app/chat/chat.component';
+import { Message } from 'src/app/chats/chat/chat.component';
 
 @Injectable({
   providedIn: 'root'
