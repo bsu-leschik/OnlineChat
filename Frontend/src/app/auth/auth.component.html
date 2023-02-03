@@ -1,2 +1,13 @@
-<p>auth works!</p>
+
+
+<nav>
+  <ul>
+    <li><a routerLink="/auth/login">Login</a></li>
+    <li><a routerLink="/auth/register">Register</a></li>
+  </ul>
+</nav>
+<!-- <div id="not-authorized-header" *ngIf="!this.storage.isLoggedIn">
+    <input type="button" (click)="this.router.navigate(['login']);" value="Login" class="reg-header-button">
+    <input type="button" (click)="this.router.navigate(['registration']);" value="Register" class="reg-header-button">
+  </div> -->
 <router-outlet></router-outlet>

@@ -22,7 +22,6 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.tryAutoLogin();
   }
 
   async onConnectClicked(): Promise<void> {
@@ -54,18 +53,6 @@ export class LoginComponent implements OnInit {
 
   showErrorMessage(message: string) : void {
     this.errorMessage = message;
-  }
-
-  private tryAutoLogin() {
-    this.authService
-      .tryAutoLogin()
-      .subscribe(result => {
-        if (result.responseCode == TokenLoginResponseCode.Success) {
-          this.onLoggedIn(result.username);
-          return;
-        }
-        console.log(result)
-      })
   }
 
   private onLoggedIn(username: string) {

@@ -4,15 +4,15 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HttpClientModule } from "@angular/common/http";
-import { HeaderComponent } from './header/header.component';
 import {FormsModule} from "@angular/forms";
 import { AuthModule } from './auth/auth.module';
 import { ChatsModule } from './chats/chats.module';
+import { ChatsGuard } from './shared/Guards/chats-guard.service';
+import { AuthGuard } from './shared/Guards/auth-guard.service';
 
 @NgModule({
   declarations: [
-    AppComponent,
-    HeaderComponent
+    AppComponent
   ],
     imports: [
         BrowserModule,
@@ -22,7 +22,7 @@ import { ChatsModule } from './chats/chats.module';
         AuthModule,
         ChatsModule
     ],
-  providers: [HttpClientModule],
+  providers: [HttpClientModule, ChatsGuard, AuthGuard],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

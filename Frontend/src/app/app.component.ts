@@ -15,21 +15,10 @@ export class AppComponent {
   title = 'Frontend';
 
   constructor(private authService: AuthenticationService,
-              private storage: StorageService,
               private router: Router) {
   }
 
   ngOnInit() {
-    this.authService.tryAutoLogin().subscribe(
-      result => {
-        if (result.responseCode != TokenLoginResponseCode.Success) {
-          this.router.navigate(['login']);
-          return;
-        }
+   }
 
-        this.storage.isLoggedIn = true;
-        this.storage.set(Constants.NicknameStorageField, result.username);
-      }
-    );
-  }
 }
