@@ -1,7 +1,5 @@
 import {Component} from '@angular/core';
 import {AuthenticationService, TokenLoginResponseCode} from "./shared/services/authentication.service";
-import {StorageService} from "./shared/services/storage.service";
-import {Constants} from "./constants";
 import {Router} from "@angular/router";
 
 @Component({

@@ -7,8 +7,8 @@ import { HttpClientModule } from "@angular/common/http";
 import {FormsModule} from "@angular/forms";
 import { AuthModule } from './auth/auth.module';
 import { ChatsModule } from './chats/chats.module';
-import { ChatsGuard } from './shared/Guards/chats-guard.service';
-import { AuthGuard } from './shared/Guards/auth-guard.service';
+import { ChatsGuard } from './shared/guards/chats-guard.service';
+import { AuthGuard } from './shared/guards/auth-guard.service';
 
 @NgModule({
   declarations: [

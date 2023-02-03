@@ -3,7 +3,7 @@ import {HubConnection, HubConnectionBuilder} from '@microsoft/signalr';
 import {StorageService} from "../../shared/services/storage.service";
 import {Router} from "@angular/router";
 import {Constants} from "../../constants";
-import {ChatroomService} from "../../shared/services/chatroom.service";
+import {ChatroomService} from "../shared/services/chatroom.service";
 
 @Component({
   selector: 'app-chat',

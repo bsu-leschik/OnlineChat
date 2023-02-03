@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {StorageService} from "../../shared/services/storage.service";
 import {Constants} from "../../constants";
 import {Router} from "@angular/router";
-import {ChatroomService} from "../../shared/services/chatroom.service";
+import {ChatroomService} from "../shared/services/chatroom.service";
 import {ChatroomInfoBase, ChatType, PrivateChatroomInfo, PublicChatroomInfo} from "../../shared/chatroom";
 import { AuthenticationService } from 'src/app/shared/services/authentication.service';
 

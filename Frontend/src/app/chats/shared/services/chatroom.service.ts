@@ -1,13 +1,11 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {ChatroomInfoBase, ChatType, PrivateChatroomInfo} from "../chatroom";
-import {Constants} from "../../constants";
+import {ChatroomInfoBase, ChatType, PrivateChatroomInfo} from "../../../shared/chatroom";
+import {Constants} from "../../../constants";
 import { Message } from 'src/app/chats/chat/chat.component';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class ChatroomService {
 
   private readonly _api = Constants.ApiUrl + '/chatrooms';
