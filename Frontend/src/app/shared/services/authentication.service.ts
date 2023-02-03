@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Constants} from "../../constants";
-import {Observable} from "rxjs";
+import {Observable, Subscription} from "rxjs";
+import { StorageService } from './storage.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,7 @@ import {Observable} from "rxjs";
 export class AuthenticationService {
 
   private readonly _api = Constants.ApiUrl + '/authentication';
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient, private storage : StorageService) {}
 
   public login(username: string, password: string) : Observable<LoginResponse> {
     return this.httpClient.post<LoginResponse>(this._api + '/login', {
@@ -21,17 +22,35 @@ export class AuthenticationService {
     });
   }
 
-  public logout() : Observable<any> {
-    return this.httpClient.post(this._api + '/logout', {},{
+  public logout() {
+    this.httpClient.post(Constants.ServerUrl + '/api/authentication/logout', {},{
       withCredentials: true
+    }).subscribe(result => {
+      this.storage.isLoggedIn = false;
     });
   }
 
-  public tryAutoLogin() : Observable<TokenLoginResponse> {
+  public sendAutoLogin() : Observable<TokenLoginResponse> {
     return this.httpClient.get<TokenLoginResponse>(this._api + '/auto-login', {
       withCredentials: true
     });
   }
+  public tryAutoLogin(): Promise<boolean>{
+    return new Promise((resolve, reject) => {
+      this.sendAutoLogin()
+      .subscribe(result => {
+        if (result.responseCode == TokenLoginResponseCode.Success) {
+          this.storage.isLoggedIn = true;
+          this.storage.set(Constants.NicknameStorageField, result.username);
+          resolve(true)
+        }
+        else{
+          console.log(result)
+          resolve(false);
+        }
+      })
+    }) 
+    }
 }
 
 export enum LoginResponse {

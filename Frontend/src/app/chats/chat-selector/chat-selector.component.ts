@@ -1,9 +1,10 @@
 import {Component, OnInit} from '@angular/core';
-import {StorageService} from "../shared/services/storage.service";
-import {Constants} from "../constants";
+import {StorageService} from "../../shared/services/storage.service";
+import {Constants} from "../../constants";
 import {Router} from "@angular/router";
 import {ChatroomService} from "../shared/services/chatroom.service";
-import {ChatroomInfoBase, ChatType, PrivateChatroomInfo, PublicChatroomInfo} from "../shared/chatroom";
+import {ChatroomInfoBase, ChatType, PrivateChatroomInfo, PublicChatroomInfo} from "../../shared/chatroom";
+import { AuthenticationService } from 'src/app/shared/services/authentication.service';
 
 @Component({
   selector: 'app-chat-selector',
@@ -15,7 +16,8 @@ export class ChatSelectorComponent implements OnInit {
 
   constructor(private storage: StorageService,
               private router: Router,
-              private chatroomsService: ChatroomService) {
+              private chatroomsService: ChatroomService,
+              public auth: AuthenticationService) {
     if (storage.get<string>(Constants.NicknameStorageField) === undefined) {
       router.navigate(['login']);
     }
@@ -45,11 +47,11 @@ export class ChatSelectorComponent implements OnInit {
 
   public joinChatroom(chatId: string) {
     this.storage.set(Constants.ChatIdStorageField, chatId);
-    this.router.navigate(['chat']);
+    this.router.navigate(['chats/chat']);
   }
 
   public createChatroom() {
-    this.router.navigate(['create-chat']);
+    this.router.navigate(['chats/create']);
   }
 
   isPublic(room: ChatroomInfoBase) {

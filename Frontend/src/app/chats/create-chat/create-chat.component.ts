@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {UsersCommunicatorService} from "../shared/services/users-communicator.service";
-import {StorageService} from "../shared/services/storage.service";
-import {Constants} from "../constants";
+import {StorageService} from "../../shared/services/storage.service";
+import {Constants} from "../../constants";
 import {ChatroomService} from "../shared/services/chatroom.service";
-import {ChatType} from "../shared/chatroom";
+import {ChatType} from "../../shared/chatroom";
 import {Router} from "@angular/router";
 
 @Component({
