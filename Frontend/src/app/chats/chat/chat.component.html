@@ -1,6 +1,6 @@
 <!--<input type="button" value="Leave" class="button" id="leave-button" (click)="onLeaveClicked()"/>-->
 <div id="messenger">
-  <p id="welcome-text">Welcome, </p>
+  <p id="welcome-text">Welcome, {{this.userName}} !</p>
   <input type="text" id="message-input" placeholder="Type your message" (keydown.enter)="onSendClicked()"/>
   <p id="error-text" hidden=true>Failed to send the message!</p>
   <input type="button" id="send-message-button" accesskey="enter" value="Send" (click)="onSendClicked()"/>
