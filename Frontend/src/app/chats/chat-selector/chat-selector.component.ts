@@ -18,9 +18,7 @@ export class ChatSelectorComponent implements OnInit {
               private router: Router,
               private chatroomsService: ChatroomService,
               public auth: AuthenticationService) {
-    if (storage.get<string>(Constants.NicknameStorageField) === undefined) {
-      router.navigate(['login']);
-    }
+
   }
 
   ngOnInit(): void {
@@ -38,7 +36,7 @@ export class ChatSelectorComponent implements OnInit {
   }
 
   getRoomName(room: ChatroomInfoBase) : string {
-    console.log('hi!' + room);
+    //console.log('hi!' + room);
     if (room.type == ChatType.Public) {
       return (room as PublicChatroomInfo).name;
     }
