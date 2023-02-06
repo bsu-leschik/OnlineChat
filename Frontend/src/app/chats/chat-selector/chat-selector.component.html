@@ -6,6 +6,6 @@
     <p class="room-info">{{ getRoomName(room) }}</p>
     <input type="button" value="Join" id="join-button" class="button" (click)="joinChatroom(room.id)"/>
   </div>
-  <input type="button" value="+" id="create-chatroom-button" (click)="createChatroom()">
+  <input type="button" value="+" id="create-chatroom-button" routerLink="create">
   <router-outlet></router-outlet>
 </div>
