@@ -1,9 +1,9 @@
 import {Component, HostListener, OnDestroy, OnInit} from '@angular/core';
-import {HubConnection, HubConnectionBuilder} from '@microsoft/signalr';
 import {StorageService} from "../../shared/services/storage.service";
 import {Router} from "@angular/router";
 import {Constants} from "../../constants";
 import {ChatroomService} from "../shared/services/chatroom.service";
+import { HubService } from '../shared/services/hub.service';
 
 @Component({
   selector: 'app-chat',
@@ -12,37 +12,33 @@ import {ChatroomService} from "../shared/services/chatroom.service";
 })
 
 export class ChatComponent implements OnInit, OnDestroy {
-  private readonly nickname: string;
   private readonly chatId: string;
-  private hubConnection: HubConnection;
   public messages: Message[] = [];
 
   constructor(private storage: StorageService,
               private router: Router,
-              private chatService: ChatroomService) {
-    // console.log('init');
-    this.nickname = this.storage.get<string>('nickname');
+              private chatService: ChatroomService,
+              private hubService: HubService) {
     this.chatId = this.storage.get<string>('chatId');
-    if (this.nickname == undefined || this.chatId == undefined) {
-      this.router.navigate(['login']);
-    }
-    this.hubConnection = new HubConnectionBuilder()
-      .withUrl(Constants.ChathubUrl)
-      .build();
-    this.hubConnection.on('Receive', message => {
+    this.hubService.hubConnection.on('Receive', message => {
       this.messages.push(message);
     });
   }
 
   ngOnDestroy(): void {
-    this.hubConnection.stop();
+    this.hubService.hubConnection.stop();
   }
+  
   ngOnInit(): void {
+    if(this.chatId == undefined){
+      this.router.navigate(['../chats']);
+      return;
+    }
     this.chatService.getMessages(this.chatId).subscribe(result => {
       this.messages = result.messages;
     });
-    this.hubConnection.start().then(async () => {
-      const response = await this.hubConnection.invoke('Connect', this.chatId) as ConnectionResponseCode;
+    this.hubService.hubConnection.start().then(async () => {
+      const response = await this.hubService.hubConnection.invoke('Connect', this.chatId) as ConnectionResponseCode;
       if (response != ConnectionResponseCode.SuccessfullyConnected) {
         ChatComponent.switchResponseCode(response);
         return;
@@ -63,7 +59,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       return;
     }
     input.value = '';
-    let value: number = await this.hubConnection.invoke('Send', this.chatId, message)
+    let value: number = await this.hubService.hubConnection.invoke('Send', this.chatId, message)
       .then()
       .catch(() => alert('Failed to send message'));
 
@@ -76,12 +72,12 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   @HostListener('window:popstate', ['$event'])
   onPopState() {
-    this.hubConnection.stop();
+    this.hubService.hubConnection.stop();
   }
 
   async onLeaveClicked() {
-    await this.hubConnection.stop();
-    this.router.navigate(['select-chat']);
+    await this.hubService.hubConnection.stop();
+    this.router.navigate(['chats']);
   }
   private static showErrorMessage(message: string) {
     const text = document.getElementById('error-text') as HTMLParagraphElement;
