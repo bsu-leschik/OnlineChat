@@ -12,7 +12,14 @@ import { HubService } from '../shared/services/hub.service';
 })
 
 export class ChatComponent implements OnInit, OnDestroy {
+  private backendSender: string = 'Receive';
+  private backendGetter: string = 'Connect';
+
   private readonly chatId: string;
+
+  public sendMessageError = true;
+  public userName: string = '';
+
   public messages: Message[] = [];
 
   constructor(private storage: StorageService,
@@ -20,13 +27,14 @@ export class ChatComponent implements OnInit, OnDestroy {
               private chatService: ChatroomService,
               private hubService: HubService) {
     this.chatId = this.storage.get<string>('chatId');
-    this.hubService.hubConnection.on('Receive', message => {
+    this.userName = this.storage.get<string>(Constants.NicknameStorageField);
+    this.hubService.addOnHandler(this.backendSender, message => {
       this.messages.push(message);
     });
   }
 
   ngOnDestroy(): void {
-    this.hubService.hubConnection.stop();
+    this.hubService.breakConnection(this.backendSender);
   }
   
   ngOnInit(): void {
@@ -37,19 +45,23 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.chatService.getMessages(this.chatId).subscribe(result => {
       this.messages = result.messages;
     });
-    this.hubService.hubConnection.start().then(async () => {
-      const response = await this.hubService.hubConnection.invoke('Connect', this.chatId) as ConnectionResponseCode;
-      if (response != ConnectionResponseCode.SuccessfullyConnected) {
-        ChatComponent.switchResponseCode(response);
-        return;
-      }
-      let welcomeText: HTMLParagraphElement = document.getElementById('welcome-text') as HTMLParagraphElement;
-      const username = this.storage.get<string>(Constants.NicknameStorageField);
-      welcomeText.textContent += username + '!';
-    }).catch((error) => {
-      alert('Failed to start connection');
-      console.log(error);
-    });
+
+    this.hubService.invokeBackendMethod(this.backendGetter, this.chatId).catch(
+      (reason: string) => {
+        alert(reason);
+        this.router.navigate(["../chats"])
+      });
+    
+    // this.hubService.hubConnection.start().then(async () => {
+    //   const response = await this.hubService.hubConnection.invoke('Connect', this.chatId) as ConnectionResponseCode;
+    //   if (response != ConnectionResponseCode.SuccessfullyConnected) {
+    //     ChatComponent.switchResponseCode(response);
+    //     return;
+    //   }
+    // }).catch((error) => {
+    //   alert('Failed to start connection');
+    //   console.log(error);
+    // });
   }
 
   async onSendClicked(): Promise<void> {
@@ -64,41 +76,43 @@ export class ChatComponent implements OnInit, OnDestroy {
       .catch(() => alert('Failed to send message'));
 
     if (value == 0) {
-      ChatComponent.showErrorMessage('Failed to send the message');
+      this.sendMessageError = false;
+      //ChatComponent.showErrorMessage('Failed to send the message');
     } else {
-      ChatComponent.hideErrorMessage();
+      this.sendMessageError = true;
+      //ChatComponent.hideErrorMessage();
     }
   }
 
   @HostListener('window:popstate', ['$event'])
   onPopState() {
-    this.hubService.hubConnection.stop();
+    this.hubService.breakConnection(this.backendSender);
   }
 
   async onLeaveClicked() {
-    await this.hubService.hubConnection.stop();
-    this.router.navigate(['chats']);
+    this.hubService.breakConnection(this.backendSender);
+    this.router.navigate(['../chats']);
   }
-  private static showErrorMessage(message: string) {
-    const text = document.getElementById('error-text') as HTMLParagraphElement;
-    text.textContent = message;
-    text.hidden = false;
-  }
+  // private static showErrorMessage(message: string) {
+  //   const text = document.getElementById('error-text') as HTMLParagraphElement;
+  //   text.textContent = message;
+  //   text.hidden = false;
+  // }
 
-  private static hideErrorMessage() {
-    const text = document.getElementById('error-text') as HTMLParagraphElement;
-    text.hidden = true;
-  }
-  private static switchResponseCode(code: ConnectionResponseCode) {
-    switch (code) {
-      case ConnectionResponseCode.AccessDenied: alert('Access denied'); break;
-      case ConnectionResponseCode.DuplicateNickname: alert('Duplicate nickname'); break;
-      case ConnectionResponseCode.BannedNickname: alert('The nickname is banned'); break;
-      case ConnectionResponseCode.RoomIsFull: alert('Room is full'); break;
-      case ConnectionResponseCode.WrongNickname: alert('Incorrect nickname'); break;
-      case ConnectionResponseCode.RoomDoesntExist: alert("Room doesn't exist"); break;
-    }
-  }
+  // private static hideErrorMessage() {
+  //   const text = document.getElementById('error-text') as HTMLParagraphElement;
+  //   text.hidden = true;
+  // }
+  // private static switchResponseCode(code: ConnectionResponseCode) {
+  //   switch (code) {
+  //     case ConnectionResponseCode.AccessDenied: alert('Access denied'); break;
+  //     case ConnectionResponseCode.DuplicateNickname: alert('Duplicate nickname'); break;
+  //     case ConnectionResponseCode.BannedNickname: alert('The nickname is banned'); break;
+  //     case ConnectionResponseCode.RoomIsFull: alert('Room is full'); break;
+  //     case ConnectionResponseCode.WrongNickname: alert('Incorrect nickname'); break;
+  //     case ConnectionResponseCode.RoomDoesntExist: alert("Room doesn't exist"); break;
+  //   }
+  // }
 }
 
 export interface Message {

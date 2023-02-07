@@ -7,6 +7,7 @@ import { ChatSelectorComponent } from './chat-selector/chat-selector.component';
 import { CreateChatComponent } from './create-chat/create-chat.component';
 import { ChatroomService } from './shared/services/chatroom.service';
 import { UsersCommunicatorService } from './shared/services/users-communicator.service';
+import { HubService } from './shared/services/hub.service';
 
 
 
@@ -17,7 +18,7 @@ import { UsersCommunicatorService } from './shared/services/users-communicator.s
     FormsModule,
     ChatsRoutingModule
   ],
-  providers: [ChatroomService, UsersCommunicatorService],
+  providers: [ChatroomService, UsersCommunicatorService, HubService],
   bootstrap: [ChatSelectorComponent]
 })
 export class ChatsModule { }
