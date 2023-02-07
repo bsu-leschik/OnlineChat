@@ -56,7 +56,7 @@ export class CreateChatComponent implements OnInit {
     this.chatService.createChatroom(type, users, this.chatName).subscribe(result => {
       if (result.created) {
         this.storage.set(Constants.ChatIdStorageField, result.chatId);
-        this.router.navigate(['chat']);
+        this.router.navigate(['../chat']);
         return;
       }
 
