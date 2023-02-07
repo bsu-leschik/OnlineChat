@@ -5,6 +5,7 @@ import {Router} from "@angular/router";
 import {ChatroomService} from "../shared/services/chatroom.service";
 import {ChatroomInfoBase, ChatType, PrivateChatroomInfo, PublicChatroomInfo} from "../../shared/chatroom";
 import { AuthenticationService } from 'src/app/shared/services/authentication.service';
+import { HubService } from '../shared/services/hub.service';
 
 @Component({
   selector: 'app-chat-selector',
@@ -14,25 +15,57 @@ import { AuthenticationService } from 'src/app/shared/services/authentication.se
 export class ChatSelectorComponent implements OnInit {
   public chatrooms: ChatroomInfoBase[] = [];
 
+  private readonly timesToUpdateChatrooms: number = 3;
+  private timesUpdatedChatrooms: number = 0;
+
   constructor(private storage: StorageService,
               private router: Router,
               private chatroomsService: ChatroomService,
-              public auth: AuthenticationService) {
+              public auth: AuthenticationService,
+              private hubService: HubService) {
 
   }
 
   ngOnInit(): void {
-    this.updateChatrooms();
+    this.updateChatrooms().then(
+      () => {
+        this.hubService.addOnHandler('PromoteToTop', (chatId: string) => this.handlePromotion(chatId));
+      },
+      (reason) => {
+          alert(reason)
+      })
   }
 
-  private updateChatrooms(): void {
-    this.chatroomsService.getChatrooms()
+  private handlePromotion(toPromoteChatId: string){
+    let chatroomToPromote: ChatroomInfoBase[] = [];
+
+      let tempChatrooms = this.chatrooms.filter((element: ChatroomInfoBase) => {
+        if(element.id === toPromoteChatId){
+          chatroomToPromote.push(element);
+          return false;
+        }
+        return true;
+        })
+        if(chatroomToPromote.length === 0 && this.timesUpdatedChatrooms < this.timesToUpdateChatrooms){
+          this.timesUpdatedChatrooms++;
+          this.updateChatrooms().then(
+            () => this.handlePromotion(toPromoteChatId),
+            (reason) => alert(reason)
+            )
+          return;
+        }
+        this.chatrooms = chatroomToPromote.concat(tempChatrooms);
+  }
+
+  private updateChatrooms(): Promise<void> {
+    return new Promise((resolve, reject) => this.chatroomsService.getChatrooms()
       .subscribe(result => {
         if (result == null || result.chatrooms == null) {
-          alert('error');
+          reject('Unknown error');
         }
         this.chatrooms = result!.chatrooms;
-      });
+        resolve();
+      }))
   }
 
   getRoomName(room: ChatroomInfoBase) : string {
