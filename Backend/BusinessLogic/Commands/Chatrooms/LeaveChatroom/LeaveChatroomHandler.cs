@@ -4,41 +4,46 @@ using Database;
 using Entities.Chatrooms;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Commands.Chatrooms.LeaveChatroom;
 
 public class LeaveChatroomHandler : IRequestHandler<LeaveChatroomCommand, LeaveChatroomResponse>
 {
-    private readonly IUsersService _usersService;
+    private readonly IUserAccessor _userAccessor;
     private readonly IStorageService _storageService;
     private readonly IHubContext<ChatHub> _hubContext;
 
-    public LeaveChatroomHandler(IUsersService usersService, IStorageService storageService, IHubContext<ChatHub> hubContext)
+    public LeaveChatroomHandler(IUserAccessor userAccessor, IStorageService storageService,
+        IHubContext<ChatHub> hubContext)
     {
-        _usersService = usersService;
+        _userAccessor = userAccessor;
         _storageService = storageService;
         _hubContext = hubContext;
     }
 
     public async Task<LeaveChatroomResponse> Handle(LeaveChatroomCommand request, CancellationToken cancellationToken)
     {
-        var user = await _usersService.GetCurrentUser(cancellationToken);
-        if (user is null)
+        var id = _userAccessor.GetId()!;
+        var ticket = await _storageService.GetChatroomTickets()
+                                          .Where(t => t.UserId == id && t.ChatroomId == request.ChatId)
+                                          .Include(t => t.Chatroom)
+                                          .Include(t => t.User)
+                                          .FirstOrDefaultAsync(cancellationToken);
+
+        if (ticket is null)
         {
             return LeaveChatroomResponse.BadRequest;
         }
 
-        var chatroom = user.Chatrooms.FirstOrDefault(c => c.Id == request.ChatId);
-        if (chatroom is null)
-        {
-            return LeaveChatroomResponse.NotInChatroom;
-        }
+        var chatroom = ticket.Chatroom;
 
         if (chatroom.Type == ChatType.Private)
         {
             return LeaveChatroomResponse.BadRequest;
         }
 
+        var user = ticket.User;
         var chat = (chatroom as PublicChatroom)!;
         if (chat.Kick(user))
         {

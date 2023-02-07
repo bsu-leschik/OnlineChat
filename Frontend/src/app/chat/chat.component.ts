@@ -13,7 +13,6 @@ import {ChatroomService} from "../shared/services/chatroom.service";
 
 export class ChatComponent implements OnInit, OnDestroy {
   private readonly nickname: string;
-  private readonly chatId: string;
   private hubConnection: HubConnection;
   public messages: Message[] = [];
 
@@ -22,8 +21,7 @@ export class ChatComponent implements OnInit, OnDestroy {
               private chatService: ChatroomService) {
     // console.log('init');
     this.nickname = this.storage.get<string>('nickname');
-    this.chatId = this.storage.get<string>('chatId');
-    if (this.nickname == undefined || this.chatId == undefined) {
+    if (this.nickname == undefined || this.chatId() == undefined) {
       this.router.navigate(['login']);
     }
     this.hubConnection = new HubConnectionBuilder()
@@ -36,13 +34,15 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.hubConnection.stop();
+    this.messages = [];
   }
   ngOnInit(): void {
-    this.chatService.getMessages(this.chatId).subscribe(result => {
+    this.chatService.getMessages(this.chatId()).subscribe(result => {
       this.messages = result.messages;
+      console.log(result.messages)
     });
     this.hubConnection.start().then(async () => {
-      const response = await this.hubConnection.invoke('Connect', this.chatId) as ConnectionResponseCode;
+      const response = await this.hubConnection.invoke('Connect', this.chatId()) as ConnectionResponseCode;
       if (response != ConnectionResponseCode.SuccessfullyConnected) {
         ChatComponent.switchResponseCode(response);
         return;
@@ -63,7 +63,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       return;
     }
     input.value = '';
-    let value: number = await this.hubConnection.invoke('Send', this.chatId, message)
+    let value: number = await this.hubConnection.invoke('Send', this.chatId(), message)
       .then()
       .catch(() => alert('Failed to send message'));
 
@@ -102,6 +102,10 @@ export class ChatComponent implements OnInit, OnDestroy {
       case ConnectionResponseCode.WrongNickname: alert('Incorrect nickname'); break;
       case ConnectionResponseCode.RoomDoesntExist: alert("Room doesn't exist"); break;
     }
+  }
+
+  private chatId() {
+    return this.storage.get<string>('chatId');
   }
 }
 

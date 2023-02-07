@@ -4,32 +4,32 @@ namespace BusinessLogic.Services.UsersService;
 
 public static class UsersServiceExtensions
 {
-    public static string? GetClaim(this IUsersService usersService, string claim)
+    public static string? GetClaim(this IUserAccessor userAccessor, string claim)
     {
-        if (!usersService.TryGetClaim(claim, out var value))
+        if (!userAccessor.TryGetClaim(claim, out var value))
         {
             value = null;
         }
         return value;
     }
 
-    public static string? GetUsername(this IUsersService usersService)
+    public static string? GetUsername(this IUserAccessor userAccessor)
     {
-        return usersService.GetClaim(Claims.Name);
+        return userAccessor.GetClaim(Claims.Name);
     }
 
-    public static Guid? GetToken(this IUsersService usersService)
+    public static Guid? GetToken(this IUserAccessor userAccessor)
     {
-        if (Guid.TryParse(usersService.GetClaim(Claims.Token), out var token))
+        if (Guid.TryParse(userAccessor.GetClaim(Claims.Token), out var token))
         {
             return token;
         }
         return null;
     }
 
-    public static Guid? GetId(this IUsersService usersService)
+    public static Guid? GetId(this IUserAccessor userAccessor)
     {
-        if (usersService.TryGetClaim(Claims.UserId, out var id))
+        if (userAccessor.TryGetClaim(Claims.UserId, out var id))
         {
             return Guid.Parse(id);
         }
