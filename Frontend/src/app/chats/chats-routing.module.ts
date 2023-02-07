@@ -6,7 +6,7 @@ import { ChatComponent } from "./chat/chat.component";
 import { CreateChatComponent } from "./create-chat/create-chat.component";
 
 const chatRoutes: Routes = [
-    {path: 'chats', component: ChatSelectorComponent, canActivate: [ChatsGuard], children: [
+    {path: '', component: ChatSelectorComponent, canActivate: [ChatsGuard], children: [
         {path: 'create', component: CreateChatComponent},
         {path: 'chat', component: ChatComponent},
     ]},

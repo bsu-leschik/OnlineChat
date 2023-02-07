@@ -15,4 +15,5 @@ export class StorageService {
   public get<T>(key: string) {
     return this.data[key] as T;
   }
+
 }

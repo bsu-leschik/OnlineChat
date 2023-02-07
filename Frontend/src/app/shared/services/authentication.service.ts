@@ -33,7 +33,7 @@ export class AuthenticationService {
   public sendAutoLogin() : Observable<TokenLoginResponse> {
     return this.httpClient.get<TokenLoginResponse>(this._api + '/auto-login', {
       withCredentials: true
-    });
+    }) ;
   }
   public tryAutoLogin(): Promise<boolean>{
     return new Promise((resolve, reject) => {

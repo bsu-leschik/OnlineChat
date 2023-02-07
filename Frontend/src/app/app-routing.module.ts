@@ -3,7 +3,10 @@ import {RouterModule, Routes} from '@angular/router';
 import { AppComponent } from './app.component';
 
 const routes: Routes = [
-  {path: "", component: AppComponent}
+  {path: '', component: AppComponent},
+  {path: 'auth', loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)},
+  {path: 'chats', loadChildren: () => import('./chats/chats.module').then(m => m.ChatsModule)}
+
 ];
 
 @NgModule({
