@@ -34,7 +34,7 @@ namespace Database.Migrations
 
                     b.HasIndex("ModeratorsId");
 
-                    b.ToTable("AdministratorsUser");
+                    b.ToTable("AdministratorsUser", (string)null);
                 });
 
             modelBuilder.Entity("Entities.ChatroomTicket", b =>
@@ -52,7 +52,7 @@ namespace Database.Migrations
 
                     b.HasIndex("ChatroomId");
 
-                    b.ToTable("ChatroomTicket");
+                    b.ToTable("ChatroomTicket", (string)null);
                 });
 
             modelBuilder.Entity("Entities.Chatrooms.Administrators", b =>
@@ -74,7 +74,7 @@ namespace Database.Migrations
                     b.HasIndex("PublicChatroomId")
                         .IsUnique();
 
-                    b.ToTable("Administrators");
+                    b.ToTable("Administrators", (string)null);
                 });
 
             modelBuilder.Entity("Entities.Chatrooms.Chatroom", b =>
@@ -91,7 +91,7 @@ namespace Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Chatroom");
+                    b.ToTable("Chatroom", (string)null);
 
                     b.UseTptMappingStrategy();
                 });
@@ -120,7 +120,7 @@ namespace Database.Migrations
 
                     b.HasIndex("ChatroomId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("Entities.User", b =>
@@ -146,14 +146,14 @@ namespace Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Entities.Chatrooms.PrivateChatroom", b =>
                 {
                     b.HasBaseType("Entities.Chatrooms.Chatroom");
 
-                    b.ToTable("PrivateChatroom");
+                    b.ToTable("PrivateChatroom", (string)null);
                 });
 
             modelBuilder.Entity("Entities.Chatrooms.PublicChatroom", b =>
@@ -164,7 +164,7 @@ namespace Database.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("PublicChatroom");
+                    b.ToTable("PublicChatroom", (string)null);
                 });
 
             modelBuilder.Entity("AdministratorsUser", b =>

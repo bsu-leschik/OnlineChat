@@ -7,41 +7,45 @@ using Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Commands.Chatrooms.KickUserFromChatroom;
 
 public class KickUserFromChatroomHandler : IRequestHandler<KickUserFromChatroomCommand, KickUserFromChatroomResponse>
 {
     private readonly IStorageService _storageService;
-    private readonly IUsersService _usersService;
+    private readonly IUserAccessor _userAccessor;
     private readonly IHubContext<ChatHub> _hubContext;
 
-    public KickUserFromChatroomHandler(IStorageService storageService, IUsersService usersService,
+    public KickUserFromChatroomHandler(IStorageService storageService, IUserAccessor userAccessor,
         IHttpContextAccessor accessor, IHubContext<ChatHub> hubContext)
     {
         _storageService = storageService;
-        _usersService = usersService;
+        _userAccessor = userAccessor;
         _hubContext = hubContext;
     }
 
     public async Task<KickUserFromChatroomResponse> Handle(KickUserFromChatroomCommand request,
         CancellationToken cancellationToken)
     {
-        var chatroom = await _storageService.GetChatroomById(request.ChatId, cancellationToken);
-        if (chatroom is null || chatroom.Type == ChatType.Private)
+        var ticket = await _storageService.GetChatroomTickets()
+                                          .Include(t => t.User)
+                                          .Where(t => t.User.Username == request.Username &&
+                                                      t.ChatroomId == request.ChatId)
+                                          .Include(t => t.Chatroom)
+                                          .FirstOrDefaultAsync(cancellationToken);
+
+        if (ticket is null)
         {
             return KickUserFromChatroomResponse.BadRequest;
         }
         
-        var user = await _usersService.GetCurrentUser(cancellationToken);
-        if (user is null)
-        {
-            return KickUserFromChatroomResponse.BadRequest;
-        }
-        
+        var chatroom = ticket.Chatroom;
+        var user = ticket.User;
+
         if (!chatroom.Users.Contains(user))
         {
-            return KickUserFromChatroomResponse.AccessDenied;
+            return KickUserFromChatroomResponse.BadRequest;
         }
 
         var toKick = chatroom.Users.FirstOrDefault(u => u.Username == request.Username);
@@ -62,7 +66,8 @@ public class KickUserFromChatroomHandler : IRequestHandler<KickUserFromChatroomC
         return KickUserFromChatroomResponse.AccessDenied;
     }
 
-    private async Task<KickUserFromChatroomResponse> Kick(PublicChatroom chatroom, User user, CancellationToken cancellationToken)
+    private async Task<KickUserFromChatroomResponse> Kick(PublicChatroom chatroom, User user,
+        CancellationToken cancellationToken)
     {
         chatroom.Kick(user);
         var saving = _storageService.SaveChangesAsync(cancellationToken);

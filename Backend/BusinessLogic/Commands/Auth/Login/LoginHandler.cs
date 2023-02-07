@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Commands.Auth.Login;
 
@@ -26,7 +27,9 @@ public class LoginHandler : IRequestHandler<LoginCommand, LoginResponse>
 
     public async Task<LoginResponse> Handle(LoginCommand command, CancellationToken cancellationToken)
     {
-        var user = await _storageService.GetUserByUsername(command.Username, cancellationToken);
+        var user = await _storageService.GetUsers()
+                                        .Where(u => u.Username == command.Username)
+                                        .FirstOrDefaultAsync(cancellationToken);
         if (user is null)
         {
             return LoginResponse.WrongUsername;

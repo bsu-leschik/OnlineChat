@@ -65,25 +65,36 @@ public class DatabaseStorageService : IStorageService
                             .Include(t => t.User);
     }
 
-    public Task<Chatroom?> GetChatroomWithMessages(Guid chatId, CancellationToken cancellationToken, int offset = 0,
-        int count = 100)
-    {
-        return _chatDatabase.Chatroom
-                            .Where(c => c.Id == chatId)
-                            .Include(c => c.Messages.Skip(offset).Take(count))
-                            .IncludeUsers()
-                            .FirstOrDefaultAsync(cancellationToken);
-    }
-
     public IQueryable<User> GetUsers()
     {
         return _chatDatabase.Users;
+    }
+
+    public IQueryable<Chatroom> GetChatrooms()
+    {
+        return _chatDatabase.Chatroom;
+    }
+
+    public IQueryable<ChatroomTicket> GetChatroomTickets()
+    {
+        return _chatDatabase.ChatroomTicket;
+    }
+
+    public IQueryable<Message> GetMessages()
+    {
+        return _chatDatabase.Messages;
     }
 
     public async Task AddChatroomAsync(Chatroom chatroom, CancellationToken cancellationToken = default)
     {
         await _chatDatabase.Chatroom.AddAsync(chatroom, cancellationToken);
         await _chatDatabase.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task AddChatroomTicketAsync(ChatroomTicket ticket, CancellationToken cancellationToken = default)
+    {
+        await _chatDatabase.AddAsync(ticket, cancellationToken);
+        await SaveChangesAsync(cancellationToken);
     }
 
     public async Task AddUserAsync(User user, CancellationToken cancellationToken = default)

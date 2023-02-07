@@ -12,9 +12,8 @@ public abstract class Chatroom : IEquatable<Chatroom>
     public int MessagesCount { get; set; }
     public ChatType Type { get; }
     public DateTime LastMessageTime { get; set; }
-    [NotMapped] public IEnumerable<Message> Messages => _messages;
-    private List<Message> _messages;
-
+    public List<Message> Messages { get; internal set; }
+    private static Message ChatCreatedMessage => new Message("", "The chat was created");
     public Chatroom(Guid id, ChatType type, List<User> users)
     {
         if (users.Count == 0)
@@ -25,7 +24,7 @@ public abstract class Chatroom : IEquatable<Chatroom>
         Id = id;
         Type = type;
         MessagesCount = 0;
-        _messages = new List<Message>();
+        Messages = new List<Message> { ChatCreatedMessage };
         LastMessageTime = DateTime.Now;
         UserTickets = users.Select(u => new ChatroomTicket(u, this)).ToList();
     }
@@ -39,7 +38,7 @@ public abstract class Chatroom : IEquatable<Chatroom>
 
     public void AddMessage(Message message)
     {
-        _messages.Add(message);
+        Messages.Add(message);
         ++MessagesCount;
         LastMessageTime = DateTime.Now;
     }
@@ -47,15 +46,12 @@ public abstract class Chatroom : IEquatable<Chatroom>
     public bool Equals(Chatroom? other)
     {
         if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return Id.Equals(other.Id);
+        return ReferenceEquals(this, other) || Id.Equals(other.Id);
     }
 
     public override bool Equals(object? obj)
     {
-        if (ReferenceEquals(null, obj)) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        return obj.GetType() == GetType() && Equals(obj as Chatroom);
+        return Equals(obj as Chatroom);
     }
 
     public override int GetHashCode()
