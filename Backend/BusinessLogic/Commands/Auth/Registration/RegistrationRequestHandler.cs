@@ -19,8 +19,11 @@ public class RegistrationRequestHandler : IRequestHandler<RegistrationCommand, R
 
     public async Task<RegistrationResponse> Handle(RegistrationCommand command, CancellationToken cancellationToken)
     {
-        if (await _storageService.GetUsersAsync(cancellationToken)
-                                 .ContainsAsync(u => u.Username == command.Username, cancellationToken))
+        if (command.Password.Length < Constants.Security.MinPasswordLength)
+        {
+            return RegistrationResponse.Error;
+        }
+        if (await _storageService.GetUserByUsername(command.Username, cancellationToken) is null)
         {
             return RegistrationResponse.DuplicateUsername;
         }

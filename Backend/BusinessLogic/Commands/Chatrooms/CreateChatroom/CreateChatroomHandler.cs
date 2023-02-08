@@ -4,7 +4,7 @@ using Entities;
 using Entities.Chatrooms;
 using Extensions;
 using MediatR;
-using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Commands.Chatrooms.CreateChatroom;
 
@@ -13,7 +13,7 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
     private readonly IStorageService _storageService;
     private readonly IUsersService _usersService;
 
-    public CreateChatroomHandler(IStorageService storageService, IHttpContextAccessor contextAccessor,
+    public CreateChatroomHandler(IStorageService storageService,
         IUsersService usersService)
     {
         _storageService = storageService;
@@ -38,9 +38,7 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
                 return CreateChatroomResponse.Failed;
             }
 
-            var users = await _storageService.GetUsersAsync(cancellationToken)
-                                             .WhereAsync(u => request.Usernames.Contains(u.Username),
-                                                 cancellationToken)
+            var users = await _storageService.GetUsersByUsername(request.Usernames, cancellationToken)
                                              .ToListAsync(cancellationToken);
 
             if (users.Count == 2
@@ -54,10 +52,6 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
             Chatroom chatroom = request.Type == ChatType.Public
                 ? new PublicChatroom(id, users, owner: user, name: request.Name!)
                 : new PrivateChatroom(id, users);
-            foreach (var u in users)
-            {
-                u.Join(chatroom);
-            }
             await _storageService.AddChatroomAsync(chatroom, cancellationToken);
             await _storageService.SaveChangesAsync(cancellationToken);
             return new CreateChatroomResponse(chatroom.Id);
@@ -71,6 +65,5 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
     private static bool IsDuplicatePrivateChatroom(User user, User second)
     {
         return user.Chatrooms.OfType<PrivateChatroom>().Contains(c => c.Users.Contains(second));
-        // return user.PrivateChatrooms.Contains(c => c.Users.Contains(second));
     }
 }

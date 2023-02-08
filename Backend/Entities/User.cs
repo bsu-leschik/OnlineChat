@@ -12,7 +12,8 @@ public class User : IEquatable<User>
     public Guid Id { get; set; }
     public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
-    public List<Chatroom> Chatrooms { get; set; } = new();
+    public List<ChatroomTicket> ChatroomTickets { get; set; } = new();
+    [NotMapped] public IEnumerable<Chatroom> Chatrooms => ChatroomTickets.Select(t => t.Chatroom);
     public string Role { get; set; } = "User";
     public Guid Token { get; set; } = Guid.NewGuid();
 
@@ -61,11 +62,14 @@ public class User : IEquatable<User>
 
     public bool Leave(Chatroom c)
     {
-        return Chatrooms.Remove(c);
+        var ticket = ChatroomTickets.FirstOrDefault(t => t.Chatroom == c);
+        return ticket is not null && ChatroomTickets.Remove(ticket);
     }
 
     public void Join(Chatroom chatroom)
     {
-        Chatrooms.Add(chatroom);
+        var ticket = new ChatroomTicket(this, chatroom);
+        ChatroomTickets.Add(ticket);
+        chatroom.UserTickets.Add(ticket);
     }
 }

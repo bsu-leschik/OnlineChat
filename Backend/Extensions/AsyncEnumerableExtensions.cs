@@ -10,7 +10,7 @@ public static class AsyncEnumerableExtensions
         var result = new List<T>();
         await foreach (var element in enumerable.WithCancellation(cancellationToken))
         {
-            result.Add(element);       
+            result.Add(element);
         }
         return result;
     }
@@ -50,7 +50,7 @@ public static class AsyncEnumerableExtensions
     }
 
     public async static IAsyncEnumerable<TResult> CastAsync<TValue, TResult>(this IAsyncEnumerable<TValue> enumerable,
-        [EnumeratorCancellation] CancellationToken cancellationToken) where TValue : class, TResult 
+        [EnumeratorCancellation] CancellationToken cancellationToken) where TValue : class, TResult
                                                                       where TResult : class
     {
         await foreach (var x in enumerable.WithCancellation(cancellationToken))
@@ -76,6 +76,45 @@ public static class AsyncEnumerableExtensions
         await foreach (var item in b.WithCancellation(cancellationToken))
         {
             yield return item;
+        }
+    }
+
+    public async static IAsyncEnumerable<T> Skip<T>(this IAsyncEnumerable<T> enumerable, int count,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        if (count < 0)
+        {
+            throw new ArgumentException($"{nameof(count)} should be >= 0");
+        }
+
+        await foreach (var item in enumerable.WithCancellation(cancellationToken))
+        {
+            if (count > 0)
+            {
+                --count;
+            }
+            else
+            {
+                yield return item;
+            }
+        }
+    }
+
+    public async static IAsyncEnumerable<T> Take<T>(this IAsyncEnumerable<T> enumerable, int count,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        if (count < 0)
+        {
+            throw new ArgumentException($"{nameof(count)} should be >= 0");
+        }
+        await foreach (var item in enumerable.WithCancellation(cancellationToken))
+        {
+            if (count <= 0)
+            {
+                yield break;
+            }
+            yield return item;
+            --count;
         }
     }
 }

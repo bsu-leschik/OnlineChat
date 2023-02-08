@@ -36,6 +36,11 @@ public static class ListExtensions
         var array = claims.ToArray();
         return types.All(t => array.Contains(c => c.Type == t));
     }
+
+    public static bool Remove<T>(this List<T> list, Func<T, bool> predicate)
+    {
+        return list.Contains(predicate) && list.Remove(list.First(predicate));
+    }
 }
 
 public static class List

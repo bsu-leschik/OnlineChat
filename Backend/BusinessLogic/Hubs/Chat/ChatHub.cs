@@ -7,6 +7,7 @@ using Entities.Chatrooms;
 using Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Hubs.Chat;
 
@@ -30,7 +31,7 @@ public class ChatHub : Hub<IChatClientInterface>
     [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
     public async Task<ConnectionResponseCode> Connect(Guid chatId)
     {
-        var chat = await _storageService.GetChatroomAsync(c => c.Id == chatId, CancellationToken.None);
+        var chat = await _storageService.GetChatroomById(chatId, CancellationToken.None);
         if (chat is null)
         {
             return ConnectionResponseCode.RoomDoesntExist;
@@ -42,8 +43,13 @@ public class ChatHub : Hub<IChatClientInterface>
             return ConnectionResponseCode.AccessDenied;
         }
 
-        await Groups.AddToGroupAsync(connectionId: Context.ConnectionId,
+        var user = await _usersService.GetCurrentUser(CancellationToken.None);
+        var ticket = user!.ChatroomTickets.FirstOrDefault(t => t.Chatroom == chat);
+        ticket!.LastMessageRead = chat.MessagesCount;
+        var saving = _storageService.SaveChangesAsync(CancellationToken.None);
+        var adding = Groups.AddToGroupAsync(connectionId: Context.ConnectionId,
             groupName: chatId.ToString());
+        await Task.WhenAll(saving, adding);
         return ConnectionResponseCode.SuccessfullyConnected;
     }
 
@@ -66,21 +72,15 @@ public class ChatHub : Hub<IChatClientInterface>
             return;
         }
 
-        if (Context.User is null)
+        var username = _usersService.GetUsername()!;
+        var chatroom = await _storageService.GetChatroomWithMessages(id, CancellationToken.None);
+        if (chatroom is null || !chatroom.Users.Contains(u => u.Username == username))
         {
             return;
         }
 
-        var user = await _usersService.GetCurrentUser(CancellationToken.None);
-        var chatroom = user?.Chatrooms.FirstOrDefault(c => c.Id == id);
-        if (chatroom is null)
-        {
-            return;
-        }
-
-        var username = Context.User.Claims.FirstOrDefault(c => c.Type == Claims.Name)!.Value;
         var messageObject = new Message(username, message);
-        await SendMessageToChat(id, messageObject);
+        await SendMessageToChat(chatroom, messageObject);
     }
 
     [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
@@ -101,23 +101,25 @@ public class ChatHub : Hub<IChatClientInterface>
     /// Method for sending message to chat
     /// Warning: method doesn't check if the caller is in chat  
     /// </summary>
-    /// <param name="chatId"></param>
+    /// <param name="chatroom"></param>
     /// <param name="message"></param>
-    private async Task SendMessageToChat(Guid chatId, Message message)
+    private async Task SendMessageToChat(Chatroom chatroom, Message message)
     {
-        var chatroom = await _storageService.GetChatroomAsync(c => c.Id == chatId, CancellationToken.None);
-        if (chatroom is null)
-        {
-            return;
-        }
         chatroom.AddMessage(message);
-        var saving = _storageService.SaveChangesAsync(CancellationToken.None);
+        int count = chatroom.MessagesCount;
+        var users = chatroom.Users
+                            .Where(u => _idTracker.GetConnectionId(u.Username) is not null)
+                            .Select(u => u.Id)
+                            .ToList();
+        var updating = _storageService.GetChatroomUsers(chatroom.Id, CancellationToken.None)
+                                      .Where(id => users.Any(u => u == id.UserId))
+                                      .ForEachAsync(t => t.LastMessageRead = count, CancellationToken.None);
         var sending = Clients
-                      .Group(chatId.ToString())
+                      .Group(chatroom.Id.ToString())
                       .Receive(message, chatroom.Id.ToString());
         var promoting = PromoteChatToTop(chatroom);
-
-        await Task.WhenAll(saving, sending, promoting);
+        await Task.WhenAll(sending, promoting, updating);
+        await _storageService.SaveChangesAsync(CancellationToken.None);
     }
 
     private async Task PromoteChatToTop(Chatroom chatroom)

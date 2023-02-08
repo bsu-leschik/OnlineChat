@@ -4,6 +4,7 @@ using Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Database.Migrations
 {
     [DbContext(typeof(ChatDatabase))]
-    partial class DatabaseModelSnapshot : ModelSnapshot
+    [Migration("20230131114014_FixedChatroomUserRelation")]
+    partial class FixedChatroomUserRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -85,9 +88,6 @@ namespace Database.Migrations
 
                     b.Property<DateTime>("LastMessageTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("MessagesCount")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -193,7 +193,7 @@ namespace Database.Migrations
                     b.HasOne("Entities.User", "User")
                         .WithMany("ChatroomTickets")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Chatroom");
@@ -224,8 +224,7 @@ namespace Database.Migrations
                 {
                     b.HasOne("Entities.Chatrooms.Chatroom", null)
                         .WithMany("Messages")
-                        .HasForeignKey("ChatroomId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("ChatroomId");
                 });
 
             modelBuilder.Entity("Entities.Chatrooms.PrivateChatroom", b =>

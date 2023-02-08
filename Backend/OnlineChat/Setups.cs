@@ -1,5 +1,6 @@
 ﻿using Constants;
 using Extensions;
+using Microsoft.AspNetCore.Authentication;
 
 namespace OnlineChat;
 
@@ -18,6 +19,7 @@ public static class Setups
             {
                 return next();
             }
+            context.SignOutAsync();
             context.Response.StatusCode = 400;
             return Task.CompletedTask;
         });

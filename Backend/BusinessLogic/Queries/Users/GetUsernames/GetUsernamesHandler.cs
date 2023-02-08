@@ -1,6 +1,6 @@
 ﻿using Database;
-using Extensions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Queries.Users.GetUsernames;
 
@@ -18,19 +18,20 @@ public class GetUsernamesHandler : IRequestHandler<GetUsernamesQuery, GetUsernam
         if (request.StartingWith is null)
         {
             return new GetUsernamesResponse(
-                await _storageService
-                      .GetUsersAsync(cancellationToken)
-                      .SelectAsync(u => u.Username, cancellationToken)
-                      .ToListAsync(cancellationToken)
+                await _storageService.GetUsers()
+                                     .Select(u => u.Username)
+                                     .Take(request.Limit)
+                                     .ToListAsync(cancellationToken)
             );
         }
 
         return new GetUsernamesResponse(
             await _storageService
-                  .GetUsersAsync(cancellationToken)
-                  .WhereAsync(u => u.Username.StartsWith(request.StartingWith), cancellationToken)
-                  .SelectAsync(u => u.Username, cancellationToken)
-                  .ToListAsync(cancellationToken)
+                .GetUsers()
+                .Where(u => u.Username.StartsWith(request.StartingWith))
+                .Select(u => u.Username)
+                .Take(request.Limit)
+                .ToListAsync(cancellationToken)
         );
     }
 }

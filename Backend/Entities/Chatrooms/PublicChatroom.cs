@@ -37,8 +37,12 @@ public class PublicChatroom : Chatroom
         {
             Administrators.Moderators.Remove(user);
         }
-        Users.Remove(user);
-        user.Leave(this);
+        var ticket = UserTickets.FirstOrDefault(t => t.User == user);
+        if (ticket is not null)
+        {
+            UserTickets.Remove(ticket);
+            user.Leave(this);
+        }
     }
 
     public void AddModerator(User user)

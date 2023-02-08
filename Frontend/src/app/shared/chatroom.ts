@@ -8,6 +8,7 @@ export interface ChatroomInfoBase {
   users: string[];
   type: ChatType;
   lastMessageDate: Date;
+  unreadMessages: number;
 }
 
 export interface PrivateChatroomInfo extends ChatroomInfoBase {}
