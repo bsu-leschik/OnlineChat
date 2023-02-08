@@ -28,9 +28,15 @@ export class AuthenticationService {
   public logout() {
     this.httpClient.post(Constants.ServerUrl + '/api/authentication/logout', {},{
       withCredentials: true
-    }).subscribe(result => {
-      this.storage.setLoggedIn(false);
-      this.router.navigate(['/auth/login'])
+    }).subscribe({
+      error: () => {
+        this.storage.setLoggedIn(false);
+        this.router.navigate(['/auth/login']);
+      },
+      complete: () => {
+        this.storage.setLoggedIn(false);
+        this.router.navigate(['/auth/login']);
+      }
     });
   }
 
