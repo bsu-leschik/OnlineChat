@@ -2,29 +2,36 @@
 using Database;
 using Entities.Chatrooms;
 using MediatR;
-using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Commands.Chatrooms.SetUsersRole;
 
 public class SetUsersRoleHandler : IRequestHandler<SetUsersRoleRequest, SetUsersRoleResponse>
 {
-    private readonly IUsersService _usersService;
+    private readonly IStorageService _storageService;
+    private readonly IUserAccessor _userAccessor;
 
-    public SetUsersRoleHandler(IStorageService storageService, IUsersService usersService,
-        IHttpContextAccessor accessor)
+    public SetUsersRoleHandler(IStorageService storageService, IUserAccessor userAccessor)
     {
-        _usersService = usersService;
+        _storageService = storageService;
+        _userAccessor = userAccessor;
     }
 
     public async Task<SetUsersRoleResponse> Handle(SetUsersRoleRequest request, CancellationToken cancellationToken)
     {
-        var user = await _usersService.GetCurrentUser(cancellationToken);
+        var userId = _userAccessor.GetId()!;
+        var ticket = await _storageService.GetChatroomTickets()
+                                          .Where(t => t.UserId == userId && t.ChatroomId == request.ChatId)
+                                          .Include(t => t.Chatroom)
+                                          .ThenInclude(c => c.Users)
+                                          .FirstOrDefaultAsync(cancellationToken);
 
-        var chatroom = user?.Chatrooms.FirstOrDefault(c => c.Id == request.ChatId);
-        if (chatroom is null)
+        if (ticket is null)
         {
             return SetUsersRoleResponse.BadRequest;
         }
+
+        var chatroom = ticket.Chatroom;
 
         if (chatroom.Type == ChatType.Private)
         {
@@ -32,7 +39,7 @@ public class SetUsersRoleHandler : IRequestHandler<SetUsersRoleRequest, SetUsers
         }
 
         var chat = (chatroom as PublicChatroom)!;
-        if (chat.Administrators.Owner != user!)
+        if (chat.Administrators.Owner.Id != userId)
         {
             return SetUsersRoleResponse.AccessDenied;
         }

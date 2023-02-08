@@ -44,7 +44,7 @@ builder.Services.AddDbContext<ChatDatabase>(options =>
 builder.Services.AddScoped<IStorageService, DatabaseStorageService>(
     sp => new DatabaseStorageService(sp.GetRequiredService<ChatDatabase>())
 );
-builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IUserAccessor, UserAccessor>();
 
 builder.Services.AddCors(options =>
 {

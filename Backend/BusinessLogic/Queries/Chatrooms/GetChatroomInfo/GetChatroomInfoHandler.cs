@@ -1,27 +1,33 @@
 ﻿using BusinessLogic.Models;
 using BusinessLogic.Services.UsersService;
+using Database;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Queries.Chatrooms.GetChatroomInfo;
 
 public class GetChatroomInfoHandler : IRequestHandler<GetChatroomInfoRequest, object?>
 {
-    private readonly IUsersService _usersService;
+    private readonly IUserAccessor _userAccessor;
+    private readonly IStorageService _storageService;
 
-    public GetChatroomInfoHandler(IUsersService usersService)
+    public GetChatroomInfoHandler(IUserAccessor userAccessor, IStorageService storageService)
     {
-        _usersService = usersService;
+        _userAccessor = userAccessor;
+        _storageService = storageService;
     }
 
     public async Task<object?> Handle(GetChatroomInfoRequest request, CancellationToken cancellationToken)
     {
-        var user = await _usersService.GetCurrentUser(cancellationToken);
-        var chatroomTicket = user!.ChatroomTickets.FirstOrDefault(t => t.Chatroom.Id == request.ChatId);
-        if (chatroomTicket is null)
-        {
-            return null;
-        }
-
-        return ChatroomInfo.Of(chatroomTicket);
+        var userId = _userAccessor.GetId()!;
+        var chatroomTicket = await _storageService.GetChatroomTickets()
+                                                  .Include(t => t.Chatroom)
+                                                  .ThenInclude(c => c.Users)
+                                                  .Where(ticket =>
+                                                      ticket.ChatroomId == request.ChatId && ticket.UserId == userId)
+                                                  .FirstOrDefaultAsync(cancellationToken);
+        return chatroomTicket is null
+            ? null
+            : ChatroomInfo.Of(chatroomTicket);
     }
 }

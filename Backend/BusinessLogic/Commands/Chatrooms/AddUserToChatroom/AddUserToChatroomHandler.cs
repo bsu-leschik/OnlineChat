@@ -1,65 +1,74 @@
 ﻿using BusinessLogic.Hubs.Chat;
 using BusinessLogic.Services.UsersService;
 using Database;
+using Entities;
 using Entities.Chatrooms;
 using Extensions;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Commands.Chatrooms.AddUserToChatroom;
 
 public class AddUserToChatroomHandler : IRequestHandler<AddUserToChatroomCommand, AddUserToChatroomResponse>
 {
     private readonly IStorageService _storageService;
-    private readonly IUsersService _usersService;
+    private readonly IUserAccessor _userAccessor;
     private readonly IHubContext<ChatHub> _hubContext;
 
-    public AddUserToChatroomHandler(IStorageService storageService, IUsersService usersService,
-        IHttpContextAccessor accessor, IHubContext<ChatHub> hubContext)
+    public AddUserToChatroomHandler(IStorageService storageService, IUserAccessor userAccessor,
+        IHubContext<ChatHub> hubContext)
     {
         _storageService = storageService;
-        _usersService = usersService;
+        _userAccessor = userAccessor;
         _hubContext = hubContext;
     }
 
     public async Task<AddUserToChatroomResponse> Handle(AddUserToChatroomCommand request,
         CancellationToken cancellationToken)
     {
-        var chatroom = await _storageService.GetChatroomById(request.ChatId, cancellationToken);
-        if (chatroom is null)
+        var tickets = await _storageService.GetChatroomTickets()
+                                           .Where(t => t.ChatroomId == request.ChatId)
+                                           .Include(t => t.User)
+                                           .Include(t => t.Chatroom)
+                                           .ToListAsync(cancellationToken);
+        if (tickets.Count == 0)
         {
             return AddUserToChatroomResponse.ChatroomDoesntExist;
         }
 
+        var chatroom = tickets.First().Chatroom;
         if (chatroom.Type == ChatType.Private)
         {
             return AddUserToChatroomResponse.ChatIsPrivate;
         }
 
-        var currentUsername = _usersService.GetUsername()!;
-        var currentToken = _usersService.GetToken()!;
-        if (!chatroom.Users.Contains(u => u.Username == currentUsername && u.Token == currentToken))
+        var currentUsername = _userAccessor.GetUsername()!;
+        if (!tickets.Contains(u => u.User.Username == currentUsername))
         {
             return AddUserToChatroomResponse.AccessDenied;
         }
 
-        if (chatroom.Users.Contains(u => u.Username == request.Username))
+        if (tickets.Contains(t => t.User.Username == request.Username))
         {
             return AddUserToChatroomResponse.UserIsAlreadyInTheChat;
         }
 
-        var user = await _storageService.GetUserByUsername(request.Username, cancellationToken);
+        var user = await _storageService.GetUsers()
+                                        .Where(u => u.Username == request.Username)
+                                        .FirstOrDefaultAsync(cancellationToken);
+
         if (user is null)
         {
             return AddUserToChatroomResponse.UserDoesntExist;
         }
+        var ticket = new ChatroomTicket(user, chatroom);
 
         var notifyTask =
             _hubContext.NotifyUserAdded(chatId: chatroom.Id.ToString(), currentUsername, cancellationToken);
-        user.Join(chatroom);
-        var saveTask = _storageService.SaveChangesAsync(cancellationToken);
-        await Task.WhenAll(notifyTask, saveTask);
+
+        var adding = _storageService.AddChatroomTicketAsync(ticket, cancellationToken);
+        await Task.WhenAll(notifyTask, adding);
         return AddUserToChatroomResponse.Success;
     }
 }

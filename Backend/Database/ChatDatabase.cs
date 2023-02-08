@@ -62,7 +62,6 @@ public class ChatDatabase : DbContext
     }
 
     public DbSet<User> Users { get; set; } = null!;
-
     public DbSet<Chatroom> Chatroom { get; set; } = null!;
     public DbSet<ChatroomTicket> ChatroomTicket { get; set; } = null!;
     public DbSet<Administrators> Administrators { get; set; } = null!;

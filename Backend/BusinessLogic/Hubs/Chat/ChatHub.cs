@@ -18,34 +18,35 @@ namespace BusinessLogic.Hubs.Chat;
 public class ChatHub : Hub<IChatClientInterface>
 {
     private readonly IStorageService _storageService;
-    private readonly IUsersService _usersService;
+    private readonly IUserAccessor _userAccessor;
     private readonly IUserConnectionIdTracker _idTracker;
 
-    public ChatHub(IStorageService storageService, IUsersService usersService, IUserConnectionIdTracker idTracker)
+    public ChatHub(IStorageService storageService, IUserAccessor userAccessor, IUserConnectionIdTracker idTracker)
     {
         _storageService = storageService;
-        _usersService = usersService;
+        _userAccessor = userAccessor;
         _idTracker = idTracker;
     }
 
     [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
-    public async Task<ConnectionResponseCode> Connect(Guid chatId)
+    public async Task<ConnectionResponseCode> Connect(string chatroomId)
     {
-        var chat = await _storageService.GetChatroomById(chatId, CancellationToken.None);
-        if (chat is null)
+        if (!Guid.TryParse(chatroomId, out var chatId))
         {
-            return ConnectionResponseCode.RoomDoesntExist;
+            return ConnectionResponseCode.Error;
         }
+        var id = _userAccessor.GetId()!;
+        var ticket = await _storageService.GetChatroomTickets()
+                                    .Where(t => t.UserId == id && t.ChatroomId == chatId)
+                                    .Include(ticket => ticket.Chatroom)
+                                    .FirstOrDefaultAsync(CancellationToken.None);
 
-        var username = _usersService.GetUsername()!;
-        if (!chat.Users.Contains(u => u.Username == username))
+        if (ticket is null)
         {
             return ConnectionResponseCode.AccessDenied;
         }
 
-        var user = await _usersService.GetCurrentUser(CancellationToken.None);
-        var ticket = user!.ChatroomTickets.FirstOrDefault(t => t.Chatroom == chat);
-        ticket!.LastMessageRead = chat.MessagesCount;
+        ticket.LastMessageRead = ticket.Chatroom.MessagesCount;
         var saving = _storageService.SaveChangesAsync(CancellationToken.None);
         var adding = Groups.AddToGroupAsync(connectionId: Context.ConnectionId,
             groupName: chatId.ToString());
@@ -65,15 +66,15 @@ public class ChatHub : Hub<IChatClientInterface>
     /// <param name="chatId"></param>
     /// <param name="message"></param>
     [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
-    public async Task Send(string chatId, string message)
+    public async Task Send(Guid chatId, string message)
     {
-        if (!Guid.TryParse(chatId, out var id))
-        {
-            return;
-        }
-
-        var username = _usersService.GetUsername()!;
-        var chatroom = await _storageService.GetChatroomWithMessages(id, CancellationToken.None);
+        var username = _userAccessor.GetUsername()!;
+        var chatroom = await _storageService.GetChatrooms()
+                                            .Where(c => c.Id == chatId)
+                                            .Include(c => c.Messages.Take(0))
+                                            .Include(c => c.UserTickets)
+                                            .ThenInclude(t => t.User)
+                                            .FirstOrDefaultAsync(CancellationToken.None);
         if (chatroom is null || !chatroom.Users.Contains(u => u.Username == username))
         {
             return;
@@ -86,14 +87,14 @@ public class ChatHub : Hub<IChatClientInterface>
     [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
     public override async Task OnConnectedAsync()
     {
-        _idTracker.Add(username: _usersService.GetUsername()!, connectionId: Context.ConnectionId);
+        _idTracker.Add(username: _userAccessor.GetUsername()!, connectionId: Context.ConnectionId);
         await base.OnConnectedAsync();
     }
 
     [Authorize(AuthenticationSchemes = Schemes.DefaultCookieScheme)]
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        _idTracker.Remove(_usersService.GetUsername()!);
+        _idTracker.Remove(_userAccessor.GetUsername()!);
         await base.OnDisconnectedAsync(exception);
     }
 
@@ -106,13 +107,14 @@ public class ChatHub : Hub<IChatClientInterface>
     private async Task SendMessageToChat(Chatroom chatroom, Message message)
     {
         chatroom.AddMessage(message);
-        int count = chatroom.MessagesCount;
-        var users = chatroom.Users
-                            .Where(u => _idTracker.GetConnectionId(u.Username) is not null)
-                            .Select(u => u.Id)
-                            .ToList();
-        var updating = _storageService.GetChatroomUsers(chatroom.Id)
-                                      .Where(id => users.Any(u => u == id.UserId))
+        var count = chatroom.MessagesCount;
+        var usersOnlineInChat = chatroom.Users
+                                        .Where(u => _idTracker.GetConnectionId(u.Username) is not null)
+                                        .Select(u => u.Id)
+                                        .ToList();
+        var updating = _storageService.GetChatroomTickets()
+                                      .Where(id =>
+                                          id.ChatroomId == chatroom.Id && usersOnlineInChat.Any(u => u == id.UserId))
                                       .ForEachAsync(t => t.LastMessageRead = count, CancellationToken.None);
         var sending = Clients
                       .Group(chatroom.Id.ToString())

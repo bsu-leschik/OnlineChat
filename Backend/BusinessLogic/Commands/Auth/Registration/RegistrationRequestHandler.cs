@@ -3,6 +3,7 @@ using Entities;
 using Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Commands.Auth.Registration;
 
@@ -23,7 +24,7 @@ public class RegistrationRequestHandler : IRequestHandler<RegistrationCommand, R
         {
             return RegistrationResponse.Error;
         }
-        if (await _storageService.GetUserByUsername(command.Username, cancellationToken) is null)
+        if (await _storageService.GetUsers().Where(u => u.Username == command.Username).AnyAsync(cancellationToken))
         {
             return RegistrationResponse.DuplicateUsername;
         }

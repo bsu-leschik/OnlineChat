@@ -3,17 +3,18 @@ using Constants;
 using Database;
 using Extensions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Queries.Messages.GetMessages;
 
 public class GetMessagesHandler : IRequestHandler<GetMessagesQuery, GetMessagesResponse>
 {
-    private readonly IUsersService _usersService;
+    private readonly IUserAccessor _userAccessor;
     private readonly IStorageService _storageService;
 
-    public GetMessagesHandler(IUsersService usersService, IStorageService storageService)
+    public GetMessagesHandler(IUserAccessor userAccessor, IStorageService storageService)
     {
-        _usersService = usersService;
+        _userAccessor = userAccessor;
         _storageService = storageService;
     }
 
@@ -21,16 +22,17 @@ public class GetMessagesHandler : IRequestHandler<GetMessagesQuery, GetMessagesR
 
     public async Task<GetMessagesResponse> Handle(GetMessagesQuery request, CancellationToken cancellationToken)
     {
-        var chatroom = await _storageService.GetChatroomWithMessages(request.ChatId, cancellationToken,
-            offset: request.Offset, count: request.Count);
+        var userId = _userAccessor.GetId()!;
+        var chatroom = await _storageService.GetChatroomTickets()
+                                            .Where(ticket => ticket.UserId == userId && ticket.ChatroomId == request.ChatId)
+                                            .Include(t => t.Chatroom)
+                                            .ThenInclude(chatroom => chatroom.Messages
+                                                                             .Skip(request.Offset)
+                                                                             .Take(request.Count))
+                                            .Select(t => t.Chatroom)
+                                            .FirstOrDefaultAsync(cancellationToken);
+        
         if (chatroom is null)
-        {
-            return EmptyResponse;
-        }
-
-        var username = _usersService.GetUsername()!;
-
-        if (!chatroom.Users.Contains(u => u.Username == username))
         {
             return EmptyResponse;
         }
