@@ -1,6 +1,5 @@
 import {Component} from '@angular/core';
 import {AuthenticationService, TokenLoginResponseCode} from "./shared/services/authentication.service";
-import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-root',
@@ -12,8 +11,8 @@ import {Router} from "@angular/router";
 export class AppComponent {
   title = 'Frontend';
 
-  constructor(private authService: AuthenticationService,
-              private router: Router) {
+  constructor(private authService: AuthenticationService) {
+      
   }
 
   ngOnInit() { }

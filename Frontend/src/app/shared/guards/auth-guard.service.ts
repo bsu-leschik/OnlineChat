@@ -9,24 +9,22 @@ import { StorageService } from '../services/storage.service';
 })
 export class AuthGuard implements CanActivate{
 
-  constructor(private storage: StorageService, private auth: AuthenticationService, private router: Router) { }
+  constructor(private storage: StorageService, private router: Router, private auth: AuthenticationService) { }
   
+  private readonly redirect: UrlTree = this.router.parseUrl('/chats');
+
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
-    if(this.storage.isLoggedIn){
-      return !true;
+    
+    if(this.storage.loggedIn()){
+      return this.redirect;
     }
     else {
-     return new Promise((resolve, reject) => {
-      this.auth.tryAutoLogin()
-      .then(value => {
-        if (value){
-          resolve(this.router.parseUrl("/chats"))
-        }
-        else{
-          resolve(true);
-        }
-      });
-     });
+      return new Promise(
+        (resolve, reject) => 
+        this.auth.tryAutoLogin()
+        .then(
+          (value: boolean) => value ? resolve(this.redirect) : resolve(true)))
     }
+
   }
 }

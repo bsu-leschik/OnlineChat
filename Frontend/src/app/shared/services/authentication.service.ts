@@ -3,6 +3,7 @@ import {HttpClient} from "@angular/common/http";
 import {Constants} from "../../constants";
 import {Observable, Subscription} from "rxjs";
 import { StorageService } from './storage.service';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,9 @@ import { StorageService } from './storage.service';
 export class AuthenticationService {
 
   private readonly _api = Constants.ApiUrl + '/authentication';
-  constructor(private httpClient: HttpClient, private storage : StorageService) {}
+  constructor(private httpClient: HttpClient, private storage : StorageService, private router: Router) {
+    this.tryAutoLogin();
+  }
 
   public login(username: string, password: string) : Observable<LoginResponse> {
     return this.httpClient.post<LoginResponse>(this._api + '/login', {
@@ -26,7 +29,8 @@ export class AuthenticationService {
     this.httpClient.post(Constants.ServerUrl + '/api/authentication/logout', {},{
       withCredentials: true
     }).subscribe(result => {
-      this.storage.isLoggedIn = false;
+      this.storage.setLoggedIn(false);
+      this.router.navigate(['/auth/login'])
     });
   }
 
@@ -40,12 +44,11 @@ export class AuthenticationService {
       this.sendAutoLogin()
       .subscribe(result => {
         if (result.responseCode == TokenLoginResponseCode.Success) {
-          this.storage.isLoggedIn = true;
+          this.storage.setLoggedIn(true);
           this.storage.set(Constants.NicknameStorageField, result.username);
           resolve(true)
         }
         else{
-          console.log(result)
           resolve(false);
         }
       })

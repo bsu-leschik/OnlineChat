@@ -56,8 +56,8 @@ export class LoginComponent implements OnInit {
   }
 
   private onLoggedIn(username: string) {
-    this.storage.isLoggedIn = true;
+    this.storage.setLoggedIn(true);
     this.storage.set(Constants.NicknameStorageField, username);
-    this.router.navigate(['chats']);
+    this.router.navigate(['/chats']);
   }
 }

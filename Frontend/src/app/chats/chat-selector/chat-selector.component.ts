@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {StorageService} from "../../shared/services/storage.service";
 import {Constants} from "../../constants";
 import {Router} from "@angular/router";
@@ -12,7 +12,7 @@ import { HubService } from '../shared/services/hub.service';
   templateUrl: './chat-selector.component.html',
   styleUrls: ['./chat-selector.component.css']
 })
-export class ChatSelectorComponent implements OnInit {
+export class ChatSelectorComponent implements OnInit, OnDestroy {
   public chatrooms: ChatroomInfoBase[] = [];
 
   private readonly timesToUpdateChatrooms: number = 3;
@@ -34,6 +34,10 @@ export class ChatSelectorComponent implements OnInit {
       (reason) => {
           alert(reason)
       })
+  }
+
+  ngOnDestroy(): void {
+    this.hubService.breakConnection('PromoteToTop');
   }
 
   private handlePromotion(toPromoteChatId: string){
