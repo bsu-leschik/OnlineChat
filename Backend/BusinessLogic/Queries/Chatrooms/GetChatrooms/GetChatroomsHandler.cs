@@ -1,8 +1,6 @@
 ﻿using BusinessLogic.Models;
 using BusinessLogic.Services.UsersService;
 using Database;
-using Entities;
-using Entities.Chatrooms;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +20,7 @@ public class GetChatroomsHandler : IRequestHandler<GetChatroomsRequest, GetChatr
     public async Task<GetChatroomsResult> Handle(GetChatroomsRequest request, CancellationToken cancellationToken)
     {
         var id = _usersService.GetId()!;
-        var tickets = await _storageService.GetUsersChatroomTickets(id.Value, cancellationToken)
+        var tickets = await _storageService.GetUsersChatroomTickets(id.Value)
                                      .ToListAsync(cancellationToken);
         var result = tickets.Select(ChatroomInfo.Of).ToList();
         result.Sort(SortComparator);

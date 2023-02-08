@@ -38,7 +38,7 @@ public class CreateChatroomHandler : IRequestHandler<CreateChatroomCommand, Crea
                 return CreateChatroomResponse.Failed;
             }
 
-            var users = await _storageService.GetUsersByUsername(request.Usernames, cancellationToken)
+            var users = await _storageService.GetUsersByUsername(request.Usernames)
                                              .ToListAsync(cancellationToken);
 
             if (users.Count == 2

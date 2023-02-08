@@ -28,13 +28,13 @@ public class DatabaseStorageService : IStorageService
                             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public IQueryable<User> GetUsersById(IEnumerable<Guid> ids, CancellationToken cancellationToken)
+    public IQueryable<User> GetUsersById(IEnumerable<Guid> ids)
     {
         return _chatDatabase.Users
                             .Where(u => ids.Any(s => s == u.Id));
     }
 
-    public IQueryable<User> GetUsersByUsername(IEnumerable<string> names, CancellationToken cancellationToken)
+    public IQueryable<User> GetUsersByUsername(IEnumerable<string> names)
     {
         return _chatDatabase.Users
                             .Where(u => names.Any(n => n == u.Username))
@@ -49,7 +49,7 @@ public class DatabaseStorageService : IStorageService
                             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public IQueryable<ChatroomTicket> GetUsersChatroomTickets(Guid userId, CancellationToken cancellationToken)
+    public IQueryable<ChatroomTicket> GetUsersChatroomTickets(Guid userId)
     {
         return _chatDatabase.ChatroomTicket
                             .Where(c => c.UserId == userId)
@@ -58,7 +58,7 @@ public class DatabaseStorageService : IStorageService
                             .ThenInclude(t => t.User);
     }
 
-    public IQueryable<ChatroomTicket> GetChatroomUsers(Guid chatId, CancellationToken cancellationToken)
+    public IQueryable<ChatroomTicket> GetChatroomUsers(Guid chatId)
     {
         return _chatDatabase.ChatroomTicket
                             .Where(t => t.ChatroomId == chatId)

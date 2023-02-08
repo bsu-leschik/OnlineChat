@@ -1,8 +1,6 @@
 ﻿using Entities;
 using Entities.Chatrooms;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Logging;
 
 namespace Database;
 
@@ -68,5 +66,5 @@ public class ChatDatabase : DbContext
     public DbSet<Chatroom> Chatroom { get; set; } = null!;
     public DbSet<ChatroomTicket> ChatroomTicket { get; set; } = null!;
     public DbSet<Administrators> Administrators { get; set; } = null!;
-    public DbSet<Message> Messages { get; set; }
+    public DbSet<Message> Messages { get; set; } = null!;
 }

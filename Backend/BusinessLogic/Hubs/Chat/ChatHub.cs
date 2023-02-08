@@ -111,7 +111,7 @@ public class ChatHub : Hub<IChatClientInterface>
                             .Where(u => _idTracker.GetConnectionId(u.Username) is not null)
                             .Select(u => u.Id)
                             .ToList();
-        var updating = _storageService.GetChatroomUsers(chatroom.Id, CancellationToken.None)
+        var updating = _storageService.GetChatroomUsers(chatroom.Id)
                                       .Where(id => users.Any(u => u == id.UserId))
                                       .ForEachAsync(t => t.LastMessageRead = count, CancellationToken.None);
         var sending = Clients
