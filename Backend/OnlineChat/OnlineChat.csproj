@@ -20,22 +20,18 @@
 
     <ItemGroup>
       <Compile Remove="Pages\**" />
-      <Compile Remove="wwwroot\**" />
     </ItemGroup>
 
     <ItemGroup>
       <EmbeddedResource Remove="Pages\**" />
-      <EmbeddedResource Remove="wwwroot\**" />
     </ItemGroup>
 
     <ItemGroup>
       <None Remove="Pages\**" />
-      <None Remove="wwwroot\**" />
     </ItemGroup>
 
     <ItemGroup>
       <Content Remove="Pages\**" />
-      <Content Remove="wwwroot\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -51,6 +47,10 @@
       <ProjectReference Include="..\Constants\Constants.csproj" />
       <ProjectReference Include="..\Database\Database.csproj" />
       <ProjectReference Include="..\Entities\Entities.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="wwwroot" />
     </ItemGroup>
 
 </Project>
