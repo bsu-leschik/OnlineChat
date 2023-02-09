@@ -3,32 +3,28 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { LoginComponent } from './login/login.component';
-import { ChatComponent } from './chat/chat.component';
-import { ChatSelectorComponent } from './chat-selector/chat-selector.component';
 import { HttpClientModule } from "@angular/common/http";
-import { RegistrationComponent } from './registration/registration.component';
-import { HeaderComponent } from './header/header.component';
-import { CreateChatComponent } from './create-chat/create-chat.component';
-import {FormsModule} from "@angular/forms";
+import { FormsModule } from "@angular/forms";
+import { AuthModule } from './auth/auth.module';
+import { ChatsModule } from './chats/chats.module';
+import { ChatsGuard } from './shared/guards/chats-guard.service';
+import { AuthGuard } from './shared/guards/auth-guard.service';
+import { StorageService } from './shared/services/storage.service';
+import { AuthenticationService } from './shared/services/authentication.service';
 
 @NgModule({
   declarations: [
-    AppComponent,
-    LoginComponent,
-    ChatComponent,
-    ChatSelectorComponent,
-    RegistrationComponent,
-    HeaderComponent,
-    CreateChatComponent
+    AppComponent
   ],
     imports: [
         BrowserModule,
         AppRoutingModule,
         HttpClientModule,
-        FormsModule
+        FormsModule,
+        AuthModule,
+        ChatsModule
     ],
-  providers: [HttpClientModule],
+  providers: [HttpClientModule, ChatsGuard, AuthGuard, StorageService, AuthenticationService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

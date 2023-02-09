@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import {StorageService} from "../shared/services/storage.service";
+import {StorageService} from "../../shared/services/storage.service";
 import {Router} from "@angular/router";
-import {Constants} from "../constants";
-import {AuthenticationService, LoginResponse, TokenLoginResponseCode} from "../shared/services/authentication.service";
+import {Constants} from "../../constants";
+import {AuthenticationService, LoginResponse, TokenLoginResponseCode} from "../../shared/services/authentication.service";
 
 @Component({
   selector: 'app-login',
@@ -22,7 +22,6 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.tryAutoLogin();
   }
 
   async onConnectClicked(): Promise<void> {
@@ -56,21 +55,9 @@ export class LoginComponent implements OnInit {
     this.errorMessage = message;
   }
 
-  private tryAutoLogin() {
-    this.authService
-      .tryAutoLogin()
-      .subscribe(result => {
-        if (result.responseCode == TokenLoginResponseCode.Success) {
-          this.onLoggedIn(result.username);
-          return;
-        }
-        console.log(result)
-      })
-  }
-
   private onLoggedIn(username: string) {
-    this.storage.isLoggedIn = true;
+    this.storage.setLoggedIn(true);
     this.storage.set(Constants.NicknameStorageField, username);
-    this.router.navigate(['select-chat']);
+    this.router.navigate(['/chats']);
   }
 }

@@ -1,22 +1,18 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {LoginComponent} from "./login/login.component";
-import {ChatComponent} from "./chat/chat.component";
-import {ChatSelectorComponent} from "./chat-selector/chat-selector.component";
-import {RegistrationComponent} from "./registration/registration.component";
-import {CreateChatComponent} from "./create-chat/create-chat.component";
+import { AppComponent } from './app.component';
+import { AuthGuard } from './shared/guards/auth-guard.service';
+import { ChatsGuard } from './shared/guards/chats-guard.service';
 
 const routes: Routes = [
-  {path: 'login', component: LoginComponent},
-  {path: 'chat', component: ChatComponent},
-  {path: 'select-chat', component: ChatSelectorComponent},
-  {path: 'registration', component: RegistrationComponent},
-  {path: 'create-chat', component: CreateChatComponent},
-  {path: '**', redirectTo: 'login'}
+  {path: '', component: AppComponent},
+  {path: 'auth', canActivate: [AuthGuard], loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)},
+  {path: 'chats', canActivate: [ChatsGuard], loadChildren: () => import('./chats/chats.module').then(m => m.ChatsModule)}
+
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, {onSameUrlNavigation: 'reload'})],
   exports: [RouterModule]
 })
 export class AppRoutingModule {
